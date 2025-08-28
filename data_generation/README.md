@@ -1,0 +1,1 @@
+This is the main place of the script for the generation of data from the py-xl-sindy library. 

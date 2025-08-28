@@ -1,0 +1,39 @@
+<!-- https://mujoco.readthedocs.io/en/latest/overview.html?highlight=hello.xml#examples -->
+<mujoco>
+  <option gravity = "0 0 -9.81" integrator="RK4" timestep="0.0005" />
+   <worldbody>
+      <camera pos="-1.316 -4.893 1.281" xyaxes="0.963 -0.271 0.000 0.058 0.206 0.977"/>
+
+      <geom type="cylinder" size="0.02 3" rgba="0.5 0.5 0.5 1" mass="0.0" contype="0" euler="0 90 0" pos="0 0 1"/>
+      <body pos="0 0 1" euler="0 180 0">
+         <joint name="joint0" type="slide" axis = "-1 0 0" pos = "0 0 0" damping="1.5" />
+         <geom type="capsule" size="0.05 0.1" euler="0 90 0" rgba="1 0 0 1" mass="0.8" pos="0 0 0" contype="0"/>
+         <body pos="0 0.0 -0.5" euler="0 0 0">
+            <joint name="joint1" type="hinge" axis = "0 -1 0" pos = "0 0 0.5" damping="1.8"/>
+            <geom type="cylinder" size="0.05 0.1" rgba="0 1 0 1" mass="0.2" euler="90 0 0" pos="0 -0.05 -0.5" contype="0"/>
+            <geom type="cylinder" size="0.03 0.5" rgba="0.7 0.35 0 1" mass="0.0" pos="0 0 0" contype="0"/>
+            <body pos="0 -0.1 -1.0" euler="0 0 0">
+              <joint name="joint2" type="hinge" axis = "0 -1 0" pos = "0 0 0.5" damping="1.2"/>
+              <geom type="sphere" size="0.05" rgba="0 1 0 1" mass="0.5" pos="0 0 -0.5" contype="0"/>
+              <geom type="cylinder" size="0.03 0.5" rgba="0.7 0.35 0 1" mass="0.0" pos="0 0 0" contype="0"/>
+            </body>
+         </body>
+
+      </body>
+    </worldbody>
+   <actuator>
+      <motor name="torque0" joint="joint0"  gear="1" />
+      <motor name="torque1" joint="joint1"  gear="1" />
+      <motor name="torque2" joint="joint2"  gear="1" />
+   </actuator>
+  <asset>
+    <texture type="skybox" builtin="gradient" rgb1=".3 .5 .7" rgb2="0 0 0" width="512" height="512"/>
+    <texture name="floor" type="2d" builtin="checker" width="512" height="512" rgb1=".1 .2 .3" rgb2=".2 .3 .4"/>
+    <material name="floor" texture="floor" texrepeat="1 1" texuniform="true" reflectance=".2"/>
+  </asset>
+  <worldbody>
+    <geom name="floor" size="10 10 .05" type="plane" material="floor" condim="3" pos="0 0 -2"/>
+    <light directional="true" diffuse=".9 .9 .9" specular="0.1 0.1 0.1" pos="0 0 5" dir="0 0 -1" castshadow="true"/>
+    <light name="spotlight" mode="targetbodycom" target="world" diffuse="1 1 1" specular="0.3 0.3 0.3" pos="-6 -6 4" cutoff="60"/>
+  </worldbody>
+</mujoco>
