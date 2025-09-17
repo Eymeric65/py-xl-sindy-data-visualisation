@@ -24,6 +24,8 @@ const TimeIndicator: React.FC<TimeIndicatorProps> = ({ currentTime, data, rectan
   
   // Calculate exact position within the chart area
   const timeRatio = (currentTime - minTime) / timeRange;
+  
+  // Now rectangle contains relative positions within the parent container
   const xPosition = rectangle.left + (timeRatio * rectangle.width);
   
   return (

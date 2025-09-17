@@ -10,16 +10,30 @@ interface InteractiveCurveProps {
 
 const InteractiveCurve: React.FC<InteractiveCurveProps> = ({ data, lines, currentTime }) => {
 
-  const ref = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const curveRef = useRef<HTMLDivElement>(null);
   const [plotRect, setPlotRect] = useState<DOMRect | null>(null);
 
   // Function to update plot rectangle
   const updatePlotRect = () => {
-    if (ref.current) {
-      const plotArea = ref.current.querySelector(".recharts-cartesian-grid") as SVGElement | null;
+    if (curveRef.current) {
+      const plotArea = curveRef.current.querySelector(".recharts-cartesian-grid") as SVGElement | null;
       if (plotArea) {
-        const newRect = plotArea.getBoundingClientRect();
-        setPlotRect(newRect);
+        // Get the chart container's bounding rect
+        const containerRect = containerRef.current?.getBoundingClientRect();
+        const plotAreaRect = plotArea.getBoundingClientRect();
+        
+        if (containerRect) {
+          // Calculate relative position within the container
+          const relativeRect = {
+            left: plotAreaRect.left - containerRect.left,
+            top: plotAreaRect.top - containerRect.top,
+            width: plotAreaRect.width,
+            height: plotAreaRect.height,
+          };
+          
+          setPlotRect(relativeRect as DOMRect);
+        }
       }
     }
   };
@@ -41,8 +55,13 @@ const InteractiveCurve: React.FC<InteractiveCurveProps> = ({ data, lines, curren
     window.addEventListener('orientationchange', handleResize);
 
     // Observe the container
-    if (ref.current) {
-      resizeObserver.observe(ref.current);
+    if (containerRef.current) {
+      resizeObserver.observe(containerRef.current);
+    }
+    
+    // Also observe the curve container for chart changes
+    if (curveRef.current) {
+      resizeObserver.observe(curveRef.current);
     }
 
     // Cleanup
@@ -63,9 +82,11 @@ const InteractiveCurve: React.FC<InteractiveCurveProps> = ({ data, lines, curren
   }, [data, lines]);
 
   return (
-    <div className="w-full flex justify-center mt-2" >
-      <Curve data={data} lines={lines} containerRef={ref} />
-      <TimeIndicator currentTime={currentTime} data={data} rectangle={plotRect} />
+    <div className="w-full flex justify-center mt-2 relative overflow-hidden">
+      <div ref={containerRef} className="relative w-full max-w-full" style={{ width: '100%' }}>
+        <Curve data={data} lines={lines} containerRef={curveRef} />
+        <TimeIndicator currentTime={currentTime} data={data} rectangle={plotRect} />
+      </div>
     </div>
   );
 
