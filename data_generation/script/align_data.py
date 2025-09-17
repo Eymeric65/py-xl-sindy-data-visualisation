@@ -37,7 +37,7 @@ from tqdm import tqdm
 
 from xlsindy.logger import setup_logger
 
-from data_generation.script.util import generate_theorical_trajectory
+from data_generation.script.util import generate_theorical_trajectory,convert_to_lists
 
 logger = setup_logger(__name__)
 
@@ -267,7 +267,7 @@ if __name__ == "__main__":
     if not valid_model:
         print("Skipped model verification, retrieval failed")
 
-    simulation_dict = xlsindy.result_formatting.convert_to_lists(simulation_dict)
+    simulation_dict = convert_to_lists(simulation_dict)
     
     print("print model ...")
     with open(args.experiment_file + ".json", "w") as file:

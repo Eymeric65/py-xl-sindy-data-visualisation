@@ -5,12 +5,14 @@ Not really something that should go in xlsindy.
 import logging 
 import numpy as np
 
-from typing import List
+from typing import List, Dict
 
 import xlsindy
 from tqdm import tqdm
 
 import sympy as sp
+
+import json
 
 logger = logging.getLogger(__name__)
 
@@ -109,3 +111,67 @@ def generate_theorical_trajectory(
         force_vector_g = np.concatenate((force_vector_g, force_vector_m), axis=0)
 
     return simulation_time_g, simulation_qpos_g, simulation_qvel_g, simulation_qacc_g, force_vector_g
+
+
+def convert_to_lists(d):
+    if isinstance(d, dict):
+        return {k: convert_to_lists(v) for k, v in d.items()}
+    elif isinstance(d, list):
+        return [convert_to_lists(i) for i in d]
+    elif isinstance(d, np.ndarray):
+        return convert_to_lists(d.tolist())
+    elif isinstance(d, (np.float32, np.float64)):
+        return convert_to_lists(float(d))
+    elif isinstance(d,float):
+        return float(f"{format(d, '.3e')}")
+    else:
+        return d
+    
+
+def json_format_time_series(
+    name:str,
+    time:np.ndarray,
+    series:Dict[str,np.ndarray],
+    sample:int
+
+):
+    """
+    Format a time series for json saving.
+
+    Args:
+        name (str): the name of the time series.
+        time (np.ndarray): the time vector.
+        series (List[np.ndarray]): the list of series to save.
+        sample (int): the number of sample to save.
+
+    Returns:
+        dict: the formatted time series.
+    """
+
+    # Uniformly sample 'sample' points from time and each series entry
+    if len(time) < sample:
+        raise ValueError("Not enough data points to sample from.")
+    indices = np.linspace(0, len(time) - 1, sample, dtype=int)
+
+    time = time[indices]
+    restricted_series = {k: v[indices] for k, v in series.items()}
+
+    series_dict = {}
+
+    for key, value in restricted_series.items():
+
+        for i in range(value.shape[1]):
+
+            if f"coor_{i}" not in series_dict:
+                series_dict[f"coor_{i}"] = {}
+
+            series_dict[f"coor_{i}"][key] = value[:, i].tolist()
+
+    data_json = {
+        name: {
+            "time": time,
+            "series": series_dict
+        }
+    }
+
+    return data_json

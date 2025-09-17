@@ -25,7 +25,7 @@ from xlsindy.logger import setup_logger
 
 from tqdm import tqdm
 
-from data_generation.script.util import generate_theorical_trajectory
+from data_generation.script.util import generate_theorical_trajectory,json_format_time_series,convert_to_lists
 
 logger = setup_logger(__name__)
 
@@ -58,10 +58,15 @@ class Args:
     """the shift for the period of the forces function"""
     sample_number: int = 1000
     """the number of sample for the experiment (ten times the lenght of the catalog works well)"""
+    visualisation_sample: int = 1000
+    """the number of sample for the visualisation of the trajectory (should be high enough to be smooth)"""
+
 
     def get_json(self) -> str: 
         """Generate a JSON string from parameters."""
-        return json.dumps(vars(self), sort_keys=True)
+        d = vars(self).copy()
+        d.pop("visualisation_sample", None)
+        return json.dumps(d, sort_keys=True)
 
     def get_uid(self) -> str:
         """Generate a hash-based UID from parameters."""
@@ -69,7 +74,6 @@ class Args:
 if __name__ == "__main__":
 
     args = tyro.cli(Args)
-
 
     # CLI validation
     if args.forces_scale_vector == []:
@@ -272,39 +276,54 @@ if __name__ == "__main__":
 
     truncation = 20
 
-    simulation_time_g = simulation_time_g[truncation:-truncation:subsample]
-    simulation_qpos_g = simulation_qpos_g[truncation:-truncation:subsample]
-    simulation_qvel_g = simulation_qvel_g[truncation:-truncation:subsample]
-    simulation_qacc_g = simulation_qacc_g[truncation:-truncation:subsample]
-    force_vector_g = force_vector_g[truncation:-truncation:subsample]
+    simulation_time_data = simulation_time_g[truncation:-truncation:subsample]
+    simulation_qpos_data = simulation_qpos_g[truncation:-truncation:subsample]
+    simulation_qvel_data = simulation_qvel_g[truncation:-truncation:subsample]
+    simulation_qacc_data = simulation_qacc_g[truncation:-truncation:subsample]
+    force_vector_data = force_vector_g[truncation:-truncation:subsample]
 
     data = {
-        "simulation_time": simulation_time_g,
-        "simulation_qpos": simulation_qpos_g,
-        "simulation_qvel": simulation_qvel_g,
-        "simulation_qacc": simulation_qacc_g,
-        "force_vector": force_vector_g,
+        "simulation_time": simulation_time_data,
+        "simulation_qpos": simulation_qpos_data,
+        "simulation_qvel": simulation_qvel_data,
+        "simulation_qacc": simulation_qacc_data,
+        "force_vector": force_vector_data,
     }
 
     # Save pickle file
 
-    filename = f"results/{args.get_uid()}.pkl"
+    filename = f"results_data/{args.get_uid()}.pkl"
     with open(filename,'wb') as f : 
         pickle.dump(data, f)
     logger.info(f"Data saved with uid {args.get_uid()}")
 
     settings_dict = json.loads(args.get_json())
 
-    data = {
+    data_json = {
         "generation_settings" : settings_dict,
         "data_path" : filename,
-        "results" : {}
+        "results" : {},
+        "visualisation_series" : json_format_time_series(
+            name="training_data",
+            time= simulation_time_data,
+            series = {
+                "qpos": simulation_qpos_data,
+                "qvel": simulation_qvel_data,
+                "qacc": simulation_qacc_data,
+                "forces": force_vector_data
+            },
+            sample= args.visualisation_sample
+        )
         }
+    
+    data_json = convert_to_lists(data_json)
 
     # Save json file
     json_filename = f"results/{args.get_uid()}.json"
+
     with open(json_filename,'w') as f :
-        json.dump(data, f, indent=4)
+        json.dump(data_json, f, indent=None)
+
     logger.info(f"Settings saved with uid {args.get_uid()}")
 
 

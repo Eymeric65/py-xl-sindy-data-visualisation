@@ -1,0 +1,67 @@
+name: Create Data Release
+
+on:
+  # Manual trigger only - since results are not in git
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Release tag (e.g., data-v1.0.0)'
+        required: true
+        default: 'data-v1.0.0'
+        type: string
+      release_notes:
+        description: 'Release notes'
+        required: false
+        default: 'Updated result data'
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Instructions for manual upload
+        run: |
+          echo "🚀 Creating GitHub Release for Data Upload"
+          echo ""
+          echo "This workflow creates a GitHub Release where you can manually upload your data files."
+          echo ""
+          echo "After this workflow completes:"
+          echo "1. Go to: https://github.com/${{ github.repository }}/releases"
+          echo "2. Find the release: ${{ inputs.release_tag }}"
+          echo "3. Click 'Edit release'"
+          echo "4. Drag and drop your result files (JSON, PKL, etc.)"
+          echo "5. Click 'Update release'"
+          echo ""
+          echo "Your React app will then be able to fetch the data from the release assets."
+          
+      - name: Create Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ inputs.release_tag }}
+          release_name: Result Data ${{ inputs.release_tag }}
+          body: |
+            # Result Data Release
+            
+            ${{ inputs.release_notes }}
+            
+            ## How to use this data:
+            
+            The data files in this release can be accessed directly via URL:
+            ```
+            https://github.com/${{ github.repository }}/releases/download/${{ inputs.release_tag }}/your-file.json
+            ```
+            
+            ## Available files:
+            Upload your result files as assets to this release.
+            
+            Generated: $(date -u +%Y-%m-%dT%H:%M:%SZ)
+          draft: false
+          prerelease: false
