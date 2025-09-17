@@ -80,15 +80,16 @@ const TimeSlider: React.FC<TimeSliderProps> = ({ times, onChange }) => {
   }, [playing, speed, times.length]);
 
   return (
-    <div className="w-full flex flex-col items-center my-4">
-      <div className="flex items-center gap-2 w-full max-w-3xl">
+    <div className="w-full flex flex-col items-center my-4 px-4">
+      {/* Controls row */}
+      <div className="flex items-center justify-center gap-4 mb-2">
         <button
-          className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
+          className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 flex-shrink-0"
           onClick={() => setPlaying((p) => !p)}
         >
           {playing ? "Pause" : "Play"}
         </button>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 flex-shrink-0">
           <span className="text-xs text-gray-600">Speed:</span>
           <select
             value={speed}
@@ -102,17 +103,21 @@ const TimeSlider: React.FC<TimeSliderProps> = ({ times, onChange }) => {
             <option value={4}>4x</option>
           </select>
         </div>
+        <span className="text-right text-sm text-gray-700 font-mono">
+          {times[current]?.toFixed(3)} s
+        </span>
+      </div>
+      
+      {/* Slider row - full width */}
+      <div className="w-full max-w-4xl">
         <input
           type="range"
           min={0}
           max={times.length - 1}
           value={current}
           onChange={(e) => setCurrent(Number(e.target.value))}
-          className="flex-1 mx-2 accent-blue-500"
+          className="w-full accent-blue-500"
         />
-        <span className="w-20 text-right text-sm text-gray-700 font-mono">
-          {times[current]?.toFixed(3)} s
-        </span>
       </div>
     </div>
   );

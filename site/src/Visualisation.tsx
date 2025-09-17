@@ -15,8 +15,8 @@ const CartPole: React.FC<CartPoleProps> = ({
   cartPosition, 
   poleAngle, 
   forces = [0, 0],
-  width = 400, 
-  height = 300,
+  width = 800, 
+  height = 400,
   smoothTransition = true,
   positionRange,
   forceRange
@@ -25,6 +25,39 @@ const CartPole: React.FC<CartPoleProps> = ({
   const [displayCartPosition, setDisplayCartPosition] = useState(cartPosition);
   const [displayPoleAngle, setDisplayPoleAngle] = useState(poleAngle);
   const [displayForces, setDisplayForces] = useState(forces);
+
+  // Responsive dimensions based on screen size
+  const getResponsiveDimensions = () => {
+    if (typeof window === 'undefined') return { width, height };
+    
+    const screenWidth = window.innerWidth;
+    
+    if (screenWidth < 480) {
+      // Mobile - tall rectangular aspect ratio (1:3)
+      return { width: 300, height: 425 };
+    } else if (screenWidth < 768) {
+      // Tablet - tall rectangular aspect ratio (1:2)
+      return { width: 300, height: 300 };
+    } else {
+      // Desktop - wider aspect ratio (2:1)
+      return { width: 700, height: 300 };
+    }
+  };
+
+  const [dimensions, setDimensions] = useState(getResponsiveDimensions);
+
+  // Update dimensions on window resize
+  useEffect(() => {
+    const handleResize = () => {
+      setDimensions(getResponsiveDimensions());
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const responsiveWidth = dimensions.width;
+  const responsiveHeight = dimensions.height;
 
   // World boundaries - use provided range or defaults
   const minTrack = positionRange?.min ?? -20; // minimum x position in meters
@@ -81,8 +114,8 @@ const CartPole: React.FC<CartPoleProps> = ({
 
   // Scale and positioning
   const scale = 100; // pixels per meter
-  const centerX = width / 2;
-  const centerY = height * 0.65;
+  const centerX = responsiveWidth / 2;
+  const centerY = responsiveHeight * 0.65;
   
   // Ground and track positioning
   const groundY = centerY + 40;
@@ -121,7 +154,7 @@ const CartPole: React.FC<CartPoleProps> = ({
       const screenX = centerX + (worldX * scale) + backgroundOffset;
       
       // Skip if not visible
-      if (screenX < -100 || screenX > width + 100) continue;
+      if (screenX < -100 || screenX > responsiveWidth + 100) continue;
       
       // Track segment
       elements.push(
@@ -263,7 +296,7 @@ const CartPole: React.FC<CartPoleProps> = ({
       const screenX = centerX + (worldX * scale) + backgroundOffset;
       
       // Skip if not visible
-      if (screenX < -100 || screenX > width + 100) continue;
+      if (screenX < -100 || screenX > responsiveWidth + 100) continue;
       
       const seed = worldX / 12;
       const random1 = Math.sin(seed * 15.789) * 43758.5453;
@@ -289,7 +322,7 @@ const CartPole: React.FC<CartPoleProps> = ({
       const screenX = centerX + (worldX * scale) + backgroundOffset;
       
       // Skip if not visible
-      if (screenX < -100 || screenX > width + 100) continue;
+      if (screenX < -100 || screenX > responsiveWidth + 100) continue;
       
       // Distance marker with proper sign board
       elements.push(
@@ -335,9 +368,14 @@ const CartPole: React.FC<CartPoleProps> = ({
   };
 
   return (
-    <div className="flex flex-col items-center">
+    <div className="flex flex-col items-center w-full max-w-full">
       <h3 className="text-lg font-semibold mb-2">Cart Pole Visualization</h3>
-      <svg width={width} height={height} className="border border-gray-300 bg-gradient-to-b from-sky-200 to-sky-50">
+      <div className="w-full max-w-4xl overflow-hidden">
+        <svg 
+          viewBox={`0 0 ${responsiveWidth} ${responsiveHeight}`}
+          className="w-full h-auto border border-gray-300 bg-gradient-to-b from-sky-200 to-sky-50"
+          preserveAspectRatio="xMidYMid meet"
+        >
         {/* Background elements that scroll with cart position */}
         {generateWorldBackground()}
         
@@ -345,7 +383,7 @@ const CartPole: React.FC<CartPoleProps> = ({
         <line 
           x1={0} 
           y1={groundY} 
-          x2={width} 
+          x2={responsiveWidth} 
           y2={groundY}
           stroke="#8B5A3C" 
           strokeWidth="3"
@@ -593,6 +631,7 @@ const CartPole: React.FC<CartPoleProps> = ({
           World Range: {minTrack}m to {maxTrack}m
         </text>
       </svg>
+      </div>
     </div>
   );
 };
