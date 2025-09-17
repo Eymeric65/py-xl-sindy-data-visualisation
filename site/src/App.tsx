@@ -38,7 +38,6 @@ const App: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [currentIdx, setCurrentIdx] = useState(0);
   const [simulationType, setSimulationType] = useState<string>("");
-  const [fullJsonData, setFullJsonData] = useState<ResultJson | null>(null);
 
   // Load available files on mount
   useEffect(() => {
@@ -91,7 +90,6 @@ const App: React.FC = () => {
           setSimulationType(simType);
         }
         
-        setFullJsonData(json);
         setLoading(false);
       })
       .catch((e) => {

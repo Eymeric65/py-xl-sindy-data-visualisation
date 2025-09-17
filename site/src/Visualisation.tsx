@@ -29,7 +29,6 @@ const CartPole: React.FC<CartPoleProps> = ({
   // World boundaries - use provided range or defaults
   const minTrack = positionRange?.min ?? -20; // minimum x position in meters
   const maxTrack = positionRange?.max ?? 20;  // maximum x position in meters
-  const trackLength = maxTrack - minTrack;
 
   // Force scaling - use provided range or defaults
   const minForce = forceRange?.min ?? -20; // minimum force/torque
@@ -162,10 +161,8 @@ const CartPole: React.FC<CartPoleProps> = ({
       const seed = worldX / 3;
       const random1 = Math.sin(seed * 12.9898) * 43758.5453;
       const random2 = Math.sin(seed * 78.233) * 43758.5453;
-      const random3 = Math.sin(seed * 45.164) * 43758.5453;
       const r1 = (random1 - Math.floor(random1));
       const r2 = (random2 - Math.floor(random2));
-      const r3 = (random3 - Math.floor(random3));
       
       if (r1 < 0.25) {
         // Trees with properly proportioned trunks
