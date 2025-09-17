@@ -161,30 +161,30 @@ const CartPole: React.FC<CartPoleProps> = ({
         <rect 
           key={`track-${worldX}`}
           x={screenX - 50} 
-          y={trackY} 
+          y={trackY+5} 
           width="100" 
           height="10"
           fill="#696969"
         />
       );
       
-      // Railroad ties every 0.5 meters
-      if (worldX % 0.5 === 0) {
+      // Railroad ties every 1 meter
+      if ((worldX - minTrack) % 2 === 0) {
         elements.push(
           <rect 
             key={`tie-${worldX}`}
-            x={screenX - 30} 
-            y={trackY - 2} 
-            width="60" 
-            height="14"
-            fill="#8B4513"
+            x={screenX} 
+            y={trackY+5} 
+            width="50" 
+            height="10"
+            fill="#4a4a4aff"
           />
         );
       }
     }
     
     // Generate background scenery every 3 meters (more objects)
-    for (let worldX = Math.ceil(minTrack / 3) * 3; worldX <= maxTrack; worldX += 3) {
+    for (let worldX = Math.ceil(minTrack / 3) * 3; worldX <= maxTrack; worldX += 2) {
       const screenX = centerX + (worldX * scale) + backgroundOffset;
       
       // Skip if not visible or if it's a 5m marker position
@@ -199,10 +199,10 @@ const CartPole: React.FC<CartPoleProps> = ({
       
       if (r1 < 0.25) {
         // Trees with properly proportioned trunks
-        const treeHeight = 60 + r2 * 40;
+        const treeHeight = 20 + r2 * 60;
         const foliageRadius = 20 + r2 * 8; // Scale foliage with height
         const trunkWidth = Math.max(6, foliageRadius * 0.3); // Trunk width proportional to foliage
-        const trunkHeight = treeHeight * 0.6; // Trunk is 60% of tree height
+        const trunkHeight = treeHeight; // Trunk is 60% of tree height
         elements.push(
           <g key={`tree-${worldX}`}>
             <rect 
@@ -379,18 +379,10 @@ const CartPole: React.FC<CartPoleProps> = ({
         {/* Background elements that scroll with cart position */}
         {generateWorldBackground()}
         
-        {/* Ground line */}
-        <line 
-          x1={0} 
-          y1={groundY} 
-          x2={responsiveWidth} 
-          y2={groundY}
-          stroke="#8B5A3C" 
-          strokeWidth="3"
-        />        {/* Cart shadow */}
+        {/* Cart shadow */}
         <ellipse 
-          cx={cartX + cartWidth / 2 + 3} 
-          cy={wheelY + wheelRadius + 8} 
+          cx={cartX + cartWidth / 2 } 
+          cy={wheelY + wheelRadius} 
           rx={cartWidth / 2 + 5} 
           ry="8"
           fill="rgba(0,0,0,0.2)"
