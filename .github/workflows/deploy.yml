@@ -131,24 +131,10 @@ jobs:
             fi
           fi
           
-          # Final check and manifest creation
+          # Final check
           echo "📋 Final contents of public/results:"
           ls -la public/results/
           
-          echo "📋 Creating files manifest..."
-          cd public/results
-          if ls *.json 1> /dev/null 2>&1; then
-            echo '{"files":['$(ls -1 *.json | sed 's/.*/"&"/' | paste -sd,)']}" > files.json
-            echo "✅ Created files.json with contents:"
-            cat files.json
-          else
-            echo '{"files":[]}' > files.json
-            echo "⚠️  No JSON files found, created empty manifest"
-          fi
-          
-          echo "🎯 Final file count:"
-          echo "JSON files: $(ls -1 *.json 2>/dev/null | wc -l)"
-          echo "All files: $(ls -1 * 2>/dev/null | wc -l)"
           
       - name: Build site
         working-directory: ./site
