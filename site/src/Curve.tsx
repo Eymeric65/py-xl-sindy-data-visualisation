@@ -1,5 +1,6 @@
 import React from "react";
 import "./zindex.css";
+import BatchLabel from "./BatchLabel";
 import {
   LineChart,
   Line,
@@ -9,15 +10,17 @@ import {
   Legend,
   ResponsiveContainer,
   CartesianGrid,
+  ReferenceLine,
 } from "recharts";
 
 type CurveProps = {
   lines: string[];
   data: any[];
   containerRef: React.Ref<HTMLDivElement> | undefined;
+  batchStartTimes?: number[];
 };
 
-const Curve: React.FC<CurveProps> = ({ lines,data,containerRef }) => {
+const Curve: React.FC<CurveProps> = ({ lines,data,containerRef,batchStartTimes })=> {
 
   return (
     <div className="w-full max-w-full h-[250px] bg-white rounded shadow p-4 relative">
@@ -29,6 +32,15 @@ const Curve: React.FC<CurveProps> = ({ lines,data,containerRef }) => {
             <YAxis tick={{ fontSize: 12 }} />
             <Tooltip />
             <Legend />
+            {batchStartTimes?.map((batchTime, idx) => (
+              <ReferenceLine 
+                key={`batch-${idx}`}
+                x={batchTime} 
+                stroke="green" 
+                strokeDasharray="3 3"
+                label={<BatchLabel value={`Batch ${idx + 1}`} />}
+              />
+            ))}
             {lines.map((line, idx) => (
               <Line
                 key={line}

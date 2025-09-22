@@ -40,9 +40,9 @@ const TimeSlider: React.FC<TimeSliderProps> = ({ times, onChange }) => {
           
           // Check if we should advance based on data timing
           while (newIndex < times.length - 1) {
-            const nextDataTime = times[newIndex + 1];
-            const currentDataTime = times[newIndex];
-            const timeToNext = (nextDataTime - currentDataTime)*1000;
+            const nextDataTime = Number(times[newIndex + 1]) || 0;
+            const currentDataTime = Number(times[newIndex]) || 0;
+            const timeToNext = (nextDataTime - currentDataTime) * 1000;
             
             if (elapsedTime.current >= timeToNext) {
               elapsedTime.current = elapsedTime.current - timeToNext; // Subtract the time we "used"
@@ -104,7 +104,7 @@ const TimeSlider: React.FC<TimeSliderProps> = ({ times, onChange }) => {
           </select>
         </div>
         <span className="text-right text-sm text-gray-700 font-mono">
-          {times[current]?.toFixed(3)} s
+          {(typeof times[current] === 'number' ? times[current].toFixed(3) : '0.000')} s
         </span>
       </div>
       

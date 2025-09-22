@@ -20,7 +20,7 @@ mujoco_angle_offset = np.pi
 
 
 def xlsindy_component(
-    mode: str = "xlsindy", random_seed: List[int] = [12], sindy_catalog_len: int = 93, damping_coefficients: List[float] = [-1.0, -1.4]
+    mode: str = "mixed", random_seed: List[int] = [12], sindy_catalog_len: int = 93, damping_coefficients: List[float] = [-1.0, -1.4]
 ):  # Name of this function should not be changed
     """
     This function is used to generate backbone of the xl_sindy algorithm
@@ -100,7 +100,7 @@ def xlsindy_component(
         + m2 * g * l2 * sp.cos(theta2)
     )
 
-    if mode == "xlsindy":
+    if mode == "xlsindy" or mode == "mixed":
 
         # Create the catalog (Mandatory part)
         function_catalog_1 = [lambda x: symbols_matrix[2, x]]
@@ -131,28 +131,49 @@ def xlsindy_component(
 
         expand_matrix = np.ones((len(friction_catalog), num_coordinates), dtype=int)
 
-        catalog_repartition = xlsindy.catalog.CatalogRepartition(
-            [
-                xlsindy.catalog_base.ExternalForces(
-                    [[1,-2], [2]], symbols_matrix
-                ),
-                xlsindy.catalog_base.Lagrange(
-                    lagrange_catalog, symbols_matrix, time_sym
-                ),
-                xlsindy.catalog_base.Classical(
-                    friction_catalog, expand_matrix
-                ),
-            ]
-        )
+        if mode == "mixed":
 
-        ideal_solution_vector = catalog_repartition.create_solution_vector(
-            [
-                ([]),
-                ([Lagrangian.subs(substitutions)]),
-                ([friction_forces]),
-            ]
-        )
+            catalog_repartition = xlsindy.catalog.CatalogRepartition(
+                [
+                    xlsindy.catalog_base.ExternalForces(
+                        [[1], [2]], symbols_matrix
+                    ),
+                    xlsindy.catalog_base.Lagrange(
+                        lagrange_catalog, symbols_matrix, time_sym
+                    ),
+                    xlsindy.catalog_base.Classical(
+                        friction_catalog, expand_matrix
+                    ),
+                ]
+            )
 
+            ideal_solution_vector = catalog_repartition.create_solution_vector(
+                [
+                    ([]),
+                    ([Lagrangian.subs(substitutions)]),
+                    ([friction_forces]),
+                ]
+            )
+
+        elif mode == "xlsindy":
+
+            catalog_repartition = xlsindy.catalog.CatalogRepartition(
+                [
+                    xlsindy.catalog_base.ExternalForces(
+                        [[1], [2]], symbols_matrix
+                    ),
+                    xlsindy.catalog_base.Lagrange(
+                        lagrange_catalog, symbols_matrix, time_sym
+                    ),
+                ]
+            )
+
+            ideal_solution_vector = catalog_repartition.create_solution_vector(
+                [
+                    ([]),
+                    ([Lagrangian.subs(substitutions)]),
+                ]
+            )
         catalog_len = len(ideal_solution_vector)
 
     elif mode == "sindy":

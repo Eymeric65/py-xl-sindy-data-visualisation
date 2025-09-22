@@ -25,7 +25,7 @@ from xlsindy.logger import setup_logger
 
 from tqdm import tqdm
 
-from data_generation.script.util import generate_theorical_trajectory,json_format_time_series,convert_to_lists
+from data_generation.script.util import generate_theorical_trajectory,generate_mujoco_trajectory,json_format_time_series,convert_to_lists
 
 logger = setup_logger(__name__)
 
@@ -60,12 +60,18 @@ class Args:
     """the number of sample for the experiment (ten times the lenght of the catalog works well)"""
     visualisation_sample: int = 1000
     """the number of sample for the visualisation of the trajectory (should be high enough to be smooth)"""
+    validation_time: float = 20.0
+    """the time for the validation trajectory"""
+    max_validation_sample: int = 4000
+    """the maximum number of sample for the validation trajectory, if the validation time is too high compared to the max time and the sample number, this will limit the number of sample to avoid memory issues"""
 
 
     def get_json(self) -> str: 
         """Generate a JSON string from parameters."""
         d = vars(self).copy()
         d.pop("visualisation_sample", None)
+        d.pop("validation_time", None)
+        d.pop("max_validation_sample", None)
         return json.dumps(d, sort_keys=True)
 
     def get_uid(self) -> str:
@@ -128,126 +134,64 @@ if __name__ == "__main__":
 
 ### ----------------------- Part 1, generate the data using Mujoco or theorical ----------------------
     
-    # Batch generation of data
-
-
     # Batch generation
     if args.generation_type == "mujoco" : # Mujoco Generation
         
-
-        # Initialise 
-        simulation_time_g = np.empty((0,1))
-        simulation_qpos_g = np.empty((0,num_coordinates))
-        simulation_qvel_g = np.empty((0,num_coordinates))
-        simulation_qacc_g = np.empty((0,num_coordinates))
-        force_vector_g = np.empty((0,num_coordinates))
-
-        if len(args.initial_position)==0:
-            args.initial_position = np.zeros((num_coordinates,2))
-
-        rng = np.random.default_rng(args.random_seed)
-
-        # initialize Mujoco environment and controller
-        mujoco_model = mujoco.MjModel.from_xml_string(xml_content)
-        mujoco_data = mujoco.MjData(mujoco_model)
-
-        def random_controller(forces_function):
-
-            def ret(model, data):
-
-                forces = forces_function(data.time)
-                data.qfrc_applied = forces
-
-                force_vector_m.append(forces.copy())
-
-                simulation_time_m.append(data.time)
-                simulation_qpos_m.append(data.qpos.copy())
-                simulation_qvel_m.append(data.qvel.copy())
-                simulation_qacc_m.append(data.qacc.copy())
-
-            return ret
+        if mujoco_transform is None or inverse_mujoco_transform is None:
+            raise ValueError(
+                "mujoco_transform and inverse_mujoco_transform functions must be defined in xlsindy_gen.py for MuJoCo generation"
+            )
         
-        for i in tqdm(range(args.batch_number),desc="Generating batches", unit="batch"):
-
-            # Random controller initialisation. This is the only random place of the code Everything else is deterministic (except if non deterministic solver is used)
-            simulation_time_m = []
-            simulation_qpos_m = []
-            simulation_qvel_m = []
-            simulation_qacc_m = []
-            force_vector_m = []
-
-            # Initial condition
-            initial_condition = np.array(args.initial_position).reshape(num_coordinates,2) + extra_info["initial_condition"]
-
-            if len(args.initial_condition_randomness) == 1:
-                initial_condition += rng.normal(
-                    loc=0, scale=args.initial_condition_randomness, size=initial_condition.shape
-                )
-            else:
-                initial_condition += rng.normal(
-                    loc=0, scale=np.reshape(args.initial_condition_randomness,initial_condition.shape)
-                )
-
-            initial_qpos,initial_qvel = initial_condition[:,0].reshape(1,-1),initial_condition[:,1].reshape(1,-1)
-
-            initial_qpos,initial_qvel,_ = inverse_mujoco_transform(initial_qpos,initial_qvel,None)
-
-            mujoco_data.qpos = initial_qpos
-            mujoco_data.qvel = initial_qvel
-            mujoco_data.time = 0.0
-            
-            forces_function = xlsindy.dynamics_modeling.optimized_force_generator(
-                component_count=num_coordinates,
-                scale_vector=args.forces_scale_vector,
-                time_end=args.max_time,
-                period=args.forces_period,
-                period_shift=args.forces_period_shift,
-                augmentations=10, # base is 40
-                random_seed=[args.random_seed,i],
-            )
-
-
-            mujoco.set_mjcb_control(
-                random_controller(forces_function)
-            )  # use this for the controller, could be made easier with using directly the data from mujoco.
-
-            pbar_2 = tqdm(
-                total=args.max_time,
-                desc="Running Mujoco simulation",
-                unit="s",
-                leave=False,
-                miniters=1,
-            )
-            while mujoco_data.time < args.max_time:
-                mujoco.mj_step(mujoco_model, mujoco_data)
-                pbar_2.update(mujoco_data.time - pbar_2.n)
-            pbar_2.close()
-            
-
-            # turn the result into a numpy array, and transform the data if needed
-            simulation_qpos_m, simulation_qvel_m, simulation_qacc_m = mujoco_transform(
-                np.array(simulation_qpos_m), np.array(simulation_qvel_m), np.array(simulation_qacc_m)
-            )
-            simulation_time_m = np.array(simulation_time_m).reshape(-1, 1)
-            force_vector_m = np.array(force_vector_m)
-
-            if len(simulation_qvel_g) >0:
-                simulation_time_m += np.max(simulation_time_g)
-
-            # Concatenate the data
-            simulation_time_g = np.concatenate((simulation_time_g, simulation_time_m), axis=0)
-            simulation_qpos_g = np.concatenate((simulation_qpos_g, simulation_qpos_m), axis=0)
-            simulation_qvel_g = np.concatenate((simulation_qvel_g, simulation_qvel_m), axis=0)
-            simulation_qacc_g = np.concatenate((simulation_qacc_g, simulation_qacc_m), axis=0)
-            force_vector_g = np.concatenate((force_vector_g, force_vector_m), axis=0)
+        (simulation_time_t, 
+         simulation_qpos_t, 
+         simulation_qvel_t, 
+         simulation_qacc_t, 
+         force_vector_t,
+         batch_starting_times) = generate_mujoco_trajectory(
+             num_coordinates,
+             args.initial_position,
+             args.initial_condition_randomness,
+             args.random_seed,
+             args.batch_number,
+             args.max_time,
+             xml_content,
+             args.forces_scale_vector,
+             args.forces_period,
+             args.forces_period_shift,
+             extra_info,
+             mujoco_transform,
+             inverse_mujoco_transform
+         )
+        
+        (simulation_time_v, 
+         simulation_qpos_v, 
+         simulation_qvel_v, 
+         simulation_qacc_v, 
+         force_vector_v,
+         _) = generate_mujoco_trajectory(
+             num_coordinates,
+             args.initial_position,
+             args.initial_condition_randomness,
+             [args.random_seed,0], # Important to keep in mind the change of seed for validation
+             1,
+             args.validation_time,
+             xml_content,
+             args.forces_scale_vector,
+             args.forces_period,
+             args.forces_period_shift,
+             extra_info,
+             mujoco_transform,
+             inverse_mujoco_transform
+         )
 
     elif args.generation_type == "theorical": # Theorical generation
 
-        (simulation_time_g, 
-         simulation_qpos_g, 
-         simulation_qvel_g, 
-         simulation_qacc_g, 
-         force_vector_g) = generate_theorical_trajectory(
+        (simulation_time_t, 
+         simulation_qpos_t, 
+         simulation_qvel_t, 
+         simulation_qacc_t, 
+         force_vector_t,
+         batch_starting_times) = generate_theorical_trajectory(
              num_coordinates,
              args.initial_position,
              args.initial_condition_randomness,
@@ -263,31 +207,68 @@ if __name__ == "__main__":
              args.forces_period,
              args.forces_period_shift
          )
+        
+        (simulation_time_v, 
+         simulation_qpos_v, 
+         simulation_qvel_v, 
+         simulation_qacc_v, 
+         force_vector_v,
+         _) = generate_theorical_trajectory(
+             num_coordinates,
+             args.initial_position,
+             args.initial_condition_randomness,
+             [args.random_seed,0],# Important to keep in mind the change of seed for validation
+             1,
+             args.validation_time,
+             ideal_solution_vector,
+             full_catalog,
+             extra_info,
+             time_sym,
+             symbols_matrix,
+             args.forces_scale_vector,
+             args.forces_period,
+             args.forces_period_shift
+         )
 
-    raw_sample_number = len(simulation_time_g)
-    logger.info( f"Raw simulation len {raw_sample_number}")
+    logger.info( f"Raw simulation len {len(simulation_time_t)}")
 
     # Reduce the data to the desired lenght
 
-    subsample = raw_sample_number // args.sample_number
+    subsample_t = len(simulation_time_t) // args.sample_number
 
-    if subsample == 0 :
-        subsample =1
+    subsample_v = len(simulation_time_v) // args.max_validation_sample
+
+    if subsample_t == 0 :
+        subsample_t =1
+
+    if subsample_v == 0 :
+        subsample_v = 1
 
     truncation = 20
 
-    simulation_time_data = simulation_time_g[truncation:-truncation:subsample]
-    simulation_qpos_data = simulation_qpos_g[truncation:-truncation:subsample]
-    simulation_qvel_data = simulation_qvel_g[truncation:-truncation:subsample]
-    simulation_qacc_data = simulation_qacc_g[truncation:-truncation:subsample]
-    force_vector_data = force_vector_g[truncation:-truncation:subsample]
+    simulation_time_data_training = simulation_time_t[truncation:-truncation:subsample_t]
+    simulation_qpos_data_training = simulation_qpos_t[truncation:-truncation:subsample_t]
+    simulation_qvel_data_training = simulation_qvel_t[truncation:-truncation:subsample_t]
+    simulation_qacc_data_training = simulation_qacc_t[truncation:-truncation:subsample_t]
+    force_vector_data_training = force_vector_t[truncation:-truncation:subsample_t]
+
+    simulation_time_data_validation = simulation_time_v[truncation:-truncation:subsample_v]
+    simulation_qpos_data_validation = simulation_qpos_v[truncation:-truncation:subsample_v]
+    simulation_qvel_data_validation = simulation_qvel_v[truncation:-truncation:subsample_v]
+    simulation_qacc_data_validation = simulation_qacc_v[truncation:-truncation:subsample_v]
+    force_vector_data_validation = force_vector_v[truncation:-truncation:subsample_v]
 
     data = {
-        "simulation_time": simulation_time_data,
-        "simulation_qpos": simulation_qpos_data,
-        "simulation_qvel": simulation_qvel_data,
-        "simulation_qacc": simulation_qacc_data,
-        "force_vector": force_vector_data,
+        "simulation_time_training": simulation_time_data_training,
+        "simulation_qpos_training": simulation_qpos_data_training,
+        "simulation_qvel_training": simulation_qvel_data_training,
+        "simulation_qacc_training": simulation_qacc_data_training,
+        "force_vector_training": force_vector_data_training,
+        "simulation_time_validation": simulation_time_data_validation,
+        "simulation_qpos_validation": simulation_qpos_data_validation,
+        "simulation_qvel_validation": simulation_qvel_data_validation,
+        "simulation_qacc_validation": simulation_qacc_data_validation,
+        "force_vector_validation": force_vector_data_validation,
     }
 
     # Save pickle file
@@ -302,19 +283,48 @@ if __name__ == "__main__":
     data_json = {
         "generation_settings" : settings_dict,
         "data_path" : filename,
-        "results" : {},
-        "visualisation_series" : json_format_time_series(
-            name="training_data",
-            time= simulation_time_data,
-            series = {
-                "qpos": simulation_qpos_data,
-                "qvel": simulation_qvel_data,
-                "qacc": simulation_qacc_data,
-                "forces": force_vector_data
+        "visualisation" : {
+            "training_group": {
+                "data": {
+                    **json_format_time_series(
+                        name="training_data",
+                        time= simulation_time_data_training,
+                        series = {
+                            "qpos": simulation_qpos_data_training,
+                            "qvel": simulation_qvel_data_training,
+                            "qacc": simulation_qacc_data_training,
+                            "forces": force_vector_data_training
+                        },
+                        sample= args.visualisation_sample,
+                        mode_solution="mixed",
+                        ideal_solution_vector=ideal_solution_vector,
+                        solution_label=full_catalog.label(),
+                        reference=True
+                    )
+                },
+                "batch_starting_times": batch_starting_times,
             },
-            sample= args.visualisation_sample
-        )
+            "validation_group":{
+                "data": {
+                    **json_format_time_series(
+                        name="validation_data",
+                        time= simulation_time_data_validation,
+                        series = {
+                            "qpos": simulation_qpos_data_validation,
+                            "qvel": simulation_qvel_data_validation,
+                            "qacc": simulation_qacc_data_validation,
+                            "forces": force_vector_data_validation
+                        },
+                        sample= args.visualisation_sample,
+                        mode_solution="mixed",
+                        ideal_solution_vector=ideal_solution_vector,
+                        solution_label=full_catalog.label(),
+                        reference=True
+                    )
+                },
+            },
         }
+    }
     
     data_json = convert_to_lists(data_json)
 

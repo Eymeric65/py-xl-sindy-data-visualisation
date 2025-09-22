@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import InteractiveCurve from "./InteractiveCurve";
 import TimeSlider from "./TimeSlider";
 import Visualisation from "./Visualisation";
+import GenerationSettings from "./GenerationSettings";
 
 type CoordinateData = {
   [varName: string]: number[];
@@ -12,32 +13,43 @@ type SeriesData = {
 };
 
 type VisualisationData = {
-  time: number[][];
+  time: number[];
   series: SeriesData;
+  reference?: boolean;
+  solution?: any;
 };
 
-type VisualisationSeries = {
-  [seriesName: string]: VisualisationData;
+type GroupData = {
+  data: {
+    [dataName: string]: VisualisationData;
+  };
+  batch_starting_times?: number[];
+};
+
+type VisualisationGroups = {
+  [groupName: string]: GroupData;
 };
 
 type ResultJson = {
   generation_settings?: {
     experiment_folder?: string;
   };
-  visualisation_series: VisualisationSeries;
+  visualisation: VisualisationGroups;
 };
 
 const App: React.FC = () => {
   const [availableFiles, setAvailableFiles] = useState<string[]>([]);
   const [selectedFile, setSelectedFile] = useState<string>("");
-  const [availableVisualisationSeries, setAvailableVisualisationSeries] = useState<string[]>([]);
-  const [selectedVisualisationSeries, setSelectedVisualisationSeries] = useState<string>("");
+  const [availableGroups, setAvailableGroups] = useState<string[]>([]);
+  const [selectedGroup, setSelectedGroup] = useState<string>("");
   const [data, setData] = useState<any[]>([]);
   const [groupedLines, setGroupedLines] = useState<{[varType: string]: {[coordinate: string]: string[]}}>({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [currentIdx, setCurrentIdx] = useState(0);
   const [simulationType, setSimulationType] = useState<string>("");
+  const [batchStartTimes, setBatchStartTimes] = useState<number[]>([]);
+  const [generationSettings, setGenerationSettings] = useState<any>(null);
 
   // Load available files on mount
   useEffect(() => {
@@ -77,11 +89,14 @@ const App: React.FC = () => {
         return res.json();
       })
       .then((json: ResultJson) => {
-        const visualisationSeries = Object.keys(json.visualisation_series);
-        setAvailableVisualisationSeries(visualisationSeries);
-        if (visualisationSeries.length > 0 && !selectedVisualisationSeries) {
-          setSelectedVisualisationSeries(visualisationSeries[0]);
+        const groups = Object.keys(json.visualisation);
+        setAvailableGroups(groups);
+        if (groups.length > 0 && !selectedGroup) {
+          setSelectedGroup(groups[0]);
         }
+        
+        // Set generation settings
+        setGenerationSettings(json.generation_settings || null);
         
         // Extract simulation type from experiment_folder
         if (json.generation_settings?.experiment_folder) {
@@ -98,28 +113,45 @@ const App: React.FC = () => {
       });
   }, [selectedFile]);
 
-  // Process data when visualisation series is selected
+  // Process data when group is selected
   useEffect(() => {
-    if (!selectedFile || !selectedVisualisationSeries) return;
+    if (!selectedFile || !selectedGroup) return;
 
     setLoading(true);
     
     fetch(`results/${selectedFile}`)
       .then(res => res.json())
       .then((json: ResultJson) => {
-        const selectedData = json.visualisation_series[selectedVisualisationSeries];
-        const timeArr = selectedData.time.map((t) => t[0]);
+        const groupData = json.visualisation[selectedGroup];
+        
+        // Set batch starting times if available
+        if (groupData.batch_starting_times) {
+          setBatchStartTimes(groupData.batch_starting_times);
+        } else {
+          setBatchStartTimes([]);
+        }
+        
+        // Get the first (and likely only) data entry in the group
+        const dataKeys = Object.keys(groupData.data);
+        if (dataKeys.length === 0) {
+          setError("No data found in selected group");
+          setLoading(false);
+          return;
+        }
+        
+        const selectedData = groupData.data[dataKeys[0]];
+        const timeArr = selectedData.time;
         
         // Create flat data and group by variable type with coordinates side by side
         const groupedByVar: {[varType: string]: {[coordinate: string]: string[]}} = {};
-        const flatData = timeArr.map((t, i) => {
+        const flatData = timeArr.map((t: number, i: number) => {
           const point: any = { time: t };
           
-          // Process all coordinates for this visualisation series
+          // Process all coordinates for this group
           Object.entries(selectedData.series).forEach(([coordinateName, coordinateData]) => {
-            Object.entries(coordinateData).forEach(([varName, arr]) => {
+            Object.entries(coordinateData as CoordinateData).forEach(([varName, arr]) => {
               const key = `${coordinateName}.${varName}`;
-              point[key] = arr[i];
+              point[key] = (arr as number[])[i];
               
               // Group by variable type, then by coordinate
               if (!groupedByVar[varName]) groupedByVar[varName] = {};
@@ -142,7 +174,7 @@ const App: React.FC = () => {
         setError(e.message);
         setLoading(false);
       });
-  }, [selectedFile, selectedVisualisationSeries]);
+  }, [selectedFile, selectedGroup]);
 
   // Calculate position and force ranges for cart pole visualization
   const getPositionRange = () => {
@@ -190,15 +222,15 @@ const App: React.FC = () => {
             
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Select Visualisation Series:
+                Select Group:
               </label>
               <select 
-                value={selectedVisualisationSeries} 
-                onChange={(e) => setSelectedVisualisationSeries(e.target.value)}
+                value={selectedGroup} 
+                onChange={(e) => setSelectedGroup(e.target.value)}
                 className="w-full p-2 border border-gray-300 rounded-md"
               >
-                {availableVisualisationSeries.map(series => (
-                  <option key={series} value={series}>{series}</option>
+                {availableGroups.map(group => (
+                  <option key={group} value={group}>{group}</option>
                 ))}
               </select>
             </div>
@@ -206,11 +238,37 @@ const App: React.FC = () => {
           
           {data.length > 0 && (
             <TimeSlider
-              times={data.map((d) => d.time)}
+              times={data.map((d) => Number(d.time))}
               onChange={setCurrentIdx}
             />
           )}
         </div>
+
+        {/* Generation Settings Section */}
+        {generationSettings && (
+          <div className="bg-white rounded-lg shadow p-6 mb-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div>
+                <GenerationSettings settings={generationSettings} />
+              </div>
+              <div>
+                {/* Right half - can be used for additional info later */}
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <h3 className="text-lg font-semibold text-gray-700 mb-2">Data Summary</h3>
+                  {data.length > 0 && (
+                    <div className="text-sm text-gray-600">
+                      <p>Total data points: {data.length}</p>
+                      <p>Simulation type: {simulationType}</p>
+                      {batchStartTimes.length > 0 && (
+                        <p>Batches: {batchStartTimes.length}</p>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Simulation Visualization */}
         {!loading && !error && data.length > 0 && simulationType === 'cart_pole' && (
@@ -239,28 +297,39 @@ const App: React.FC = () => {
         
         {/* Visualizations */}
         {!loading && !error && data.length > 0 && (
-          <div className="space-y-6">
-            {Object.entries(groupedLines).map(([varType, coordinateGroups]) => (
-              <div key={varType} className="bg-white rounded-lg shadow p-6">
-                <h2 className="text-xl font-semibold mb-4 capitalize">
-                  {varType} ({selectedVisualisationSeries})
-                </h2>
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  {Object.entries(coordinateGroups).map(([coordinateName, lines]) => (
-                    <div key={coordinateName} className="space-y-2">
-                      <h3 className="text-lg font-medium text-gray-700">
-                        {coordinateName}
-                      </h3>
-                      <InteractiveCurve 
-                        data={data} 
-                        lines={lines} 
-                        currentTime={data[currentIdx]?.time} 
-                      />
-                    </div>
-                  ))}
+          <div className="bg-white rounded-lg shadow p-6 mb-6">
+            <h2 className="text-xl font-semibold mb-4">
+              Data Visualization ({selectedGroup})
+              {batchStartTimes.length > 0 && (
+                <span className="text-sm text-gray-500 ml-2">
+                  - {batchStartTimes.length} batches
+                </span>
+              )}
+            </h2>
+            <div className="space-y-6">
+              {Object.entries(groupedLines).map(([varType, coordinateGroups]) => (
+                <div key={varType}>
+                  <h3 className="text-lg font-medium text-gray-800 mb-3 capitalize border-b border-gray-200 pb-2">
+                    {varType}
+                  </h3>
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-4">
+                    {Object.entries(coordinateGroups).map(([coordinateName, lines]) => (
+                      <div key={coordinateName} className="space-y-2">
+                        <h4 className="text-md font-medium text-gray-700">
+                          {coordinateName}
+                        </h4>
+                        <InteractiveCurve 
+                          data={data} 
+                          lines={lines} 
+                          currentTime={data[currentIdx]?.time} 
+                          batchStartTimes={batchStartTimes}
+                        />
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         )}
       </div>
