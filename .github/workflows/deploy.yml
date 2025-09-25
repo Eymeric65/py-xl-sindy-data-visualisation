@@ -52,25 +52,36 @@ jobs:
           # Create public/results directory
           mkdir -p public/results
           
-          # Get releases and find the latest one with data
-          echo "📡 Querying GitHub API for data releases..."
-          RELEASES_JSON=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+          # Get the latest release directly
+          echo "📡 Querying GitHub API for latest release..."
+          LATEST_RELEASE_JSON=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
             "https://api.github.com/repos/${{ github.repository }}/releases/latest")
 
-          echo $RELEASES_JSON   # Debug: print the full JSON response
+          echo "🔍 Latest release info:"
+          TAG_NAME=$(echo "$LATEST_RELEASE_JSON" | jq -r '.tag_name // "No tag found"')
+          echo "Latest release tag: $TAG_NAME"
           
-          echo "🔍 Looking for data releases..."
-          echo "$RELEASES_JSON" | jq -r '.[] | select(.tag_name | contains("data")) | .tag_name' | head -5
-          
-          # Get the latest data release assets
-          LATEST_DATA_RELEASE=$(echo "$RELEASES_JSON" | jq -r '
-            .[] | 
-            select(.tag_name | contains("data")) | 
-            select(.assets | length > 0) | 
-            .assets[] | 
-            select(.name | test("results.*\\.(tar\\.gz|zip|json)$")) | 
-            "\(.browser_download_url)||||\(.name)"
-          ' | head -10)
+          # Check if it's a data release and get assets
+          if [[ "$TAG_NAME" == *"data"* ]]; then
+            echo "✅ Latest release is a data release: $TAG_NAME"
+            LATEST_DATA_RELEASE=$(echo "$LATEST_RELEASE_JSON" | jq -r '
+              .assets[]? | 
+              select(.name | test("results.*\\.(tar\\.gz|zip|json)$")) | 
+              "\(.browser_download_url)||||\(.name)"
+            ')
+          else
+            echo "⚠️  Latest release ($TAG_NAME) is not a data release, searching for latest data release..."
+            ALL_RELEASES_JSON=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+              "https://api.github.com/repos/${{ github.repository }}/releases")
+            LATEST_DATA_RELEASE=$(echo "$ALL_RELEASES_JSON" | jq -r '
+              .[] | 
+              select(.tag_name | contains("data")) | 
+              select(.assets | length > 0) | 
+              .assets[] | 
+              select(.name | test("results.*\\.(tar\\.gz|zip|json)$")) | 
+              "\(.browser_download_url)||||\(.name)"
+            ' | head -10)
+          fi
           
           if [ -n "$LATEST_DATA_RELEASE" ]; then
             echo "📦 Found data release assets:"
