@@ -305,7 +305,7 @@ def json_format_time_series(
     series:Dict[str,np.ndarray],
     sample:int,
     mode_solution:str="mixed",
-    ideal_solution_vector:list=None,
+    solution_vector:list=None,
     solution_label:List[str]=None,
     reference:bool=False,
     extra_info:Dict=None
@@ -335,12 +335,14 @@ def json_format_time_series(
 
     for key, value in restricted_series.items():
 
-        for i in range(value.shape[1]):
+        if value is not None:
 
-            if f"coor_{i}" not in series_dict:
-                series_dict[f"coor_{i}"] = {}
+            for i in range(value.shape[1]):
 
-            series_dict[f"coor_{i}"][key] = value[:, i].tolist()
+                if f"coor_{i}" not in series_dict:
+                    series_dict[f"coor_{i}"] = {}
+
+                series_dict[f"coor_{i}"][key] = value[:, i].tolist()
 
     data_json = {
         name: {
@@ -349,7 +351,7 @@ def json_format_time_series(
             "reference": reference,
             "solution": {
                 mode_solution: {
-                    "vector": ideal_solution_vector,
+                    "vector": solution_vector,
                     "label": solution_label
                     } 
             }

@@ -52,6 +52,7 @@ const App: React.FC = () => {
   const [batchStartTimes, setBatchStartTimes] = useState<number[]>([]);
   const [generationSettings, setGenerationSettings] = useState<any>(null);
   const [allGroupsData, setAllGroupsData] = useState<VisualisationGroups>({});
+  const [relativeMode, setRelativeMode] = useState<boolean>(false);
 
   // Load available files on mount
   useEffect(() => {
@@ -136,7 +137,7 @@ const App: React.FC = () => {
           setBatchStartTimes([]);
         }
         
-        // Get the first (and likely only) data entry in the group
+        // Process ALL data entries in the group
         const dataKeys = Object.keys(groupData.data);
         if (dataKeys.length === 0) {
           setError("No data found in selected group");
@@ -144,18 +145,49 @@ const App: React.FC = () => {
           return;
         }
         
-        const selectedData = groupData.data[dataKeys[0]];
-        const timeArr = selectedData.time;
+        // Find all series with data
+        const seriesWithData = dataKeys.filter(key => {
+          const seriesData = groupData.data[key];
+          return seriesData.time && seriesData.time.length > 0 && 
+                 seriesData.series && Object.keys(seriesData.series).length > 0;
+        });
         
-        // Create flat data and group by variable type with coordinates side by side
+        if (seriesWithData.length === 0) {
+          setError("No series with data found in selected group");
+          setLoading(false);
+          return;
+        }
+        
+        // Find the reference series and other series
+        const referenceSeriesKey = seriesWithData.find(key => {
+          const seriesData = groupData.data[key];
+          return seriesData.reference === true;
+        });
+        
+        const otherSeriesKeys = seriesWithData.filter(key => {
+          const seriesData = groupData.data[key];
+          return seriesData.reference !== true;
+        });
+        
+        if (!referenceSeriesKey) {
+          setError("No reference series found in selected group");
+          setLoading(false);
+          return;
+        }
+        
+        const referenceData = groupData.data[referenceSeriesKey];
+        // Flatten time array if it's nested (handle [[0.1], [0.2]] format)
+        const timeArr = referenceData.time.map((t: any) => Array.isArray(t) ? t[0] : t);
+        
+        // Create unified flat data containing reference + other series
         const groupedByVar: {[varType: string]: {[coordinate: string]: string[]}} = {};
         const flatData = timeArr.map((t: number, i: number) => {
           const point: any = { time: t };
           
-          // Process all coordinates for this group
-          Object.entries(selectedData.series).forEach(([coordinateName, coordinateData]) => {
+          // 1. Process reference series data (clean keys for visualization compatibility)
+          Object.entries(referenceData.series).forEach(([coordinateName, coordinateData]) => {
             Object.entries(coordinateData as CoordinateData).forEach(([varName, arr]) => {
-              const key = `${coordinateName}.${varName}`;
+              const key = `${coordinateName}.${varName}`; // Clean key for cart pole visualization
               point[key] = (arr as number[])[i];
               
               // Group by variable type, then by coordinate
@@ -167,10 +199,47 @@ const App: React.FC = () => {
             });
           });
           
+          // 2. Process other series data (prefixed keys for curve visualization)
+          otherSeriesKeys.forEach(seriesKey => {
+            const seriesData = groupData.data[seriesKey];
+            const seriesPrefix = seriesKey.substring(0, 8); // Use first 8 chars as prefix
+            
+            // Skip if this series doesn't have data at this time index
+            if (!seriesData.time || i >= seriesData.time.length) return;
+            
+            // Flatten time for this series too
+            const seriesTimeArr = seriesData.time.map((t: any) => Array.isArray(t) ? t[0] : t);
+            
+            // Find closest time index for this series
+            let closestIndex = i;
+            if (seriesTimeArr.length !== timeArr.length) {
+              // If different lengths, find the closest time point
+              const targetTime = timeArr[i];
+              closestIndex = seriesTimeArr.reduce((closest, time, idx) => {
+                return Math.abs(time - targetTime) < Math.abs(seriesTimeArr[closest] - targetTime) ? idx : closest;
+              }, 0);
+            }
+            
+            // Process coordinates for this other series
+            Object.entries(seriesData.series).forEach(([coordinateName, coordinateData]) => {
+              Object.entries(coordinateData as CoordinateData).forEach(([varName, arr]) => {
+                const key = `${seriesPrefix}.${coordinateName}.${varName}`;
+                if (closestIndex < arr.length) {
+                  point[key] = (arr as number[])[closestIndex];
+                  
+                  // Group by variable type, then by coordinate
+                  if (!groupedByVar[varName]) groupedByVar[varName] = {};
+                  if (!groupedByVar[varName][coordinateName]) groupedByVar[varName][coordinateName] = [];
+                  if (!groupedByVar[varName][coordinateName].includes(key)) {
+                    groupedByVar[varName][coordinateName].push(key);
+                  }
+                }
+              });
+            });
+          });
+          
           return point;
-        });
-        
-        setData(flatData);
+        });        setData(flatData);
         setGroupedLines(groupedByVar);
         setCurrentIdx(0);
         setLoading(false);
@@ -201,6 +270,15 @@ const App: React.FC = () => {
       max: Math.max(...allForces)
     };
   };
+
+  // Check if relative mode should be available (has non-reference lines)
+  const hasNonReferenceLines = React.useMemo(() => {
+    return Object.values(groupedLines).some(coordinateGroups =>
+      Object.values(coordinateGroups).some(lines =>
+        lines.some(line => line.split('.').length > 2) // Lines with prefix (e.g., "prefix.coor_0.qpos")
+      )
+    );
+  }, [groupedLines]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -312,6 +390,7 @@ const App: React.FC = () => {
                 data[currentIdx]?.['coor_0.forces'] || 0,  // cart force
                 data[currentIdx]?.['coor_1.forces'] || 0   // pole torque
               ]}
+              dataPoint={data[currentIdx]}
               positionRange={getPositionRange()}
               forceRange={getForceRange()}
               width={500}
@@ -332,14 +411,43 @@ const App: React.FC = () => {
         {/* Visualizations */}
         {!loading && !error && data.length > 0 && (
           <div className="bg-white rounded-lg shadow p-6 mb-6">
-            <h2 className="text-xl font-semibold mb-4">
-              Data Visualization ({selectedGroup})
-              {batchStartTimes.length > 0 && (
-                <span className="text-sm text-gray-500 ml-2">
-                  - {batchStartTimes.length} batches
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-semibold">
+                Data Visualization ({selectedGroup})
+                {batchStartTimes.length > 0 && (
+                  <span className="text-sm text-gray-500 ml-2">
+                    - {batchStartTimes.length} batches
+                  </span>
+                )}
+              </h2>
+              <div className="flex items-center space-x-2">
+                <span className={`text-sm ${hasNonReferenceLines ? 'text-gray-600' : 'text-gray-400'}`}>
+                  Relative
                 </span>
-              )}
-            </h2>
+                <label className={`relative inline-flex items-center ${hasNonReferenceLines ? 'cursor-pointer' : 'cursor-not-allowed'}`}>
+                  <input
+                    type="checkbox"
+                    checked={relativeMode}
+                    onChange={(e) => hasNonReferenceLines && setRelativeMode(e.target.checked)}
+                    disabled={!hasNonReferenceLines}
+                    className="sr-only"
+                  />
+                  <div className={`w-11 h-6 rounded-full transition-colors duration-200 ${
+                    !hasNonReferenceLines 
+                      ? 'bg-gray-100 border border-gray-300' 
+                      : relativeMode 
+                        ? 'bg-blue-600' 
+                        : 'bg-gray-200'
+                  }`}>
+                    <div className={`w-5 h-5 rounded-full shadow transform transition-transform duration-200 ${
+                      relativeMode && hasNonReferenceLines ? 'translate-x-5' : 'translate-x-0'
+                    } mt-0.5 ml-0.5 ${
+                      !hasNonReferenceLines ? 'bg-gray-300' : 'bg-white'
+                    }`}></div>
+                  </div>
+                </label>
+              </div>
+            </div>
             <div className="space-y-6">
               {Object.entries(groupedLines).map(([varType, coordinateGroups]) => (
                 <div key={varType}>
@@ -357,6 +465,7 @@ const App: React.FC = () => {
                           lines={lines} 
                           currentTime={data[currentIdx]?.time} 
                           batchStartTimes={batchStartTimes}
+                          relative={relativeMode}
                         />
                       </div>
                     ))}

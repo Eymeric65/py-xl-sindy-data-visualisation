@@ -7,9 +7,10 @@ interface InteractiveCurveProps {
   lines: string[];
   currentTime?: number;
   batchStartTimes?: number[];
+  relative?: boolean;
 }
 
-const InteractiveCurve: React.FC<InteractiveCurveProps> = ({ data, lines, currentTime, batchStartTimes }) => {
+const InteractiveCurve: React.FC<InteractiveCurveProps> = ({ data, lines, currentTime, batchStartTimes, relative = false }) => {
 
   const containerRef = useRef<HTMLDivElement>(null);
   const curveRef = useRef<HTMLDivElement>(null);
@@ -85,7 +86,7 @@ const InteractiveCurve: React.FC<InteractiveCurveProps> = ({ data, lines, curren
   return (
     <div className="w-full flex justify-center mt-2 relative overflow-hidden">
       <div ref={containerRef} className="relative w-full max-w-full" style={{ width: '100%' }}>
-        <Curve data={data} lines={lines} containerRef={curveRef} batchStartTimes={batchStartTimes} />
+        <Curve data={data} lines={lines} containerRef={curveRef} batchStartTimes={batchStartTimes} relative={relative} />
         <TimeIndicator currentTime={currentTime} data={data} rectangle={plotRect} />
       </div>
     </div>

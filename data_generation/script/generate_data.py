@@ -66,12 +66,13 @@ class Args:
     """the maximum number of sample for the validation trajectory, if the validation time is too high compared to the max time and the sample number, this will limit the number of sample to avoid memory issues"""
 
 
-    def get_json(self) -> str: 
+    def get_json(self,essential_only=True) -> str: 
         """Generate a JSON string from parameters."""
         d = vars(self).copy()
-        d.pop("visualisation_sample", None)
-        d.pop("validation_time", None)
-        d.pop("max_validation_sample", None)
+        if essential_only :
+            d.pop("visualisation_sample", None)
+            d.pop("validation_time", None)
+            d.pop("max_validation_sample", None)
         return json.dumps(d, sort_keys=True)
 
     def get_uid(self) -> str:
@@ -278,7 +279,7 @@ if __name__ == "__main__":
         pickle.dump(data, f)
     logger.info(f"Data saved with uid {args.get_uid()}")
 
-    settings_dict = json.loads(args.get_json())
+    settings_dict = json.loads(args.get_json(essential_only=False))
 
     data_json = {
         "generation_settings" : settings_dict,
@@ -297,7 +298,7 @@ if __name__ == "__main__":
                         },
                         sample= args.visualisation_sample,
                         mode_solution="mixed",
-                        ideal_solution_vector=ideal_solution_vector,
+                        solution_vector=ideal_solution_vector,
                         solution_label=full_catalog.label(),
                         reference=True
                     )
@@ -317,7 +318,7 @@ if __name__ == "__main__":
                         },
                         sample= args.visualisation_sample,
                         mode_solution="mixed",
-                        ideal_solution_vector=ideal_solution_vector,
+                        solution_vector=ideal_solution_vector,
                         solution_label=full_catalog.label(),
                         reference=True
                     )

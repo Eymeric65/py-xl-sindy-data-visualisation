@@ -37,7 +37,7 @@ from tqdm import tqdm
 
 from xlsindy.logger import setup_logger
 
-from data_generation.script.util import generate_theorical_trajectory,convert_to_lists
+from data_generation.script.util import generate_theorical_trajectory,convert_to_lists,json_format_time_series
 
 logger = setup_logger(__name__)
 
@@ -47,8 +47,8 @@ class Args:
     """the experiment file (without extension)"""
     optimization_function: str = "lasso_regression"
     """the regression function used in the regression"""
-    algorithm: str = "xlsindy"
-    """the name of the algorithm used (for the moment "xlsindy" and "sindy" are the only possible)"""
+    algorithm: str = "mixed"
+    """the name of the algorithm used (for the moment "xlsindy", "sindy" and "mixed" are the only possible)"""
     regression_type: str = "explicit"
     """the type of regression to use (explicit, implicit, mixed)"""
     noise_level: float = 0.0
@@ -57,8 +57,6 @@ class Args:
     """the random seed for the noise"""
     skip_already_done: bool = True
     """if true, skip the experiment if already present in the result file"""
-    print_graph: bool = False
-    """if true, show the graph of the result"""
 
     def get_uid(self):
         hash_input = (
@@ -84,7 +82,7 @@ if __name__ == "__main__":
         simulation_dict = json.load(json_file)
 
     if args.skip_already_done:
-        if args.get_uid() in simulation_dict["results"]:
+        if args.get_uid() in simulation_dict["visualisation"]["validation_group"]["data"]:
             print("already aligned")
             exit()
 
@@ -121,11 +119,11 @@ if __name__ == "__main__":
     rng = np.random.default_rng(random_seed)
 
     # load
-    imported_time = sim_data["simulation_time"]
-    imported_qpos = sim_data["simulation_qpos"]
-    imported_qvel = sim_data["simulation_qvel"]
-    imported_qacc = sim_data["simulation_qacc"]
-    imported_force = sim_data["force_vector"]
+    imported_time = sim_data["simulation_time_training"]
+    imported_qpos = sim_data["simulation_qpos_training"]
+    imported_qvel = sim_data["simulation_qvel_training"]
+    imported_qacc = sim_data["simulation_qacc_training"]
+    imported_force = sim_data["force_vector_training"]
 
 
     # add noise
@@ -197,17 +195,17 @@ if __name__ == "__main__":
 
     ## Analysis of result
 
-    simulation_dict["results"][args.get_uid()] = {}
-    simulation_dict["results"][args.get_uid()]["algoritm"] = args.algorithm
-    simulation_dict["results"][args.get_uid()]["noise_level"] = args.noise_level
-    simulation_dict["results"][args.get_uid()]["optimization_function"] = args.optimization_function
-    simulation_dict["results"][args.get_uid()]["random_seed"] = random_seed
-    simulation_dict["results"][args.get_uid()]["catalog_len"] = extra_info["catalog_len"]
-    simulation_dict["results"][args.get_uid()]["solution"] = solution
-    simulation_dict["results"][args.get_uid()]["ideal_solution"] = extra_info["ideal_solution_vector"]
+    result_dict = {
+        "noise_level": args.noise_level,
+        "optimization_function": args.optimization_function,
+        "random_seed": random_seed,
+        "regression_type": args.regression_type,
+        "valid": valid_model,
+        "results":{}
+    }
+
 
     if valid_model:
-
 
         # Acceleration comparison result
 
@@ -224,7 +222,7 @@ if __name__ == "__main__":
             model_acc[3:-3], imported_qacc[3:-3]
         )
 
-        simulation_dict["results"][args.get_uid()]["RMSE_acceleration"] = RMSE_acceleration
+        result_dict["results"]["RMSE_acceleration"] = RMSE_acceleration
         print("estimate variance between mujoco and model is : ", RMSE_acceleration)
 
         # Trajectory comparison result
@@ -245,13 +243,14 @@ if __name__ == "__main__":
          simulation_qpos_g, 
          simulation_qvel_g, 
          simulation_qacc_g, 
-         force_vector_g) = generate_theorical_trajectory(
+         force_vector_g,
+         _) = generate_theorical_trajectory(
              num_coordinates,
              simulation_dict["generation_settings"]["initial_position"],
              simulation_dict["generation_settings"]["initial_condition_randomness"],
-             simulation_dict["generation_settings"]["random_seed"],
-             simulation_dict["generation_settings"]["batch_number"],
-             simulation_dict["generation_settings"]["max_time"],
+             [simulation_dict["generation_settings"]["random_seed"],0], # Ensure same seed as for data generation
+             1,
+             simulation_dict["generation_settings"]["validation_time"],
              solution,
              full_catalog,
              extra_info,
@@ -261,6 +260,30 @@ if __name__ == "__main__":
              simulation_dict["generation_settings"]["forces_period"],
              simulation_dict["generation_settings"]["forces_period_shift"]
          )
+        
+    else: 
+        simulation_time_g = None
+        simulation_qpos_g = None
+        simulation_qvel_g = None
+        simulation_qacc_g = None
+        force_vector_g = None
+
+    simulation_dict["visualisation"]["validation_group"]["data"].update(
+            **json_format_time_series(
+                name=args.get_uid(),
+                time= simulation_time_g,
+                series = {
+                    "qpos": simulation_qpos_g,
+                    "qvel": simulation_qvel_g,
+                    "qacc": simulation_qacc_g,
+                    "forces": force_vector_g
+                },
+                sample= simulation_dict["generation_settings"]["visualisation_sample"],
+                mode_solution=args.algorithm,
+                solution_vector=solution,
+                extra_info=result_dict
+            )
+        )
 
         # Generate the batch as a theory one
 
@@ -273,58 +296,3 @@ if __name__ == "__main__":
     with open(args.experiment_file + ".json", "w") as file:
         json.dump(simulation_dict, file, indent=4)
 
-    if args.print_graph and valid_model:
-        import matplotlib.pyplot as plt
-
-        plt.figure(figsize=(10, 8))
-        for i in range(num_coordinates):
-            plt.subplot(num_coordinates, 1, i + 1)
-            plt.plot(imported_time, imported_qacc[:, i], label="mujoco")
-            plt.plot(imported_time, model_acc[:, i], label="model")
-            plt.title(f"acceleration of coordinate {i}")
-            plt.legend()
-
-        plt.savefig(f"{args.experiment_file}_{args.get_uid()}_acceleration_comparison.png", dpi=300, bbox_inches='tight')
-        plt.close()
-
-        plt.figure(figsize=(15, 12))
-
-        # Plot position comparison
-        for i in range(num_coordinates):
-            plt.subplot(4, num_coordinates, i + 1)
-            plt.plot(imported_time, imported_qpos[:, i], label="mujoco", alpha=0.7)
-            plt.plot(simulation_time_g.flatten(), simulation_qpos_g[:, i], label="model", alpha=0.7)
-            plt.title(f"Position coord {i}")
-            plt.legend()
-            plt.grid(True, alpha=0.3)
-
-        # Plot velocity comparison
-        for i in range(num_coordinates):
-            plt.subplot(4, num_coordinates, num_coordinates + i + 1)
-            plt.plot(imported_time, imported_qvel[:, i], label="mujoco", alpha=0.7)
-            plt.plot(simulation_time_g.flatten(), simulation_qvel_g[:, i], label="model", alpha=0.7)
-            plt.title(f"Velocity coord {i}")
-            plt.legend()
-            plt.grid(True, alpha=0.3)
-
-        # Plot acceleration comparison
-        for i in range(num_coordinates):
-            plt.subplot(4, num_coordinates, 2 * num_coordinates + i + 1)
-            plt.plot(imported_time, imported_qacc[:, i], label="mujoco", alpha=0.7)
-            plt.plot(simulation_time_g.flatten(), simulation_qacc_g[:, i], label="model", alpha=0.7)
-            plt.title(f"Acceleration coord {i}")
-            plt.legend()
-            plt.grid(True, alpha=0.3)
-
-        # Plot force comparison
-        for i in range(num_coordinates):
-            plt.subplot(4, num_coordinates, 3 * num_coordinates + i + 1)
-            plt.plot(imported_time, imported_force[:, i], label="mujoco", alpha=0.7)
-            plt.plot(simulation_time_g.flatten(), force_vector_g[:, i], label="model", alpha=0.7)
-            plt.title(f"Force coord {i}")
-            plt.legend()
-            plt.grid(True, alpha=0.3)
-
-        plt.tight_layout()
-        plt.savefig(f"{args.experiment_file}_{args.get_uid()}_full_dynamics_comparison.png", dpi=300, bbox_inches='tight')
-        plt.close()

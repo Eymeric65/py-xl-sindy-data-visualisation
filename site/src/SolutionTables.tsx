@@ -221,6 +221,9 @@ const SolutionTables: React.FC<SolutionTablesProps> = ({ groups }) => {
               <div className="bg-gray-50 px-4 py-2 border-b border-gray-200">
                 <h3 className="text-lg font-medium text-gray-800 capitalize">
                   {solutionType} Solutions
+                  <span className="ml-2 text-sm text-gray-600 font-normal">
+                    ({labels.length} parameters)
+                  </span>
                 </h3>
               </div>
               

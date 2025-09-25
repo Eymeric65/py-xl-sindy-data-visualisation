@@ -1,9 +1,23 @@
 import React, { useEffect, useState } from 'react';
+import SlidingBackground from './SlidingBackground';
+import CartPole from './CartPole';
 
-interface CartPoleProps {
-  cartPosition: number; // x position of the cart
-  poleAngle: number;    // angle of the pole in radians
-  forces?: number[];    // forces array [cart_force, pole_torque]
+// Define what a series IS
+interface Series {
+  cartPosition: number;
+  poleAngle: number;
+  forces: number[];
+}
+
+interface CartPoleVisualizationProps {
+  cartPosition: number; // x position of the cart (reference, raw)
+  poleAngle: number;    // angle of the pole in radians (reference, raw)
+  forces?: number[];    // forces array [cart_force, pole_torque] (reference)
+  otherSeries?: Array<{  // additional series to render as ghosts (raw)
+    cartPosition: number;
+    poleAngle: number;
+    forces?: number[];
+  }>;
   width?: number;       // canvas width
   height?: number;      // canvas height
   smoothTransition?: boolean; // enable smooth transitions
@@ -11,20 +25,37 @@ interface CartPoleProps {
   forceRange?: { min: number; max: number };
 }
 
-const CartPole: React.FC<CartPoleProps> = ({ 
+const CartPoleVisualization: React.FC<CartPoleVisualizationProps> = ({ 
   cartPosition, 
   poleAngle, 
   forces = [0, 0],
+  otherSeries = [],
   width = 800, 
   height = 400,
   smoothTransition = true,
   positionRange,
   forceRange
 }) => {
-  // Internal state for smooth interpolation
-  const [displayCartPosition, setDisplayCartPosition] = useState(cartPosition);
-  const [displayPoleAngle, setDisplayPoleAngle] = useState(poleAngle);
-  const [displayForces, setDisplayForces] = useState(forces);
+  // Build clean data structure: ALL series (reference first, then others)
+  const rawAllSeries: Series[] = [
+    {
+      cartPosition,
+      poleAngle,
+      forces
+    },
+    ...otherSeries.map(s => ({
+      cartPosition: s.cartPosition,
+      poleAngle: s.poleAngle,
+      forces: s.forces || [0, 0]
+    }))
+  ];
+
+  // SINGLE state object containing ALL smoothed values
+  const [smoothedAllSeries, setSmoothedAllSeries] = useState(rawAllSeries);
+  
+  // Track data update rate for adaptive smoothing
+  const [lastUpdateTime, setLastUpdateTime] = useState(performance.now());
+  const [dataUpdateRate, setDataUpdateRate] = useState(50); // Default to 50ms (20fps)
 
   // Responsive dimensions based on screen size
   const getResponsiveDimensions = () => {
@@ -63,309 +94,89 @@ const CartPole: React.FC<CartPoleProps> = ({
   const minTrack = positionRange?.min ?? -20; // minimum x position in meters
   const maxTrack = positionRange?.max ?? 20;  // maximum x position in meters
 
-  // Force scaling - use provided range or defaults
-  const minForce = forceRange?.min ?? -20; // minimum force/torque
-  const maxForce = forceRange?.max ?? 20;  // maximum force/torque
-  const maxForceRange = Math.max(Math.abs(minForce), Math.abs(maxForce));
+  // Track data update rate for adaptive smoothing
+  useEffect(() => {
+    const currentTime = performance.now();
+    const timeSinceLastUpdate = currentTime - lastUpdateTime;
+    
+    // Update the data rate (with some smoothing to avoid jitter)
+    setDataUpdateRate(prev => Math.min(prev * 0.8 + timeSinceLastUpdate * 0.2, 2000));
+    setLastUpdateTime(currentTime);
+  }, [cartPosition, poleAngle, otherSeries, forces]);
 
-  // Smooth interpolation effect
+  // SINGLE animation loop that runs independently of data updates
   useEffect(() => {
     if (!smoothTransition) {
-      setDisplayCartPosition(cartPosition);
-      setDisplayPoleAngle(poleAngle);
-      setDisplayForces(forces);
+      setSmoothedAllSeries(rawAllSeries);
       return;
     }
 
-    const startCart = displayCartPosition;
-    const startPole = displayPoleAngle;
-    const startForces = displayForces;
-    const targetCart = cartPosition;
-    const targetPole = poleAngle;
-    const targetForces = forces;
+    let animationId: number;
     
-    const startTime = performance.now();
-    const duration = 100;
-    
-    const animate = (currentTime: number) => {
-      const elapsed = currentTime - startTime;
-      const progress = Math.min(elapsed / duration, 1);
+    const animate = () => {
+      setSmoothedAllSeries(currentSmoothed => {
+        // Get fresh target data by rebuilding rawAllSeries inside the animation
+        const currentRawAllSeries: Series[] = [
+          {
+            cartPosition,
+            poleAngle,
+            forces
+          },
+          ...otherSeries.map(s => ({
+            cartPosition: s.cartPosition,
+            poleAngle: s.poleAngle,
+            forces: s.forces || [0, 0]
+          }))
+        ];
+        
+        // Calculate adaptive smoothing factor based on data update rate
+        const targetFrameTime = 1000 / 60; // 60fps = ~16.67ms per frame
+        const dataFrameTime = dataUpdateRate; // actual ms between data updates
+        
+        // Calculate how many render frames we have per data update
+        const framesPerDataUpdate = Math.max(1, dataFrameTime / targetFrameTime);
+        
+        // Better adaptive smoothing: use exponential decay that feels consistent
+        const adaptiveSmoothingFactor = 1 / (framesPerDataUpdate*1.2); // + for extra smoothness
+        
+        // Smooth all series (including reference as first element)
+        return currentSmoothed.map((current, index) => {
+          const target = currentRawAllSeries[index];
+          if (!target) return current;
+          
+          // Helper function for smooth interpolation
+          const smoothValue = (currentVal: number, targetVal: number) => 
+            currentVal + (targetVal - currentVal) * adaptiveSmoothingFactor;
+          
+          return {
+            cartPosition: smoothValue(current.cartPosition, target.cartPosition),
+            poleAngle: (() => {
+              let targetAngle = target.poleAngle;
+              const angleDiff = targetAngle - current.poleAngle;
+              if (angleDiff > Math.PI) targetAngle -= 2 * Math.PI;
+              if (angleDiff < -Math.PI) targetAngle += 2 * Math.PI;
+              return smoothValue(current.poleAngle, targetAngle);
+            })(),
+            forces: current.forces.map((currentForce, forceIndex) => 
+              smoothValue(currentForce, target.forces[forceIndex] || 0)
+            )
+          };
+        });
+      });
       
-      const easeOut = 1 - Math.pow(1 - progress, 2.5);
-      
-      const newCartPos = startCart + (targetCart - startCart) * easeOut;
-      const newPoleAngle = startPole + (targetPole - startPole) * easeOut;
-      const newForces = [
-        startForces[0] + (targetForces[0] - startForces[0]) * easeOut,
-        startForces[1] + (targetForces[1] - startForces[1]) * easeOut
-      ];
-      
-      setDisplayCartPosition(newCartPos);
-      setDisplayPoleAngle(newPoleAngle);
-      setDisplayForces(newForces);
-      
-      if (progress < 1) {
-        requestAnimationFrame(animate);
-      }
+      // Always continue animating (never stops, always smoothing towards current target)
+      animationId = requestAnimationFrame(animate);
     };
     
-    requestAnimationFrame(animate);
-  }, [cartPosition, poleAngle, forces, smoothTransition]);
-
-  // Scale and positioning
-  const scale = 100; // pixels per meter
-  const centerX = responsiveWidth / 2;
-  const centerY = responsiveHeight * 0.65;
-  
-  // Ground and track positioning
-  const groundY = centerY + 40;
-  const trackY = groundY - 5;
-  
-  // Calculate background offset to keep cart centered
-  const backgroundOffset = -displayCartPosition * scale;
-  
-  // Cart properties - always centered on screen
-  const cartWidth = 60;
-  const cartHeight = 30;
-  const cartX = centerX - cartWidth / 2;
-  const cartY = trackY - cartHeight;
-  
-  // Pole properties
-  const poleLength = 80;
-  const poleWidth = 6;
-  const poleEndX = cartX + cartWidth / 2 + Math.sin(displayPoleAngle) * poleLength;
-  const poleEndY = cartY - Math.cos(displayPoleAngle) * poleLength;
-  
-  // Wheel properties
-  const wheelRadius = 12;
-  const wheel1X = cartX + 15;
-  const wheel2X = cartX + cartWidth - 15;
-  const wheelY = cartY + cartHeight;
-  
-  // Calculate wheel rotation based on cart position
-  const wheelRotation = (displayCartPosition / (wheelRadius * 2 * Math.PI / scale)) * 360;
-  
-  // Generate complete background for entire track range
-  const generateWorldBackground = () => {
-    const elements = [];
+    animationId = requestAnimationFrame(animate);
     
-    // Generate track for entire range
-    for (let worldX = minTrack; worldX <= maxTrack; worldX += 1) { // Every 1 meter
-      const screenX = centerX + (worldX * scale) + backgroundOffset;
-      
-      // Skip if not visible
-      if (screenX < -100 || screenX > responsiveWidth + 100) continue;
-      
-      // Track segment
-      elements.push(
-        <rect 
-          key={`track-${worldX}`}
-          x={screenX - 50} 
-          y={trackY+5} 
-          width="100" 
-          height="10"
-          fill="#696969"
-        />
-      );
-      
-      // Railroad ties every 1 meter
-      if ((worldX - minTrack) % 2 === 0) {
-        elements.push(
-          <rect 
-            key={`tie-${worldX}`}
-            x={screenX} 
-            y={trackY+5} 
-            width="50" 
-            height="10"
-            fill="#4a4a4aff"
-          />
-        );
+    // Cleanup function to stop animation when component unmounts or smoothTransition changes
+    return () => {
+      if (animationId) {
+        cancelAnimationFrame(animationId);
       }
-    }
-    
-    // Generate background scenery every 3 meters (more objects)
-    for (let worldX = Math.ceil(minTrack / 3) * 3; worldX <= maxTrack; worldX += 2) {
-      const screenX = centerX + (worldX * scale) + backgroundOffset;
-      
-      // Skip if not visible or if it's a 5m marker position
-      if (screenX < -200 || screenX > width + 200 || worldX % 5 === 0) continue;
-      
-      // Use position as seed for consistent random generation
-      const seed = worldX / 3;
-      const random1 = Math.sin(seed * 12.9898) * 43758.5453;
-      const random2 = Math.sin(seed * 78.233) * 43758.5453;
-      const r1 = (random1 - Math.floor(random1));
-      const r2 = (random2 - Math.floor(random2));
-      
-      if (r1 < 0.25) {
-        // Trees with properly proportioned trunks
-        const treeHeight = 20 + r2 * 60;
-        const foliageRadius = 20 + r2 * 8; // Scale foliage with height
-        const trunkWidth = Math.max(6, foliageRadius * 0.3); // Trunk width proportional to foliage
-        const trunkHeight = treeHeight; // Trunk is 60% of tree height
-        elements.push(
-          <g key={`tree-${worldX}`}>
-            <rect 
-              x={screenX - trunkWidth/2} 
-              y={groundY - trunkHeight} 
-              width={trunkWidth} 
-              height={trunkHeight} 
-              fill="#8B4513" 
-            />
-            <circle cx={screenX} cy={groundY - trunkHeight + foliageRadius/2} r={foliageRadius} fill="#228B22" />
-            <circle cx={screenX - foliageRadius*0.4} cy={groundY - trunkHeight + foliageRadius*0.7} r={foliageRadius*0.7} fill="#32CD32" />
-            <circle cx={screenX + foliageRadius*0.5} cy={groundY - trunkHeight + foliageRadius*0.8} r={foliageRadius*0.8} fill="#228B22" />
-          </g>
-        );
-      } else if (r1 < 0.45) {
-        // Buildings
-        const buildingHeight = 80 + r2 * 60;
-        const buildingWidth = 50;
-        const buildingY = groundY - buildingHeight;
-        elements.push(
-          <g key={`building-${worldX}`}>
-            <rect 
-              x={screenX - buildingWidth/2} 
-              y={buildingY} 
-              width={buildingWidth} 
-              height={buildingHeight} 
-              fill="#708090" 
-              stroke="#2F4F4F" 
-              strokeWidth="1"
-            />
-            {/* Windows */}
-            {Array.from({length: Math.floor(r2 * 4) + 2}).map((_, i) => (
-              <rect 
-                key={i}
-                x={screenX - buildingWidth/2 + 10} 
-                y={buildingY + 15 + i * 20} 
-                width="8" 
-                height="12" 
-                fill="#FFD700" 
-              />
-            ))}
-          </g>
-        );
-      } else if (r1 < 0.6) {
-        // Bushes/shrubs
-        const bushSize = 15 + r2 * 10;
-        elements.push(
-          <g key={`bush-${worldX}`}>
-            <circle cx={screenX - 8} cy={groundY - bushSize/2} r={bushSize/2} fill="#90EE90" />
-            <circle cx={screenX + 5} cy={groundY - bushSize/2 + 3} r={bushSize/2 - 2} fill="#228B22" />
-            <circle cx={screenX} cy={groundY - bushSize/2 - 2} r={bushSize/2 - 1} fill="#32CD32" />
-          </g>
-        );
-      } else if (r1 < 0.75) {
-        // Lamp posts
-        const lampHeight = 45 + r2 * 15;
-        elements.push(
-          <g key={`lamp-${worldX}`}>
-            <rect x={screenX - 2} y={groundY - lampHeight} width="4" height={lampHeight} fill="#2F4F4F" />
-            <circle cx={screenX} cy={groundY - lampHeight} r="8" fill="#FFE4B5" stroke="#FFA500" strokeWidth="2" />
-            <circle cx={screenX} cy={groundY - lampHeight} r="5" fill="#FFFF99" />
-          </g>
-        );
-      } else if (r1 < 0.85) {
-        // Benches
-        elements.push(
-          <g key={`bench-${worldX}`}>
-            <rect x={screenX - 15} y={groundY - 8} width="30" height="3" fill="#8B4513" />
-            <rect x={screenX - 15} y={groundY - 20} width="30" height="3" fill="#8B4513" />
-            <rect x={screenX - 12} y={groundY - 20} width="2" height="12" fill="#696969" />
-            <rect x={screenX + 10} y={groundY - 20} width="2" height="12" fill="#696969" />
-          </g>
-        );
-      } else {
-        // Power/phone poles
-        const poleHeight = 70 + r2 * 30;
-        elements.push(
-          <g key={`pole-${worldX}`}>
-            <rect x={screenX - 3} y={groundY - poleHeight} width="6" height={poleHeight} fill="#8B4513" />
-            <line x1={screenX - 20} y1={groundY - poleHeight + 20} x2={screenX + 20} y2={groundY - poleHeight + 20} 
-                  stroke="#2F4F4F" strokeWidth="2" />
-            <line x1={screenX - 20} y1={groundY - poleHeight + 30} x2={screenX + 20} y2={groundY - poleHeight + 30} 
-                  stroke="#2F4F4F" strokeWidth="2" />
-          </g>
-        );
-      }
-    }
-    
-    // Generate clouds (independent of ground features)
-    for (let worldX = minTrack; worldX <= maxTrack; worldX += 12) {
-      const screenX = centerX + (worldX * scale) + backgroundOffset;
-      
-      // Skip if not visible
-      if (screenX < -100 || screenX > responsiveWidth + 100) continue;
-      
-      const seed = worldX / 12;
-      const random1 = Math.sin(seed * 15.789) * 43758.5453;
-      const random2 = Math.sin(seed * 91.234) * 43758.5453;
-      const r1 = (random1 - Math.floor(random1));
-      const r2 = (random2 - Math.floor(random2));
-      
-      if (r1 < 0.4) {
-        const cloudY = 30 + r2 * 40;
-        const cloudSize = 12 + r2 * 8;
-        elements.push(
-          <g key={`cloud-${worldX}`}>
-            <circle cx={screenX - 15} cy={cloudY} r={cloudSize} fill="rgba(255,255,255,0.8)" />
-            <circle cx={screenX} cy={cloudY} r={cloudSize + 4} fill="rgba(255,255,255,0.8)" />
-            <circle cx={screenX + 15} cy={cloudY} r={cloudSize} fill="rgba(255,255,255,0.8)" />
-          </g>
-        );
-      }
-    }
-    
-    // Generate meter markers every 5 meters (RENDERED LAST - in front of everything)
-    for (let worldX = Math.ceil(minTrack / 5) * 5; worldX <= maxTrack; worldX += 5) {
-      const screenX = centerX + (worldX * scale) + backgroundOffset;
-      
-      // Skip if not visible
-      if (screenX < -100 || screenX > responsiveWidth + 100) continue;
-      
-      // Distance marker with proper sign board
-      elements.push(
-        <g key={`marker-${worldX}`}>
-          {/* Pole */}
-          <rect 
-            x={screenX - 4} 
-            y={groundY - 70} 
-            width="8" 
-            height="70"
-            fill="#FFD700"
-            stroke="#FFA500"
-            strokeWidth="2"
-          />
-          {/* Sign board */}
-          <rect 
-            x={screenX - 25} 
-            y={groundY - 85} 
-            width="50" 
-            height="20"
-            fill="#FFFFFF"
-            stroke="#2F4F4F"
-            strokeWidth="2"
-            rx="3"
-          />
-          {/* Text */}
-          <text 
-            x={screenX} 
-            y={groundY - 70} 
-            fontSize="16" 
-            fill="#2F4F4F"
-            fontFamily="Arial, sans-serif"
-            textAnchor="middle"
-            fontWeight="bold"
-          >
-            {worldX}m
-          </text>
-        </g>
-      );
-    }
-    
-    return elements;
-  };
+    };
+  }, [smoothTransition, cartPosition, poleAngle, forces, otherSeries, dataUpdateRate]); // Include dependencies so animation gets fresh data
 
   return (
     <div className="flex flex-col items-center w-full max-w-full">
@@ -376,253 +187,64 @@ const CartPole: React.FC<CartPoleProps> = ({
           className="w-full h-auto border border-gray-300 bg-gradient-to-b from-sky-200 to-sky-50"
           preserveAspectRatio="xMidYMid meet"
         >
-        {/* Background elements that scroll with cart position */}
-        {generateWorldBackground()}
-        
-        {/* Cart shadow */}
-        <ellipse 
-          cx={cartX + cartWidth / 2 } 
-          cy={wheelY + wheelRadius} 
-          rx={cartWidth / 2 + 5} 
-          ry="8"
-          fill="rgba(0,0,0,0.2)"
-        />
-        
-        {/* Cart body */}
-        <rect 
-          x={cartX} 
-          y={cartY} 
-          width={cartWidth} 
-          height={cartHeight}
-          fill="#FF6B6B"
-          stroke="#E55454"
-          strokeWidth="2"
-          rx="5"
-        />
-        
-        {/* Cart details */}
-        <rect 
-          x={cartX + 5} 
-          y={cartY + 5} 
-          width={cartWidth - 10} 
-          height={cartHeight - 10}
-          fill="#FF8E8E"
-          rx="3"
-        />
-        
-        {/* Wheels with rotation */}
-        <g>
-          {/* Wheel 1 */}
-          <circle 
-            cx={wheel1X} 
-            cy={wheelY} 
-            r={wheelRadius}
-            fill="#4A4A4A"
-            stroke="#2A2A2A"
-            strokeWidth="2"
+          {/* Sliding Background */}
+          <SlidingBackground 
+            cartPosition={smoothedAllSeries[0]?.cartPosition || 0}
+            width={responsiveWidth}
+            height={responsiveHeight}
+            positionRange={positionRange}
           />
-          <g transform={`rotate(${wheelRotation} ${wheel1X} ${wheelY})`}>
-            <line x1={wheel1X - 6} y1={wheelY} x2={wheel1X + 6} y2={wheelY} stroke="#2A2A2A" strokeWidth="2" />
-            <line x1={wheel1X} y1={wheelY - 6} x2={wheel1X} y2={wheelY + 6} stroke="#2A2A2A" strokeWidth="2" />
-            <line x1={wheel1X - 4} y1={wheelY - 4} x2={wheel1X + 4} y2={wheelY + 4} stroke="#2A2A2A" strokeWidth="1" />
-            <line x1={wheel1X - 4} y1={wheelY + 4} x2={wheel1X + 4} y2={wheelY - 4} stroke="#2A2A2A" strokeWidth="1" />
-          </g>
           
-          {/* Wheel 2 */}
-          <circle 
-            cx={wheel2X} 
-            cy={wheelY} 
-            r={wheelRadius}
-            fill="#4A4A4A"
-            stroke="#2A2A2A"
-            strokeWidth="2"
-          />
-          <g transform={`rotate(${wheelRotation} ${wheel2X} ${wheelY})`}>
-            <line x1={wheel2X - 6} y1={wheelY} x2={wheel2X + 6} y2={wheelY} stroke="#2A2A2A" strokeWidth="2" />
-            <line x1={wheel2X} y1={wheelY - 6} x2={wheel2X} y2={wheelY + 6} stroke="#2A2A2A" strokeWidth="2" />
-            <line x1={wheel2X - 4} y1={wheelY - 4} x2={wheel2X + 4} y2={wheelY + 4} stroke="#2A2A2A" strokeWidth="1" />
-            <line x1={wheel2X - 4} y1={wheelY + 4} x2={wheel2X + 4} y2={wheelY - 4} stroke="#2A2A2A" strokeWidth="1" />
-          </g>
-        </g>
-        
-        {/* Pole */}
-        <line 
-          x1={cartX + cartWidth / 2} 
-          y1={cartY} 
-          x2={poleEndX} 
-          y2={poleEndY}
-          stroke="#8B4513"
-          strokeWidth={poleWidth}
-          strokeLinecap="round"
-        />
-        
-        {/* Pole highlight */}
-        <line 
-          x1={cartX + cartWidth / 2} 
-          y1={cartY} 
-          x2={poleEndX} 
-          y2={poleEndY}
-          stroke="#CD853F"
-          strokeWidth={poleWidth - 2}
-          strokeLinecap="round"
-        />
-        
-        {/* Pole tip (mass) */}
-        <circle 
-          cx={poleEndX} 
-          cy={poleEndY} 
-          r="8"
-          fill="#FFD700"
-          stroke="#FFA500"
-          strokeWidth="2"
-        />
-        
-        {/* Pole tip highlight */}
-        <circle 
-          cx={poleEndX - 2} 
-          cy={poleEndY - 2} 
-          r="3"
-          fill="#FFFF99"
-        />
-        
-        {/* Pivot point */}
-        <circle 
-          cx={cartX + cartWidth / 2} 
-          cy={cartY} 
-          r="4"
-          fill="#2A2A2A"
-        />
-        
-        {/* Force visualization */}
-        {displayForces && (displayForces[0] !== 0 || displayForces[1] !== 0) && (
-          <g>
-            {/* Cart force arrow (horizontal) */}
-            {displayForces[0] !== 0 && (
-              <g>
-                {/* Force arrow for cart */}
-                <defs>
-                  <marker id="arrowhead-cart" markerWidth="10" markerHeight="7" 
-                          refX="9" refY="3.5" orient="auto">
-                    <polygon points="0 0, 10 3.5, 0 7" fill="#FF4500" />
-                  </marker>
-                </defs>
-                <line 
-                  x1={cartX + cartWidth / 2} 
-                  y1={cartY + cartHeight / 2} 
-                  x2={cartX + cartWidth / 2 + Math.sign(displayForces[0]) * Math.min((Math.abs(displayForces[0]) / maxForceRange) * 80, 80)} 
-                  y2={cartY + cartHeight / 2}
-                  stroke="#FF4500" 
-                  strokeWidth="4"
-                  markerEnd="url(#arrowhead-cart)"
-                />
-                {/* Force label */}
-                <text 
-                  x={cartX + cartWidth / 2 + Math.sign(displayForces[0]) * (Math.min((Math.abs(displayForces[0]) / maxForceRange) * 80, 80) / 2)} 
-                  y={cartY + cartHeight / 2 - 10} 
-                  fontSize="10" 
-                  fill="#FF4500"
-                  fontFamily="Arial, sans-serif"
-                  textAnchor="middle"
-                  fontWeight="bold"
-                >
-                  F={displayForces[0].toFixed(1)}N
-                </text>
-              </g>
-            )}
-            
-            {/* Pole torque arc arrow */}
-            {displayForces[1] !== 0 && (
-              <g>
-                <defs>
-                  <marker id="arrowhead-torque" markerWidth="6" markerHeight="6" 
-                          refX="0" refY="3" orient="auto">
-                    <polygon points="0 0, 6 3, 0 6" fill="#9400D3" />
-                  </marker>
-                </defs>
-                {(() => {
-                  // Calculate arc parameters
-                  const centerX = cartX + cartWidth / 2;
-                  const centerY = cartY;
-                  const radius = 30;
-                  const forceRatio = Math.min(Math.abs(displayForces[1]) / maxForceRange, 1);
-                  const maxAngle = Math.PI * 2; // Full circle (360 degrees)
-                  const arcAngle = forceRatio * maxAngle * 0.8; // Scale to 80% of full circle for visualization
-                  
-                  // Fix direction: positive torque = counterclockwise, negative = clockwise
-                  const isCounterClockwise = displayForces[1] > 0;
-                  
-                  // Start angle (always start from top)
-                  const startAngle = -Math.PI / 2; // Start at top (12 o'clock)
-                  const endAngle = startAngle + (isCounterClockwise ? -arcAngle : arcAngle);
-                  
-                  // Calculate start and end points
-                  const startX = centerX + radius * Math.cos(startAngle);
-                  const startY = centerY + radius * Math.sin(startAngle);
-                  const endX = centerX + radius * Math.cos(endAngle);
-                  const endY = centerY + radius * Math.sin(endAngle);
-                  
-                  // Determine if we need a large arc (> 180 degrees)
-                  const largeArcFlag = arcAngle > Math.PI ? 1 : 0;
-                  const sweepFlag = isCounterClockwise ? 0 : 1;
-                  
-                  return (
-                    <path 
-                      d={`M ${startX} ${startY} 
-                          A ${radius} ${radius} 0 ${largeArcFlag} ${sweepFlag} ${endX} ${endY}`}
-                      stroke="#9400D3" 
-                      strokeWidth="3"
-                      fill="none"
-                      markerEnd="url(#arrowhead-torque)"
-                    />
-                  );
-                })()}
-                {/* Torque label */}
-                <text 
-                  x={cartX + cartWidth / 2 + 45} 
-                  y={cartY - 15} 
-                  fontSize="10" 
-                  fill="#9400D3"
-                  fontFamily="Arial, sans-serif"
-                  textAnchor="middle"
-                  fontWeight="bold"
-                >
-                  τ={displayForces[1].toFixed(1)}Nm
-                </text>
-              </g>
-            )}
-          </g>
-        )}
-        
-        {/* Position indicator - now shows absolute position */}
-        <text 
-          x={10} 
-          y={30} 
-          fontSize="12" 
-          fill="#333"
-          fontFamily="monospace"
-        >
-          Cart: {displayCartPosition.toFixed(2)}m (world)
-        </text>
-        <text 
-          x={10} 
-          y={50} 
-          fontSize="12" 
-          fill="#333"
-          fontFamily="monospace"
-        >
-          Pole: {(displayPoleAngle * 180 / Math.PI).toFixed(1)}°
-        </text>
-        
-        <text 
-          x={10} 
-          y={70} 
-          fontSize="10" 
-          fill="#666"
-          fontFamily="monospace"
-        >
-          World Range: {minTrack}m to {maxTrack}m
-        </text>
-      </svg>
+          {/* Ghost CartPoles (all series except reference) */}
+          {smoothedAllSeries.slice(1).map((series: Series, index: number) => (
+            <CartPole
+              key={`ghost-${index}`}
+              cartPosition={series.cartPosition}
+              poleAngle={series.poleAngle}
+              forces={series.forces}
+              width={responsiveWidth}
+              height={responsiveHeight}
+              forceRange={forceRange}
+              ghost={true}
+              referenceCartPosition={smoothedAllSeries[0]?.cartPosition || 0}
+            />
+          ))}
+          
+          {/* Main CartPole (reference - first in array) */}
+          {smoothedAllSeries[0] && (
+            <CartPole
+              cartPosition={smoothedAllSeries[0].cartPosition}
+              poleAngle={smoothedAllSeries[0].poleAngle}
+              forces={smoothedAllSeries[0].forces}
+              width={responsiveWidth}
+              height={responsiveHeight}
+              forceRange={forceRange}
+              referenceCartPosition={smoothedAllSeries[0].cartPosition}
+            />
+          )}
+          
+          {/* World Range indicator */}
+          <text 
+            x={10} 
+            y={responsiveHeight - 20} 
+            fontSize="10" 
+            fill="#666"
+            fontFamily="monospace"
+          >
+            World Range: {minTrack}m to {maxTrack}m
+          </text>
+          
+          {/* Data Update Rate indicator for debugging */}
+          <text 
+            x={10} 
+            y={responsiveHeight - 5} 
+            fontSize="10" 
+            fill="#666"
+            fontFamily="monospace"
+          >
+            Data Rate: {dataUpdateRate.toFixed(1)}ms ({(1000/dataUpdateRate).toFixed(1)}fps)
+          </text>
+        </svg>
       </div>
     </div>
   );
@@ -633,6 +255,7 @@ interface VisualisationProps {
   type: 'cartpole' | 'pendulum' | 'other';
   coordinates: number[];
   forces?: number[];
+  dataPoint?: any; // Current data point with all series
   width?: number;
   height?: number;
   smoothTransition?: boolean;
@@ -644,6 +267,7 @@ const Visualisation: React.FC<VisualisationProps> = ({
   type, 
   coordinates, 
   forces,
+  dataPoint,
   width, 
   height,
   smoothTransition = true,
@@ -652,12 +276,44 @@ const Visualisation: React.FC<VisualisationProps> = ({
 }) => {
   switch (type) {
     case 'cartpole':
+      // Extract other series data from dataPoint
+      const otherSeries: Array<{cartPosition: number; poleAngle: number; forces?: number[]}> = [];
+      
+      if (dataPoint) {
+        // Find all series prefixes (exclude reference data)
+        const allKeys = Object.keys(dataPoint);
+        const seriesPrefixes = new Set<string>();
+        
+        allKeys.forEach(key => {
+          // Look for keys like "prefix.coor_0.qpos" (but not direct "coor_0.qpos")
+          const parts = key.split('.');
+          if (parts.length === 3 && parts[1].startsWith('coor_') && !key.startsWith('coor_')) {
+            seriesPrefixes.add(parts[0]);
+          }
+        });
+        
+        // Extract data for each series
+        seriesPrefixes.forEach(prefix => {
+          const cartPosition = dataPoint[`${prefix}.coor_0.qpos`] || 0;
+          const poleAngle = dataPoint[`${prefix}.coor_1.qpos`] || 0;
+          const cartForce = dataPoint[`${prefix}.coor_0.forces`] || 0;
+          const poleForce = dataPoint[`${prefix}.coor_1.forces`] || 0;
+          
+          otherSeries.push({
+            cartPosition,
+            poleAngle,
+            forces: [cartForce, poleForce]
+          });
+        });
+      }
+      
       // For cart pole: coordinates[0] = cart position, coordinates[1] = pole angle
       return (
-        <CartPole 
+        <CartPoleVisualization 
           cartPosition={coordinates[0] || 0}
           poleAngle={coordinates[1] || 0}
           forces={forces}
+          otherSeries={otherSeries}
           width={width}
           height={height}
           smoothTransition={smoothTransition}
@@ -677,4 +333,4 @@ const Visualisation: React.FC<VisualisationProps> = ({
 };
 
 export default Visualisation;
-export { CartPole };
+export { CartPole, CartPoleVisualization };

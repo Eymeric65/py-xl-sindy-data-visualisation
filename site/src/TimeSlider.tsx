@@ -34,9 +34,13 @@ const TimeSlider: React.FC<TimeSliderProps> = ({ times, onChange }) => {
 
         elapsedTime.current = elapsedTime.current + offset;
 
+        //console.log(timestamp);
+
 
         setCurrent((prevIndex) => {
           let newIndex = prevIndex;
+
+          console.log("Tick");
           
           // Check if we should advance based on data timing
           while (newIndex < times.length - 1) {
@@ -46,6 +50,7 @@ const TimeSlider: React.FC<TimeSliderProps> = ({ times, onChange }) => {
             
             if (elapsedTime.current >= timeToNext) {
               elapsedTime.current = elapsedTime.current - timeToNext; // Subtract the time we "used"
+              console.log("Tock");
               newIndex++;
             } else {
               break;
