@@ -70,6 +70,7 @@ class Args:
         """Generate a JSON string from parameters."""
         d = vars(self).copy()
         if essential_only :
+            d.pop("sample_number", None)
             d.pop("visualisation_sample", None)
             d.pop("validation_time", None)
             d.pop("max_validation_sample", None)

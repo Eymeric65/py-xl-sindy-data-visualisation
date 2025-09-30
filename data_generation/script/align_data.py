@@ -17,6 +17,8 @@ import tyro
 
 import xlsindy
 
+import time
+
 import numpy as np
 import json
 
@@ -55,6 +57,8 @@ class Args:
     """the level of noise introduce in the experiment"""
     random_seed: List[int] = field(default_factory=lambda: [0])
     """the random seed for the noise"""
+    data_ratio: float = 2.0
+    """the ratio of data to use (in respect with catalog size)"""
     skip_already_done: bool = True
     """if true, skip the experiment if already present in the result file"""
 
@@ -65,6 +69,7 @@ class Args:
             + str(self.noise_level)
             + self.regression_type
             + str(self.random_seed)
+            + str(self.data_ratio)
         )
         return hashlib.md5(hash_input.encode()).hexdigest()
 
@@ -118,6 +123,23 @@ if __name__ == "__main__":
 
     rng = np.random.default_rng(random_seed)
 
+    # Add the other ideal vector if another mode is present.
+
+    if args.algorithm not in simulation_dict["visualisation"]["training_group"]["data"]["training_data"]["solution"]:
+
+        simulation_dict["visualisation"]["training_group"]["data"]["training_data"]["solution"][args.algorithm] = {
+            "vector": extra_info["ideal_solution_vector"],
+            "label" : full_catalog.label()
+        }
+
+    if args.algorithm not in simulation_dict["visualisation"]["validation_group"]["data"]["validation_data"]["solution"]:
+
+        simulation_dict["visualisation"]["validation_group"]["data"]["validation_data"]["solution"][args.algorithm] = {
+            "vector": extra_info["ideal_solution_vector"],
+            "label" : full_catalog.label()
+        }
+
+
     # load
     imported_time = sim_data["simulation_time_training"]
     imported_qpos = sim_data["simulation_qpos_training"]
@@ -132,9 +154,36 @@ if __name__ == "__main__":
     imported_qacc += rng.normal(loc=0, scale=args.noise_level, size=imported_qacc.shape)*np.linalg.norm(imported_qacc)/imported_qacc.shape[0]
     imported_force += rng.normal(loc=0, scale=args.noise_level, size=imported_force.shape)*np.linalg.norm(imported_force)/imported_force.shape[0]
 
+    # Use a fixed ratio of the data in respect with catalog size
+    catalog_size = full_catalog.catalog_length
+    data_ratio = args.data_ratio
+    
+    # Sample uniformly n samples from the imported arrays
+    n_samples = int(catalog_size * data_ratio)
+    total_samples = imported_qpos.shape[0]
+    
+    if n_samples < total_samples:
+
+        # Evenly spaced sampling (deterministic, uniform distribution)
+        sample_indices = np.linspace(0, total_samples - 1, n_samples, dtype=int)
+        
+        # Apply sampling to all arrays
+        imported_qpos = imported_qpos[sample_indices]
+        imported_qvel = imported_qvel[sample_indices]
+        imported_qacc = imported_qacc[sample_indices]
+        imported_force = imported_force[sample_indices]
+        
+        logger.info(f"Sampled {n_samples} points uniformly from {total_samples} total samples")
+    else:
+        logger.info(f"Using all {total_samples} samples (requested {n_samples})")
+
     ## XLSINDY dependent
 
+    start_time = time.perf_counter()
+
     if args.regression_type == "implicit":
+
+        logger.info("Starting implicit regression")
 
         solution, exp_matrix = xlsindy.simulation.regression_implicite(
             theta_values=imported_qpos,
@@ -147,6 +196,8 @@ if __name__ == "__main__":
         )
 
     elif args.regression_type == "explicit":
+        
+        logger.info("Starting explicit regression")
 
         solution, exp_matrix = xlsindy.simulation.regression_explicite(
             theta_values=imported_qpos,
@@ -161,6 +212,8 @@ if __name__ == "__main__":
 
     elif args.regression_type == "mixed":
 
+        logger.info("Starting mixed regression")
+
         solution, exp_matrix = xlsindy.simulation.regression_mixed(
             theta_values=imported_qpos,
             velocity_values=imported_qvel,
@@ -171,6 +224,12 @@ if __name__ == "__main__":
             external_force=imported_force,
             regression_function=regression_function,
         )
+
+    end_time = time.perf_counter()
+
+    regression_time = end_time - start_time
+
+    logger.info(f"Regression completed in {end_time - start_time:.2f} seconds")
 
     # DEBUG
     # solution = extra_info["ideal_solution_vector"]
@@ -201,6 +260,7 @@ if __name__ == "__main__":
         "random_seed": random_seed,
         "regression_type": args.regression_type,
         "valid": valid_model,
+        "regression_time": regression_time,
         "results":{}
     }
 
@@ -278,6 +338,7 @@ if __name__ == "__main__":
                     "qacc": simulation_qacc_g,
                     "forces": force_vector_g
                 },
+                reference_time= simulation_dict["visualisation"]["validation_group"]["data"]["validation_data"]["time"],
                 sample= simulation_dict["generation_settings"]["visualisation_sample"],
                 mode_solution=args.algorithm,
                 solution_vector=solution,

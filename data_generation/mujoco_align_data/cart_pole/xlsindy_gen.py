@@ -15,9 +15,10 @@ import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from text_utils import replace_placeholders
 
+logger = xlsindy.logger.setup_logger(__name__)
 
 def xlsindy_component(
-    mode: str = "mixed", random_seed: List[int] = [12], sindy_catalog_len: int = 93, damping_coefficients: List[float] = [-0.8, -1.3]
+    mode: str = "mixed", random_seed: List[int] = [12], sindy_catalog_len: int = -1, damping_coefficients: List[float] = [-0.8, -1.3]
 ):  # Name of this function should not be changed
     """
     This function is used to generate backbone of the xl_sindy algorithm
@@ -189,7 +190,7 @@ def xlsindy_component(
         )
 
         # complete the catalog
-
+        # Method 1
         function_catalog_0 = [lambda x: symbols_matrix[3, x]]  # \ddot{x}
         function_catalog_1 = [lambda x: symbols_matrix[2, x]]  # \dot{x}
         function_catalog_2 = [
@@ -197,11 +198,19 @@ def xlsindy_component(
             lambda x: sp.cos(symbols_matrix[1, x]),
         ]
 
-        catalog_part0 = np.array(
-            xlsindy.symbolic_util.generate_full_catalog(
-                function_catalog_0, num_coordinates, 1
-            )
-        )
+        # Method 2 (less term)
+        function_catalog_1 = [lambda x: symbols_matrix[2, x],lambda x: symbols_matrix[3, x]]  # \dot{x},\ddot{x}
+        function_catalog_2 = [
+            lambda x: sp.sin(symbols_matrix[1, x]),
+            lambda x: sp.cos(symbols_matrix[1, x]),
+        ]
+
+
+        # catalog_part0 = np.array(
+        #     xlsindy.symbolic_util.generate_full_catalog(
+        #         function_catalog_0, num_coordinates, 1
+        #     )
+        # )
         catalog_part1 = np.array(
             xlsindy.symbolic_util.generate_full_catalog(
                 function_catalog_1, num_coordinates, 2
@@ -216,9 +225,11 @@ def xlsindy_component(
         lagrange_catalog = xlsindy.symbolic_util.cross_catalog(
             catalog_part1, catalog_part2
         )
-        lagrange_catalog = xlsindy.symbolic_util.cross_catalog(
-            lagrange_catalog, catalog_part0
-        )
+        # lagrange_catalog = xlsindy.symbolic_util.cross_catalog(
+        #     lagrange_catalog, catalog_part0
+        # )
+
+        logger.info(f"Max catalog length: {len(lagrange_catalog)}")
         # --------------------
 
         coeff_matrix, binary_matrix, catalog_need = xlsindy.symbolic_util.augment_catalog(

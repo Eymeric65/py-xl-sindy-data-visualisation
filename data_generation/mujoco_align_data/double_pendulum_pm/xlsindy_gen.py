@@ -18,9 +18,10 @@ from text_utils import replace_placeholders
 
 mujoco_angle_offset = np.pi
 
+logger = xlsindy.logger.setup_logger(__name__)
 
 def xlsindy_component(
-    mode: str = "mixed", random_seed: List[int] = [12], sindy_catalog_len: int = 93, damping_coefficients: List[float] = [-1.0, -1.4]
+    mode: str = "mixed", random_seed: List[int] = [12], sindy_catalog_len: int = -1, damping_coefficients: List[float] = [-1.0, -1.4]
 ):  # Name of this function should not be changed
     """
     This function is used to generate backbone of the xl_sindy algorithm
@@ -230,6 +231,8 @@ def xlsindy_component(
         lagrange_catalog = xlsindy.symbolic_util.cross_catalog(
             lagrange_catalog, catalog_part0
         )
+
+        logger.info(f"Max catalog length: {len(lagrange_catalog)}")
         # --------------------
 
         coeff_matrix, binary_matrix, catalog_need = xlsindy.symbolic_util.augment_catalog(

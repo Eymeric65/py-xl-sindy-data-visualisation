@@ -17,9 +17,11 @@ from text_utils import replace_placeholders
 
 mujoco_angle_offset = np.pi
 
+logger = xlsindy.logger.setup_logger(__name__)
+
 
 def xlsindy_component(
-    mode: str = "mixed", random_seed: List[int] = [12], sindy_catalog_len: int = 289, damping_coefficients: List[float] = [-1.5, -1.8, -1.2]
+    mode: str = "mixed", random_seed: List[int] = [12], sindy_catalog_len: int = -1, damping_coefficients: List[float] = [-1.5, -1.8, -1.2]
 ):  # Name of this function should not be changed
     """
     This function is used to generate backbone of the xl_sindy algorithm
@@ -150,7 +152,7 @@ def xlsindy_component(
             catalog_repartition = xlsindy.catalog.CatalogRepartition(
                 [
                     xlsindy.catalog_base.ExternalForces(
-                        [[1], [2]], symbols_matrix
+                        [[1], [2], [3]], symbols_matrix
                     ),
                     xlsindy.catalog_base.Lagrange(
                         lagrange_catalog, symbols_matrix, time_sym
@@ -213,7 +215,7 @@ def xlsindy_component(
         # complete the catalog
 
         function_catalog_0 = [lambda x: symbols_matrix[3, x]]  # \ddot{x}
-        function_catalog_1 = [lambda x: symbols_matrix[2, x]]  # \ddot{x}
+        function_catalog_1 = [lambda x: symbols_matrix[2, x]]  # \dot{x}
         function_catalog_2 = [
             lambda x: sp.sin(symbols_matrix[1, x]),
             lambda x: sp.cos(symbols_matrix[1, x]),
@@ -241,6 +243,9 @@ def xlsindy_component(
         lagrange_catalog = xlsindy.symbolic_util.cross_catalog(
             lagrange_catalog, catalog_part0
         )
+
+        logger.info(f"Max catalog length: {len(lagrange_catalog)}")
+        
         # --------------------
 
         coeff_matrix, binary_matrix, catalog_need = xlsindy.symbolic_util.augment_catalog(

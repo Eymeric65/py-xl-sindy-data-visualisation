@@ -4,6 +4,7 @@ import TimeSlider from "./TimeSlider";
 import Visualisation from "./Visualisation";
 import GenerationSettings from "./GenerationSettings";
 import SolutionTables from "./SolutionTables";
+import FileExplorer from "./FileExplorer";
 
 type CoordinateData = {
   [varName: string]: number[];
@@ -39,7 +40,6 @@ type ResultJson = {
 };
 
 const App: React.FC = () => {
-  const [availableFiles, setAvailableFiles] = useState<string[]>([]);
   const [selectedFile, setSelectedFile] = useState<string>("");
   const [availableGroups, setAvailableGroups] = useState<string[]>([]);
   const [selectedGroup, setSelectedGroup] = useState<string>("");
@@ -50,34 +50,22 @@ const App: React.FC = () => {
   const [currentIdx, setCurrentIdx] = useState(0);
   const [simulationType, setSimulationType] = useState<string>("");
   const [batchStartTimes, setBatchStartTimes] = useState<number[]>([]);
-  const [generationSettings, setGenerationSettings] = useState<any>(null);
+  const [generationSettings, setGenerationSettings] = useState<any | null>(null);
   const [allGroupsData, setAllGroupsData] = useState<VisualisationGroups>({});
   const [relativeMode, setRelativeMode] = useState<boolean>(false);
 
-  // Load available files on mount
+  // Handle file selection from FileExplorer
+  const handleFileSelect = (filename: string) => {
+    setSelectedFile(filename);
+  };
+
+  // Set a default file if none selected (for backward compatibility)
   useEffect(() => {
-    // Fetch the files manifest
-    fetch("results/files.json")
-      .then(res => {
-        if (!res.ok) {
-          throw new Error("Could not fetch files manifest");
-        }
-        return res.json();
-      })
-      .then((manifest: { files: string[] }) => {
-        setAvailableFiles(manifest.files);
-        if (manifest.files.length > 0) {
-          setSelectedFile(manifest.files[0]);
-        }
-      })
-      .catch((error) => {
-        console.error("Failed to load files manifest:", error);
-        // Fallback to hardcoded file
-        const fallbackFiles = ["0a25fa5db7bcb8cafb152f79f36db501.json"];
-        setAvailableFiles(fallbackFiles);
-        setSelectedFile(fallbackFiles[0]);
-      });
-  }, []);
+    if (!selectedFile) {
+      // Set a default file - you can change this to any default filename
+      setSelectedFile("0a25fa5db7bcb8cafb152f79f36db501.json");
+    }
+  }, [selectedFile]);
 
   // Load data when file is selected
   useEffect(() => {
@@ -224,7 +212,7 @@ const App: React.FC = () => {
             Object.entries(seriesData.series).forEach(([coordinateName, coordinateData]) => {
               Object.entries(coordinateData as CoordinateData).forEach(([varName, arr]) => {
                 const key = `${seriesPrefix}.${coordinateName}.${varName}`;
-                if (closestIndex < arr.length) {
+                if (closestIndex < (arr as number[]).length) {
                   point[key] = (arr as number[])[closestIndex];
                   
                   // Group by variable type, then by coordinate
@@ -239,7 +227,9 @@ const App: React.FC = () => {
           });
           
           return point;
-        });        setData(flatData);
+        });
+        
+        setData(flatData);
         setGroupedLines(groupedByVar);
         setCurrentIdx(0);
         setLoading(false);
@@ -300,22 +290,6 @@ const App: React.FC = () => {
             
             {/* Enhanced Controls */}
             <div className="flex items-center space-x-6 flex-1 justify-end">
-              {/* File Selection */}
-              <div className="flex items-center space-x-3">
-                <label className="text-sm font-medium text-gray-700 whitespace-nowrap">
-                  Data File
-                </label>
-                <select 
-                  value={selectedFile} 
-                  onChange={(e) => setSelectedFile(e.target.value)}
-                  className="text-sm px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 min-w-[140px] hover:border-gray-400 shadow-sm"
-                >
-                  {availableFiles.map(file => (
-                    <option key={file} value={file}>{file}</option>
-                  ))}
-                </select>
-              </div>
-              
               {/* Group Selection */}
               <div className="flex items-center space-x-3">
                 <label className="text-sm font-medium text-gray-700 whitespace-nowrap">
@@ -350,9 +324,14 @@ const App: React.FC = () => {
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto p-4">
+        
+        {/* File Explorer Section */}
+        <div className="mb-6">
+          <FileExplorer onFileSelect={handleFileSelect} selectedFile={selectedFile} />
+        </div>
 
         {/* Generation Settings Section */}
-        {generationSettings && (
+        {generationSettings !== null && (
           <div className="bg-white rounded-lg shadow p-6 mb-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div>
