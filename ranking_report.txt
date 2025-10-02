@@ -1,0 +1,157 @@
+================================================================================
+SOLUTION RANKING ANALYSIS REPORT
+================================================================================
+
+SUMMARY STATISTICS
+----------------------------------------
+Total experiment×noise combinations analyzed: 128
+Total unique catalog×solution combinations: 7
+Total individual attempts: 504
+Total successful rankings: 299
+
+OVERALL PERFORMANCE RANKING (by number of 1st place wins)
+------------------------------------------------------------
+Rank  Combo                    Win Rate    Wins WC Total   1st     2nd     3rd     >3rd    Failed  
+------------------------------------------------------------------------------------------------
+1     mixed × mixed            0.508       37      128     65      31      1.0     0       31      
+2     mixed × explicit         0.548       31      104     57      19      4.0     0       24      
+3     sindy × explicit         0.216       1       88      19      16      1.0     0       52      
+4     sindy × mixed            0.350       1       40      14      10      2.0     0       14      
+5     mixed × implicit         0.647       6       17      11      6       nan     0       0       
+6     xlsindy × explicit       0.069       0       72      5       6       15.0    2       44      
+7     xlsindy × mixed          0.018       0       55      1       2       10.0    2       40      
+
+DETAILED BREAKDOWN BY COMBINATION
+----------------------------------------
+
+Combination: mixed × mixed
+  Total Attempts: 128
+  Successful Rankings: 97
+  Failed Attempts: 31
+  First Place Wins: 65
+  Wins Without Competition: 37
+  Win Rate: 50.8%
+  Rank Distribution:
+    1st place: 65 times (67.0%)
+    2nd place: 31 times (32.0%)
+    3rd place: 1.0 times (1.0%)
+
+Combination: mixed × explicit
+  Total Attempts: 104
+  Successful Rankings: 80
+  Failed Attempts: 24
+  First Place Wins: 57
+  Wins Without Competition: 31
+  Win Rate: 54.8%
+  Rank Distribution:
+    1st place: 57 times (71.2%)
+    2nd place: 19 times (23.8%)
+    3rd place: 4.0 times (5.0%)
+
+Combination: sindy × explicit
+  Total Attempts: 88
+  Successful Rankings: 36
+  Failed Attempts: 52
+  First Place Wins: 19
+  Wins Without Competition: 1
+  Win Rate: 21.6%
+  Rank Distribution:
+    1st place: 19 times (52.8%)
+    2nd place: 16 times (44.4%)
+    3rd place: 1.0 times (2.8%)
+
+Combination: sindy × mixed
+  Total Attempts: 40
+  Successful Rankings: 26
+  Failed Attempts: 14
+  First Place Wins: 14
+  Wins Without Competition: 1
+  Win Rate: 35.0%
+  Rank Distribution:
+    1st place: 14 times (53.8%)
+    2nd place: 10 times (38.5%)
+    3rd place: 2.0 times (7.7%)
+
+Combination: mixed × implicit
+  Total Attempts: 17
+  Successful Rankings: 17
+  Failed Attempts: 0
+  First Place Wins: 11
+  Wins Without Competition: 6
+  Win Rate: 64.7%
+  Rank Distribution:
+    1st place: 11 times (64.7%)
+    2nd place: 6 times (35.3%)
+
+Combination: xlsindy × explicit
+  Total Attempts: 72
+  Successful Rankings: 28
+  Failed Attempts: 44
+  First Place Wins: 5
+  Wins Without Competition: 0
+  Win Rate: 6.9%
+  Rank Distribution:
+    1st place: 5 times (17.9%)
+    2nd place: 6 times (21.4%)
+    3rd place: 15.0 times (53.6%)
+    4th place: 2.0 times (7.1%)
+
+Combination: xlsindy × mixed
+  Total Attempts: 55
+  Successful Rankings: 15
+  Failed Attempts: 40
+  First Place Wins: 1
+  Wins Without Competition: 0
+  Win Rate: 1.8%
+  Rank Distribution:
+    1st place: 1 times (6.7%)
+    2nd place: 2 times (13.3%)
+    3rd place: 10.0 times (66.7%)
+    4th place: 2.0 times (13.3%)
+
+ANALYSIS BY CATALOG TYPE
+------------------------------
+mixed:
+  Total First Place Wins: 133.0
+  Total Wins Without Competition: 74.0
+  Total Appearances: 194.0
+  Overall Win Rate: 68.6%
+  Average Win Rate: 56.8%
+
+sindy:
+  Total First Place Wins: 33.0
+  Total Wins Without Competition: 2.0
+  Total Appearances: 62.0
+  Overall Win Rate: 53.2%
+  Average Win Rate: 28.3%
+
+xlsindy:
+  Total First Place Wins: 6.0
+  Total Wins Without Competition: 0.0
+  Total Appearances: 43.0
+  Overall Win Rate: 14.0%
+  Average Win Rate: 4.4%
+
+ANALYSIS BY SOLUTION TYPE
+------------------------------
+implicit:
+  Total First Place Wins: 11.0
+  Total Wins Without Competition: 6.0
+  Total Appearances: 17.0
+  Overall Win Rate: 64.7%
+  Average Win Rate: 64.7%
+
+mixed:
+  Total First Place Wins: 80.0
+  Total Wins Without Competition: 38.0
+  Total Appearances: 138.0
+  Overall Win Rate: 58.0%
+  Average Win Rate: 29.2%
+
+explicit:
+  Total First Place Wins: 81.0
+  Total Wins Without Competition: 32.0
+  Total Appearances: 144.0
+  Overall Win Rate: 56.2%
+  Average Win Rate: 27.8%
+

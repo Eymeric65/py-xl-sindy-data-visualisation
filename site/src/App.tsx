@@ -1,10 +1,13 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import InteractiveCurve from "./InteractiveCurve";
 import TimeSlider from "./TimeSlider";
 import Visualisation from "./Visualisation";
 import GenerationSettings from "./GenerationSettings";
 import SolutionTables from "./SolutionTables";
 import FileExplorer from "./FileExplorer";
+import SolutionControlTable from "./SolutionControlTable";
+import { createSolutionRanking, transformLinesWithRanking, transformDataWithRanking } from './solutionRanking';
+import type { GroupData as RankingGroupData } from './solutionRanking';
 
 type CoordinateData = {
   [varName: string]: number[];
@@ -53,6 +56,26 @@ const App: React.FC = () => {
   const [generationSettings, setGenerationSettings] = useState<any | null>(null);
   const [allGroupsData, setAllGroupsData] = useState<VisualisationGroups>({});
   const [relativeMode, setRelativeMode] = useState<boolean>(false);
+  const [hiddenSolutions, setHiddenSolutions] = useState<Set<string>>(new Set());
+  
+  // Create ranking map for consistent solution numbering across all components
+  const rankingMap = useMemo(() => {
+    return createSolutionRanking(allGroupsData as { [groupName: string]: RankingGroupData });
+  }, [allGroupsData]);
+
+  // Handle solution visibility toggle
+  const handleSolutionToggle = (solutionId: string, isVisible: boolean) => {
+    setHiddenSolutions(prev => {
+      const newSet = new Set(prev);
+      if (isVisible) {
+        newSet.delete(solutionId);
+      } else {
+        newSet.add(solutionId);
+      }
+      console.log(`Solution ${solutionId} is now ${isVisible ? 'visible' : 'hidden'}. Hidden solutions:`, Array.from(newSet));
+      return newSet;
+    });
+  };
 
   // Handle file selection from FileExplorer
   const handleFileSelect = (filename: string) => {
@@ -229,8 +252,20 @@ const App: React.FC = () => {
           return point;
         });
         
-        setData(flatData);
-        setGroupedLines(groupedByVar);
+        // Transform data and lines to use ranking numbers instead of UIDs
+        const transformedData = transformDataWithRanking(flatData, rankingMap, hiddenSolutions);
+        
+        // Transform groupedLines to use ranking numbers
+        const transformedGroupedLines: {[varType: string]: {[coordinate: string]: string[]}} = {};
+        Object.entries(groupedByVar).forEach(([varType, coordinateGroups]) => {
+          transformedGroupedLines[varType] = {};
+          Object.entries(coordinateGroups).forEach(([coordinateName, lines]) => {
+            transformedGroupedLines[varType][coordinateName] = transformLinesWithRanking(lines, rankingMap, hiddenSolutions);
+          });
+        });
+        
+        setData(transformedData);
+        setGroupedLines(transformedGroupedLines);
         setCurrentIdx(0);
         setLoading(false);
       })
@@ -238,7 +273,7 @@ const App: React.FC = () => {
         setError(e.message);
         setLoading(false);
       });
-  }, [selectedFile, selectedGroup]);
+  }, [selectedFile, selectedGroup, hiddenSolutions, rankingMap]);
 
   // Calculate position and force ranges for cart pole visualization
   const getPositionRange = () => {
@@ -265,7 +300,11 @@ const App: React.FC = () => {
   const hasNonReferenceLines = React.useMemo(() => {
     return Object.values(groupedLines).some(coordinateGroups =>
       Object.values(coordinateGroups).some(lines =>
-        lines.some(line => line.split('.').length > 2) // Lines with prefix (e.g., "prefix.coor_0.qpos")
+        lines.some(line => {
+          const parts = line.split('.');
+          // Lines with ranking prefix (e.g., "1.coor_0.qpos") - first part should be a number
+          return parts.length > 2 && !isNaN(parseInt(parts[0]));
+        })
       )
     );
   }, [groupedLines]);
@@ -333,26 +372,17 @@ const App: React.FC = () => {
         {/* Generation Settings Section */}
         {generationSettings !== null && (
           <div className="bg-white rounded-lg shadow p-6 mb-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div>
-                <GenerationSettings settings={generationSettings} />
-              </div>
-              <div>
-                {/* Right half - can be used for additional info later */}
-                <div className="bg-gray-50 rounded-lg p-4">
-                  <h3 className="text-lg font-semibold text-gray-700 mb-2">Data Summary</h3>
-                  {data.length > 0 && (
-                    <div className="text-sm text-gray-600">
-                      <p>Total data points: {data.length}</p>
-                      <p>Simulation type: {simulationType}</p>
-                      {batchStartTimes.length > 0 && (
-                        <p>Batches: {batchStartTimes.length}</p>
-                      )}
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
+            <GenerationSettings settings={generationSettings} />
+          </div>
+        )}
+
+        {/* Solution Control Table - Full Width Section */}
+        {Object.keys(allGroupsData).length > 0 && (
+          <div className="mb-6">
+            <SolutionControlTable 
+              groups={allGroupsData}
+              onSolutionToggle={handleSolutionToggle}
+            />
           </div>
         )}
 
@@ -380,7 +410,10 @@ const App: React.FC = () => {
 
         {/* Solution Analysis Tables */}
         {!loading && !error && selectedGroup && allGroupsData[selectedGroup] && (
-          <SolutionTables groups={{ [selectedGroup]: allGroupsData[selectedGroup] }} />
+          <SolutionTables 
+            groups={{ [selectedGroup]: allGroupsData[selectedGroup] }} 
+            hiddenSolutions={hiddenSolutions}
+          />
         )}
 
         {/* Status */}

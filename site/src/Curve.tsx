@@ -23,22 +23,48 @@ type CurveProps = {
 
 const Curve: React.FC<CurveProps> = ({ lines,data,containerRef,batchStartTimes, relative = false })=> {
 
+  // Helper function to get display name for legend (only ranking number)
+  const getDisplayName = (line: string): string => {
+    if (line.includes('_rel')) {
+      // For relative lines, just show the number with "rel"
+      return line; // e.g., "1_rel", "2_rel"
+    }
+    
+    const parts = line.split('.');
+    if (parts.length > 2 && !isNaN(parseInt(parts[0]))) {
+      // For ranking lines, show only the number
+      return parts[0]; // e.g., "1", "2", "3"
+    }
+    
+    // For reference lines, show as-is
+    return line;
+  };
+
   // Transform data and lines for relative mode
   const { processedData, processedLines } = React.useMemo(() => {
     if (!relative) {
       return { processedData: data, processedLines: lines };
     }
 
-    // Find reference line (line without prefix, e.g., "coor_0.qpos")
-    const referenceLine = lines.find(line => !line.includes('.') || line.split('.').length <= 2);
+    // Find reference line (line without ranking number prefix, e.g., "coor_0.qpos")
+    const referenceLine = lines.find(line => {
+      const parts = line.split('.');
+      // Reference line doesn't start with a number or has no dots
+      return parts.length <= 2 || isNaN(parseInt(parts[0]));
+    });
     
     if (!referenceLine) {
       // No reference line found, return original data
       return { processedData: data, processedLines: lines };
     }
 
-    // Find other lines (lines with prefix, e.g., "abcd1234.coor_0.qpos")
-    const otherLines = lines.filter(line => line !== referenceLine && line.split('.').length > 2);
+    // Find other lines (lines with ranking number prefix, e.g., "1.coor_0.qpos", "2.coor_0.qpos")
+    const otherLines = lines.filter(line => {
+      if (line === referenceLine) return false;
+      const parts = line.split('.');
+      // Other lines start with a number (ranking)
+      return parts.length > 2 && !isNaN(parseInt(parts[0]));
+    });
     
     if (otherLines.length === 0) {
       // No other lines to make relative, return original data
@@ -54,8 +80,10 @@ const Curve: React.FC<CurveProps> = ({ lines,data,containerRef,batchStartTimes, 
       otherLines.forEach(line => {
         const otherValue = point[line];
         if (typeof referenceValue === 'number' && typeof otherValue === 'number') {
-          // Create a new line name for the relative difference
-          const relativeName = `${line}_rel`;
+          // Extract ranking number from line (e.g., "1" from "1.coor_0.qpos")
+          const rankingNumber = line.split('.')[0];
+          // Create a new line name using the ranking number with _rel suffix
+          const relativeName = `${rankingNumber}_rel`;
           newPoint[relativeName] = otherValue - referenceValue;
         }
       });
@@ -63,8 +91,8 @@ const Curve: React.FC<CurveProps> = ({ lines,data,containerRef,batchStartTimes, 
       return newPoint;
     });
 
-    // New lines list: only relative difference lines (no reference line)
-    const relativeLines = otherLines.map(line => `${line}_rel`);
+    // New lines list: only relative difference lines using ranking numbers (no reference line)
+    const relativeLines = otherLines.map(line => `${line.split('.')[0]}_rel`);
 
     return { 
       processedData: transformedData, 
@@ -80,7 +108,14 @@ const Curve: React.FC<CurveProps> = ({ lines,data,containerRef,batchStartTimes, 
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="time" type="number" domain={["auto", "auto"]} tick={{ fontSize: 12 }} />
             <YAxis tick={{ fontSize: 12 }} />
-            <Tooltip />
+            <Tooltip 
+              labelFormatter={(value) => `Time: ${value}`}
+              formatter={(value, _name, props) => {
+                // Use the display name for tooltip
+                const displayName = getDisplayName(props.dataKey as string);
+                return [value, displayName];
+              }}
+            />
             <Legend />
             {batchStartTimes?.map((batchTime, idx) => (
               <ReferenceLine 
@@ -96,6 +131,7 @@ const Curve: React.FC<CurveProps> = ({ lines,data,containerRef,batchStartTimes, 
                 key={line}
                 type="monotone"
                 dataKey={line}
+                name={getDisplayName(line)}
                 stroke={`hsl(${(idx * 47) % 360}, 70%, 50%)`}
                 dot={false}
                 strokeWidth={2}

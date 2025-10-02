@@ -12,4 +12,12 @@ cpulimit -l 2000 -- python -m data_generation.script.automatic_align \
     --regression-types "explicit" \
     --noise-levels 0.0 0.01 0.1 0.001 \
     --random-seed 1 \
-    --data-ratio 2
+    --data-ratio 2 \
+    --experiment-folders "cart_pole" "double_pendulum_pm"
+
+cpulimit -l 2000 -- python -m data_generation.script.automatic_align \
+    --max-workers 4 \
+    --noise-levels 0.0 0.01 0.1 0.001 \
+    --random-seed 1 \
+    --data-ratio 2 \
+    --experiment-folders "cart_pole" "double_pendulum_pm"

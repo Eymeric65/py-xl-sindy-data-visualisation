@@ -66,6 +66,21 @@ class Args:
     
     verbose: bool = False
     """Enable verbose output"""
+    
+    experiment_folders: List[str] = field(default_factory=lambda: ["cart_pole", "double_pendulum_pm", "cart_pole_double"])
+    """Filter experiments by folder name (last component after slash). Default: all supported folders"""
+
+def extract_experiment_folder_name(experiment_folder: str) -> str:
+    """
+    Extract the last component of experiment folder path.
+    
+    Args:
+        experiment_folder: Full path like "data_generation/mujoco_align_data/cart_pole"
+        
+    Returns:
+        Last component like "cart_pole"
+    """
+    return experiment_folder.split('/')[-1]
 
 def check_force_vector_type(forces_scale_vector: List[float]) -> str:
     """
@@ -157,7 +172,7 @@ def build_align_command(
         Command as list of strings
     """
     cmd = [
-        "cpulimit", "-l", "2000", "--",  # Limit CPU usage to 2000%
+        "cpulimit", "-l", "1000", "--",  # Limit CPU usage to 2000%
         sys.executable, "-m", "data_generation.script.align_data",
         "--experiment-file", experiment_file,
         "--algorithm", algorithm,
@@ -196,7 +211,7 @@ def run_single_alignment(cmd: List[str], args: Args) -> dict:
             cmd, 
             capture_output=True, 
             text=True, 
-            timeout=3600  # 60 minute timeout per alignment
+            timeout=36000  # 60 minute timeout per alignment
         )
         end_time = time.time()
         
@@ -242,6 +257,20 @@ def process_experiment(experiment_info: dict, args: Args) -> List[dict]:
         logger.error(f"Failed to load metadata for {experiment_id}")
         return []
     
+    # Check if experiment folder matches filter
+    try:
+        experiment_folder = metadata['generation_settings']['experiment_folder']
+        folder_name = extract_experiment_folder_name(experiment_folder)
+        
+        if folder_name not in args.experiment_folders:
+            if args.verbose:
+                logger.info(f"Skipping {experiment_id}: folder '{folder_name}' not in filter {args.experiment_folders}")
+            return []
+            
+    except KeyError:
+        logger.error(f"No experiment_folder found in {experiment_id}")
+        return []
+    
     # Get force scale vector from generation settings
     try:
         forces_scale_vector = metadata['generation_settings']['forces_scale_vector']
@@ -254,7 +283,7 @@ def process_experiment(experiment_info: dict, args: Args) -> List[dict]:
     allowable_regression_types = get_allowable_regression_types(force_type, args.regression_types)
     
     if args.verbose:
-        logger.info(f"Processing {experiment_id}: force_type={force_type}, "
+        logger.info(f"Processing {experiment_id} [{folder_name}]: force_type={force_type}, "
                    f"allowable_regression_types={allowable_regression_types}")
     
     # Generate all combinations of parameters

@@ -1,10 +1,24 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { InlineMath, BlockMath } from 'react-katex';
 import 'katex/dist/katex.min.css';
+import { createSolutionRanking } from './solutionRanking';
+import type { SolutionRanking, GroupData as RankingGroupData } from './solutionRanking';
 
 type SolutionData = {
   vector: number[];
   label: string[];
+  extraInfo?: ExtraInfo;
+};
+
+type ExtraInfo = {
+  noise_level: number;
+  optimization_function: string;
+  regression_type: string;
+  valid?: boolean;
+  regression_time?: number;
+  results?: {
+    RMSE_acceleration?: number;
+  };
 };
 
 type SeriesData = {
@@ -12,6 +26,7 @@ type SeriesData = {
     [solutionType: string]: SolutionData;
   };
   reference?: boolean;
+  extra_info?: ExtraInfo;
 };
 
 type GroupData = {
@@ -24,12 +39,68 @@ type SolutionTablesProps = {
   groups: {
     [groupName: string]: GroupData;
   };
+  hiddenSolutions?: Set<string>;
 };
 
-const SolutionTables: React.FC<SolutionTablesProps> = ({ groups }) => {
+// Component to render solution information in a styled table format
+const SolutionInfoCard: React.FC<{ extraInfo: ExtraInfo; seriesName: string; ranking?: SolutionRanking }> = ({ extraInfo, seriesName, ranking }) => {
+  return (
+    <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 min-w-0">
+      <div className="flex items-center justify-between mb-2">
+        <div className="text-xs font-semibold text-gray-700 truncate" title={seriesName}>
+          Solution Info
+        </div>
+        {ranking && (
+          <div className="bg-blue-600 text-white text-xs font-bold px-2 py-1 rounded-full ml-2">
+            #{ranking.rank}
+          </div>
+        )}
+      </div>
+      <div className="space-y-1 text-xs">
+        <div className="flex justify-between">
+          <span className="text-gray-600">Type:</span>
+          <span className="font-medium text-blue-700 capitalize">{extraInfo.regression_type}</span>
+        </div>
+        <div className="flex justify-between">
+          <span className="text-gray-600">Noise:</span>
+          <span className="font-medium text-green-700">{extraInfo.noise_level}</span>
+        </div>
+        <div className="flex justify-between">
+          <span className="text-gray-600">Optimizer:</span>
+          <span className="font-medium text-purple-700 truncate" title={extraInfo.optimization_function}>
+            {extraInfo.optimization_function.replace('_', ' ')}
+          </span>
+        </div>
+        {extraInfo.valid !== undefined && (
+          <div className="flex justify-between">
+            <span className="text-gray-600">Valid:</span>
+            <span className={`font-medium ${extraInfo.valid ? 'text-green-600' : 'text-red-600'}`}>
+              {extraInfo.valid ? '✓' : '✗'}
+            </span>
+          </div>
+        )}
+        {extraInfo.results?.RMSE_acceleration !== undefined && (
+          <div className="flex justify-between">
+            <span className="text-gray-600">RMSE:</span>
+            <span className="font-medium text-orange-700">
+              {extraInfo.results.RMSE_acceleration.toFixed(3)}
+            </span>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+const SolutionTables: React.FC<SolutionTablesProps> = ({ groups, hiddenSolutions }) => {
   
   const [showValues, setShowValues] = useState(true);
   const [collapseZeros, setCollapseZeros] = useState(true);
+  
+  // Create ranking map for consistent solution numbering
+  const rankingMap = useMemo(() => {
+    return createSolutionRanking(groups as { [groupName: string]: RankingGroupData });
+  }, [groups]);
   
   // Helper function to safely format numbers
   const formatValue = (value: any): string => {
@@ -114,7 +185,11 @@ const SolutionTables: React.FC<SolutionTablesProps> = ({ groups }) => {
           if (!solutionData[solutionType][groupName]) {
             solutionData[solutionType][groupName] = {};
           }
-          solutionData[solutionType][groupName][seriesName] = solutionInfo;
+          // Store both solution info and extra_info
+          solutionData[solutionType][groupName][seriesName] = {
+            ...solutionInfo,
+            extraInfo: seriesData.extra_info
+          };
         });
       }
     });
@@ -200,7 +275,7 @@ const SolutionTables: React.FC<SolutionTablesProps> = ({ groups }) => {
           const { label: labels, vector: referenceVector } = referenceData.data;
           
           // Get all other series for this solution type
-          const otherSeries: { groupName: string; seriesName: string; vector: number[] }[] = [];
+          const otherSeries: { groupName: string; seriesName: string; vector: number[]; extraInfo?: ExtraInfo; ranking?: SolutionRanking }[] = [];
           
           Object.entries(solutionData[solutionType]).forEach(([groupName, groupSeries]) => {
             Object.entries(groupSeries).forEach(([seriesName, seriesData]) => {
@@ -208,12 +283,39 @@ const SolutionTables: React.FC<SolutionTablesProps> = ({ groups }) => {
               if (groupName === referenceData.groupName && seriesName === referenceData.seriesName) {
                 return;
               }
+              
+              // Skip hidden solutions
+              const solutionId = `${groupName}_${seriesName}`;
+              if (hiddenSolutions && hiddenSolutions.has(solutionId)) {
+                return;
+              }
+              
+              const uid = seriesName.substring(0, 8);
+              const ranking = rankingMap.get(uid);
               otherSeries.push({
                 groupName,
                 seriesName,
-                vector: seriesData.vector
+                vector: seriesData.vector,
+                extraInfo: seriesData.extraInfo,
+                ranking: ranking
               });
             });
+          });
+
+          // Sort by ranking number first, then by groupName for consistent ordering
+          otherSeries.sort((a, b) => {
+            // Primary sort: by ranking number (ascending)
+            if (a.ranking && b.ranking && a.ranking.rank !== b.ranking.rank) {
+              return a.ranking.rank - b.ranking.rank;
+            }
+            
+            // Secondary sort: by group name
+            if (a.groupName !== b.groupName) {
+              return a.groupName.localeCompare(b.groupName);
+            }
+            
+            // Tertiary sort: by series name
+            return a.seriesName.localeCompare(b.seriesName);
           });
 
           return (
@@ -227,19 +329,29 @@ const SolutionTables: React.FC<SolutionTablesProps> = ({ groups }) => {
                 </h3>
               </div>
               
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
+              <div className="overflow-x-auto relative">
+                <table className="min-w-full divide-y divide-gray-200 table-fixed">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="sticky left-0 z-30 bg-gray-50 px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-48 min-w-48 max-w-48" style={{boxShadow: '2px 0 4px rgba(0,0,0,0.1)'}}>
                         Parameter
                       </th>
-                      <th className="px-4 py-2 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                      <th className="sticky left-48 z-30 bg-gray-50 px-4 py-2 text-left text-xs font-bold text-gray-700 uppercase tracking-wider w-40 min-w-40 max-w-40" style={{boxShadow: '2px 0 4px rgba(0,0,0,0.1)'}}>
                         {referenceData.seriesName}
                       </th>
                       {otherSeries.map((series, idx) => (
-                        <th key={idx} className="px-4 py-2 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                          {series.seriesName}
+                        <th key={idx} className="px-2 py-2 text-left w-48 min-w-48">
+                          {series.extraInfo ? (
+                            <SolutionInfoCard 
+                              extraInfo={series.extraInfo} 
+                              seriesName={series.seriesName} 
+                              ranking={series.ranking}
+                            />
+                          ) : (
+                            <div className="text-xs font-bold text-gray-700 uppercase tracking-wider">
+                              {series.seriesName}
+                            </div>
+                          )}
                         </th>
                       ))}
                     </tr>
@@ -256,15 +368,15 @@ const SolutionTables: React.FC<SolutionTablesProps> = ({ groups }) => {
                       
                       return (
                         <tr key={rowIdx} className={rowIdx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                          <td className="px-4 py-2 text-sm font-medium text-gray-900">
-                            {renderLatexLabel(label)}
+                          <td className={`sticky left-0 z-30 px-4 py-2 text-sm font-medium text-gray-900 w-48 min-w-48 max-w-48 overflow-hidden text-ellipsis ${rowIdx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`} style={{boxShadow: '2px 0 4px rgba(0,0,0,0.1)'}}>
+                            <div className="truncate">{renderLatexLabel(label)}</div>
                           </td>
-                          <td className="px-4 py-2 text-sm text-gray-700 font-mono">
-                            {renderCellContent(referenceVector[rowIdx], true)}
+                          <td className={`sticky left-48 z-30 px-4 py-2 text-sm text-gray-700 font-mono w-40 min-w-40 max-w-40 overflow-hidden text-ellipsis ${rowIdx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`} style={{boxShadow: '2px 0 4px rgba(0,0,0,0.1)'}}>
+                            <div className="truncate">{renderCellContent(referenceVector[rowIdx], true)}</div>
                           </td>
                           {otherSeries.map((series, colIdx) => (
-                            <td key={colIdx} className="px-4 py-2 text-sm text-gray-700 font-mono">
-                              {renderCellContent(series.vector[rowIdx], false)}
+                            <td key={colIdx} className="px-2 py-2 text-sm text-gray-700 font-mono w-48 min-w-48 overflow-hidden text-ellipsis text-center">
+                              <div className="truncate">{renderCellContent(series.vector[rowIdx], false)}</div>
                             </td>
                           ))}
                         </tr>
