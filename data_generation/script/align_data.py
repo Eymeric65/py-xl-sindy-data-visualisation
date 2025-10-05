@@ -61,6 +61,8 @@ class Args:
     """the ratio of data to use (in respect with catalog size)"""
     skip_already_done: bool = True
     """if true, skip the experiment if already present in the result file"""
+    timeout_signal: bool = False
+    """if true, skip everything and return the experiment with a timeout"""
 
     def get_uid(self):
         hash_input = (
@@ -138,6 +140,41 @@ if __name__ == "__main__":
             "vector": extra_info["ideal_solution_vector"],
             "label" : full_catalog.label()
         }
+
+    ## Mark the experiment as timeout if needed
+    if args.timeout_signal:
+
+        result_dict = {
+            "noise_level": args.noise_level,
+            "optimization_function": args.optimization_function,
+            "random_seed": random_seed,
+            "regression_type": args.regression_type,
+            "valid": False,
+            "regression_time": None,
+            "results":{},
+            "timeout": True
+        }
+
+        simulation_dict["visualisation"]["validation_group"]["data"].update(
+                **json_format_time_series(
+                    name=args.get_uid(),
+                    time= None,
+                    series = None,
+                    reference_time= simulation_dict["visualisation"]["validation_group"]["data"]["validation_data"]["time"],
+                    sample= simulation_dict["generation_settings"]["visualisation_sample"],
+                    mode_solution=args.algorithm,
+                    solution_vector=None,
+                    extra_info=result_dict
+                )
+            )
+
+        simulation_dict = convert_to_lists(simulation_dict)
+        
+        print("print model ...")
+        with open(args.experiment_file + ".json", "w") as file:
+            json.dump(simulation_dict, file, indent=4)
+
+        exit()
 
 
     # load
@@ -261,7 +298,8 @@ if __name__ == "__main__":
         "regression_type": args.regression_type,
         "valid": valid_model,
         "regression_time": regression_time,
-        "results":{}
+        "results":{},
+        "timeout": False
     }
 
 

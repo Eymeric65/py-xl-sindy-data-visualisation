@@ -121,6 +121,7 @@ def extract_solution_data(experiment_id: str,
         'optimizer': extra_info.get('optimization_function'),  # optimizer (lasso_regression, etc.)
         'noise_level': extra_info.get('noise_level'),
         'valid': extra_info.get('valid'),
+        'timeout': extra_info.get('timeout'),
     })
     
     # Extract essential generation settings

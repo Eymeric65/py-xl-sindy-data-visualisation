@@ -211,7 +211,7 @@ def run_single_alignment(cmd: List[str], args: Args) -> dict:
             cmd, 
             capture_output=True, 
             text=True, 
-            timeout=36000  # 60 minute timeout per alignment
+            timeout=3600  # 60 minute timeout per alignment
         )
         end_time = time.time()
         
@@ -231,6 +231,16 @@ def run_single_alignment(cmd: List[str], args: Args) -> dict:
         }
         
     except subprocess.TimeoutExpired:
+
+        #Register the timeout
+        cmd += ["--timeout-signal"]
+        subprocess.run(
+            cmd, 
+            capture_output=True, 
+            text=True, 
+            timeout=120
+        )
+
         logger.error(f"Command timed out: {' '.join(cmd)}")
         return {"success": False, "error": "timeout", "command": " ".join(cmd)}
     except Exception as e:

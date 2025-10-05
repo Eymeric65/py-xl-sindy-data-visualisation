@@ -6,14 +6,14 @@
 
       <geom type="cylinder" size="0.02 3" rgba="0.5 0.5 0.5 1" mass="0.0" contype="0" euler="0 90 0" pos="0 0 1"/>
       <body pos="0 0 1" euler="0 180 0">
-         <joint name="joint0" type="slide" axis = "-1 0 0" pos = "0 0 0" damping="1.5" />
+         <joint name="joint0" type="slide" axis = "-1 0 0" pos = "0 0 0" damping="{{DAMPING_1}}" />
          <geom type="capsule" size="0.05 0.1" euler="0 90 0" rgba="1 0 0 1" mass="0.8" pos="0 0 0" contype="0"/>
          <body pos="0 0.0 -0.5" euler="0 0 0">
-            <joint name="joint1" type="hinge" axis = "0 -1 0" pos = "0 0 0.5" damping="1.8"/>
+            <joint name="joint1" type="hinge" axis = "0 -1 0" pos = "0 0 0.5" damping="{{DAMPING_2}}"/>
             <geom type="cylinder" size="0.05 0.1" rgba="0 1 0 1" mass="0.2" euler="90 0 0" pos="0 -0.05 -0.5" contype="0"/>
             <geom type="cylinder" size="0.03 0.5" rgba="0.7 0.35 0 1" mass="0.0" pos="0 0 0" contype="0"/>
             <body pos="0 -0.1 -1.0" euler="0 0 0">
-              <joint name="joint2" type="hinge" axis = "0 -1 0" pos = "0 0 0.5" damping="1.2"/>
+              <joint name="joint2" type="hinge" axis = "0 -1 0" pos = "0 0 0.5" damping="{{DAMPING_3}}"/>
               <geom type="sphere" size="0.05" rgba="0 1 0 1" mass="0.5" pos="0 0 -0.5" contype="0"/>
               <geom type="cylinder" size="0.03 0.5" rgba="0.7 0.35 0 1" mass="0.0" pos="0 0 0" contype="0"/>
             </body>

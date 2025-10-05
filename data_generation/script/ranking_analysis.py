@@ -124,6 +124,47 @@ def calculate_rankings_for_group(group_df: pd.DataFrame) -> Dict[str, Dict[str, 
     return rankings
 
 
+def analyze_experiment_statistics(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Analyze statistics by experiment_id including failed, timeout, and successful counts.
+    
+    Args:
+        df: DataFrame with experiment results
+        
+    Returns:
+        DataFrame with experiment statistics
+    """
+    experiment_stats = []
+    
+    # Group by experiment_id to get statistics for each experiment
+    for experiment_id, exp_group in df.groupby('experiment_id'):
+        total_attempts = len(exp_group)
+        
+        # Count different types of outcomes
+        successful = len(exp_group[exp_group['valid'] == True])
+        timeout_failed = len(exp_group[exp_group['timeout'] == True])
+        other_failed = total_attempts - successful - timeout_failed
+        total_failed = timeout_failed + other_failed
+        
+        experiment_stats.append({
+            'experiment_id': experiment_id,
+            'total_attempts': total_attempts,
+            'successful': successful,
+            'timeout_failed': timeout_failed,
+            'other_failed': other_failed,
+            'total_failed': total_failed,
+            'success_rate': successful / total_attempts if total_attempts > 0 else 0,
+            'timeout_rate': timeout_failed / total_attempts if total_attempts > 0 else 0,
+            'failure_rate': total_failed / total_attempts if total_attempts > 0 else 0
+        })
+    
+    # Convert to DataFrame and sort by failure rate (descending)
+    exp_stats_df = pd.DataFrame(experiment_stats)
+    exp_stats_df = exp_stats_df.sort_values('failure_rate', ascending=False)
+    
+    return exp_stats_df
+
+
 def analyze_all_rankings(df: pd.DataFrame) -> Tuple[pd.DataFrame, Dict[str, Any]]:
     """
     Analyze rankings across all experiment_id × noise_level combinations.
@@ -153,6 +194,7 @@ def analyze_all_rankings(df: pd.DataFrame) -> Tuple[pd.DataFrame, Dict[str, Any]
     first_place_counts = defaultdict(int)
     appearance_counts = defaultdict(int)
     total_attempt_counts = defaultdict(int)
+    timeout_counts = defaultdict(int)
     rank_counts = defaultdict(lambda: defaultdict(int))
     
     # Also need to track all attempts (including failures) by looking at the full dataset
@@ -167,9 +209,14 @@ def analyze_all_rankings(df: pd.DataFrame) -> Tuple[pd.DataFrame, Dict[str, Any]
             full_group['solution_type'].astype(str)
         )
         
-        for combo in full_group['combo']:
+        for idx, (_, row_data) in enumerate(full_group.iterrows()):
+            combo = row_data['combo']
             all_combos.add(combo)
             total_attempt_counts[combo] += 1
+            
+            # Check for timeout in the database
+            if 'timeout' in row_data and row_data['timeout'] == True:
+                timeout_counts[combo] += 1
         
         # Calculate rankings for valid solutions only
         valid_group = full_group[
@@ -206,7 +253,8 @@ def analyze_all_rankings(df: pd.DataFrame) -> Tuple[pd.DataFrame, Dict[str, Any]
         # Calculate successful rankings and failures
         successful_rankings = appearance_counts[combo]
         total_attempts = total_attempt_counts[combo]
-        failed_attempts = total_attempts - successful_rankings
+        timeout_failures = timeout_counts[combo]
+        other_failures = total_attempts - successful_rankings - timeout_failures
         
         row = {
             'catalog_type': catalog_type,
@@ -214,7 +262,9 @@ def analyze_all_rankings(df: pd.DataFrame) -> Tuple[pd.DataFrame, Dict[str, Any]
             'combo': combo,
             'total_attempts': total_attempts,
             'total_appearances': successful_rankings,
-            'failed_attempts': failed_attempts,
+            'timeout_failures': timeout_failures,
+            'other_failures': other_failures,
+            'failed_attempts': total_attempts - successful_rankings,
             'first_place_wins': first_place_counts[combo],
             'wins_without_competition': wins_without_competition_counts[combo],
             'win_rate': first_place_counts[combo] / max(1, total_attempts),
@@ -247,7 +297,7 @@ def analyze_all_rankings(df: pd.DataFrame) -> Tuple[pd.DataFrame, Dict[str, Any]
     return results_df, summary
 
 
-def generate_ranking_report(results_df: pd.DataFrame, summary: Dict[str, Any], output_file: str) -> None:
+def generate_ranking_report(results_df: pd.DataFrame, summary: Dict[str, Any], experiment_stats_df: pd.DataFrame, output_file: str) -> None:
     """Generate a comprehensive text report of the ranking analysis."""
     
     with open(output_file, 'w') as f:
@@ -263,6 +313,21 @@ def generate_ranking_report(results_df: pd.DataFrame, summary: Dict[str, Any], o
         f.write(f"Total individual attempts: {summary['total_attempts_analyzed']}\n")
         f.write(f"Total successful rankings: {summary['total_rankings_analyzed']}\n\n")
         
+        # Experiment statistics section
+        f.write("EXPERIMENT STATISTICS (ranked by failure percentage)\n")
+        f.write("-" * 50 + "\n")
+        f.write(f"{'Experiment ID':<35}{'Failed':<8}{'Timeout':<9}{'Success':<9}{'Total':<7}{'Fail %':<8}\n")
+        f.write("-" * 76 + "\n")
+        
+        for _, row in experiment_stats_df.iterrows():  # Show every experiment
+            f.write(f"{row['experiment_id']:<35}{row['other_failed']:<8}{row['timeout_failed']:<9}"
+                   f"{row['successful']:<9}{row['total_attempts']:<7}{row['failure_rate']:<8.1%}\n")
+        
+        # if len(experiment_stats_df) > 20:
+        #     f.write(f"... and {len(experiment_stats_df) - 20} more experiments\n")
+        
+        f.write("\n")
+        
         # Overall performance ranking
         f.write("OVERALL PERFORMANCE RANKING (by number of 1st place wins)\n")
         f.write("-" * 60 + "\n")
@@ -270,18 +335,19 @@ def generate_ranking_report(results_df: pd.DataFrame, summary: Dict[str, Any], o
         # Sort by number of 1st place wins (absolute problem-solving ability), then by win rate
         performance_ranking = results_df.sort_values(['first_place_wins', 'win_rate'], ascending=False)
         
-        f.write(f"{'Rank':<6}{'Combo':<25}{'Win Rate':<12}{'Wins WC':<8}{'Total':<8}{'1st':<8}{'2nd':<8}{'3rd':<8}{'>3rd':<8}{'Failed':<8}\n")
-        f.write("-" * 96 + "\n")
+        f.write(f"{'Rank':<6}{'Combo':<25}{'Win Rate':<12}{'Wins WC':<8}{'Total':<8}{'1st':<8}{'2nd':<8}{'3rd':<8}{'>3rd':<8}{'Timeout':<8}{'Other Fail':<10}\n")
+        f.write("-" * 106 + "\n")
         
         for idx, (_, row) in enumerate(performance_ranking.iterrows()):
             rank_1 = row.get('rank_1_count', 0)
             rank_2 = row.get('rank_2_count', 0)  
             rank_3 = row.get('rank_3_count', 0)
             rank_gt3 = row.get('rank_greater_than_3_count', 0)
-            failed = row.get('failed_attempts', 0)
+            timeouts = row.get('timeout_failures', 0)
+            other_fails = row.get('other_failures', 0)
             
             f.write(f"{idx+1:<6}{row['combo']:<25}{row['win_rate']:<12.3f}{row['wins_without_competition']:<8}"
-                   f"{row['total_attempts']:<8}{rank_1:<8}{rank_2:<8}{rank_3:<8}{rank_gt3:<8}{failed:<8}\n")
+                   f"{row['total_attempts']:<8}{rank_1:<8}{rank_2:<8}{rank_3:<8}{rank_gt3:<8}{timeouts:<8}{other_fails:<10}\n")
         
         f.write("\n")
         
@@ -293,7 +359,9 @@ def generate_ranking_report(results_df: pd.DataFrame, summary: Dict[str, Any], o
             f.write(f"Combination: {row['combo']}\n")
             f.write(f"  Total Attempts: {row['total_attempts']}\n")
             f.write(f"  Successful Rankings: {row['total_appearances']}\n")
-            f.write(f"  Failed Attempts: {row['failed_attempts']}\n")
+            f.write(f"  Timeout Failures: {row['timeout_failures']}\n")
+            f.write(f"  Other Failures: {row['other_failures']}\n")
+            f.write(f"  Total Failed Attempts: {row['failed_attempts']}\n")
             f.write(f"  First Place Wins: {row['first_place_wins']}\n")
             f.write(f"  Wins Without Competition: {row['wins_without_competition']}\n")
             f.write(f"  Win Rate: {row['win_rate']:.1%}\n")
@@ -400,12 +468,16 @@ def main():
         logging.error("No ranking data generated!")
         return 1
     
+    # Analyze experiment statistics
+    logging.info("Analyzing experiment statistics...")
+    experiment_stats_df = analyze_experiment_statistics(df)
+    
     # Save results
     results_df.to_csv(args.output_csv, index=False)
     logging.info(f"Saved detailed results to {args.output_csv}")
     
     # Generate and save report
-    generate_ranking_report(results_df, summary, args.output_report)
+    generate_ranking_report(results_df, summary, experiment_stats_df, args.output_report)
     logging.info(f"Saved comprehensive report to {args.output_report}")
     
     # Print summary to console
