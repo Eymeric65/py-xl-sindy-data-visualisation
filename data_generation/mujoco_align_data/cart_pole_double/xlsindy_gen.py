@@ -176,7 +176,7 @@ def xlsindy_component(
             catalog_repartition = xlsindy.catalog.CatalogRepartition(
                 [
                     xlsindy.catalog_base.ExternalForces(
-                        [[1], [2]], symbols_matrix
+                        [[1], [2], [3]], symbols_matrix
                     ),
                     xlsindy.catalog_base.Lagrange(
                         lagrange_catalog, symbols_matrix, time_sym

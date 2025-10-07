@@ -4,57 +4,42 @@ SOLUTION RANKING ANALYSIS REPORT
 
 SUMMARY STATISTICS
 ----------------------------------------
-Total experiment×noise combinations analyzed: 176
+Total experiment×noise combinations analyzed: 116
 Total unique catalog×solution combinations: 9
-Total individual attempts: 778
-Total successful rankings: 273
+Total individual attempts: 664
+Total successful rankings: 361
 
 EXPERIMENT STATISTICS (ranked by failure percentage)
 --------------------------------------------------
 Experiment ID                      Failed  Timeout  Success  Total  Fail %  
 ----------------------------------------------------------------------------
-112d36f9d75066ae804be89baae92d95   12      4        0        16     100.0%  
-2cefb850b809bab4e953407032dda0ea   7       6        0        13     100.0%  
-37590cd689d1dd2dd9fdd1acf1c717ca   0       8        0        8      100.0%  
-f01c70dfd46475b6742a04a3f6e1c58d   8       8        0        16     100.0%  
-a3408d8a97af074a47e0529dcc76bc25   12      3        0        15     100.0%  
-a07006c05667f280e7959e05347357eb   0       7        0        7      100.0%  
-a8d33bbfddfef387ac17fd75aa351166   24      0        0        24     100.0%  
-a5c89b04ec88eb4b2c018aeddd8c7379   23      1        0        24     100.0%  
-58d45bd06825d4c5ee8448bb64da7c48   7       8        0        15     100.0%  
-6ccb7f91e29b140bcbc3c7bda7b59f8a   7       7        0        14     100.0%  
-4ccbb0928a35d8fc731cf0f67902c6db   20      0        0        20     100.0%  
-41e9a4b6070fd6ee55104970c2183b01   12      4        0        16     100.0%  
-c194cf6f49b3abd9996da90ea6aa1a0e   8       8        0        16     100.0%  
-df508e52b48e8e243a017c66c6a295d6   11      5        0        16     100.0%  
-ed8d9ecb51c221eb7c018e34b9410745   0       8        0        8      100.0%  
-ff8341d52a7a78af2c224bf0164dc1cb   7       2        0        9      100.0%  
-bb98e2f099a7cb05362794c3ad9b312a   8       7        0        15     100.0%  
-e19750f2d5e78915567ae29952c8d274   7       7        0        14     100.0%  
+853372d8d80bbcfd72203c65d4213f7f   7       8        3        18     83.3%   
+d2f5406c4dbdbbf4eb47f6e49b3e77c8   6       8        4        18     77.8%   
 13cfdbda00ad2841ab19d3d0a68ad25b   6       8        4        18     77.8%   
 242eaf2ea764a3a70c8c55098ffabf61   17      1        6        24     75.0%   
 d2c452482ac4a09f606d805d7e6a10fb   17      1        6        24     75.0%   
-853372d8d80bbcfd72203c65d4213f7f   7       2        3        12     75.0%   
-9976f5ebff722039ae32142ba9abf651   5       7        6        18     66.7%   
-d2f5406c4dbdbbf4eb47f6e49b3e77c8   6       2        4        12     66.7%   
+9976f5ebff722039ae32142ba9abf651   5       8        6        19     68.4%   
+18422305b9dd8fc458f51a2f7e52809a   16      0        8        24     66.7%   
 4bc5dfbca199f7fa3f88a2179c053f29   15      1        8        24     66.7%   
 d5a80adc1adfa361d4c2b609755ec08d   15      1        8        24     66.7%   
-b1469063853c52bc47403aa4fcee74a1   5       7        7        19     63.2%   
-18422305b9dd8fc458f51a2f7e52809a   13      0        8        21     61.9%   
-3c297647ab7fcfdfb7e2eb30b1ac54e5   13      0        8        21     61.9%   
-c29a4c2600abec29fefecf6dc4d40ad9   4       4        8        16     50.0%   
-bb02636c42b159fe5c449ee96e5138a4   0       8        8        16     50.0%   
-ac4f507ffdfc73767146ace3105478db   4       4        8        16     50.0%   
-332448707d37eb6fb65192125a1e3964   0       8        8        16     50.0%   
-d50adfd610bfe0cfe0e304b75d58f8f9   7       0        8        15     46.7%   
-0e35cc88d4b1f5a82f5dc0e90725982d   4       3        8        15     46.7%   
-004c4cfdd89a1399163db196139330ac   5       1        11       17     35.3%   
+3c297647ab7fcfdfb7e2eb30b1ac54e5   16      0        8        24     66.7%   
+0e35cc88d4b1f5a82f5dc0e90725982d   12      3        8        23     65.2%   
+7babcd3de7cc317e5406c2757ec614c1   15      0        8        23     65.2%   
+b1469063853c52bc47403aa4fcee74a1   6       7        7        20     65.0%   
+004c4cfdd89a1399163db196139330ac   5       8        11       24     54.2%   
+bb02636c42b159fe5c449ee96e5138a4   0       8        16       24     33.3%   
+c29a4c2600abec29fefecf6dc4d40ad9   4       4        16       24     33.3%   
 3fab59ce5091a36a2feee7acba293467   7       1        16       24     33.3%   
+332448707d37eb6fb65192125a1e3964   0       8        16       24     33.3%   
 396f3105ab61308a891bf8131014e04d   8       0        16       24     33.3%   
 5375664dcc5f4f6673dfc8d79485f58e   8       0        16       24     33.3%   
 605cd3c0ab1b644788728af16933cad6   8       0        16       24     33.3%   
+ac4f507ffdfc73767146ace3105478db   4       4        16       24     33.3%   
+53a13f01fa151efbb5a58c2c9ce369f5   7       0        16       23     30.4%   
+d50adfd610bfe0cfe0e304b75d58f8f9   7       0        16       23     30.4%   
+d243c454329ea90486a670c3fe9587ee   4       3        16       23     30.4%   
 ef4c80c8a4a0421bda4c3e53746e3956   6       0        18       24     25.0%   
-485a6be3b9a9b03101c6646cd5339490   0       0        16       16     0.0%    
+485a6be3b9a9b03101c6646cd5339490   0       0        24       24     0.0%    
 e69ef26e7a213af73c7742de309b7132   0       0        24       24     0.0%    
 eda7370f97a161bf1c152174ba5aecd8   0       0        24       24     0.0%    
 
@@ -62,86 +47,115 @@ OVERALL PERFORMANCE RANKING (by number of 1st place wins)
 ------------------------------------------------------------
 Rank  Combo                    Win Rate    Wins WC Total   1st     2nd     3rd     >3rd    Timeout Other Fail
 ----------------------------------------------------------------------------------------------------------
-1     mixed × mixed            0.373       46      169     63.0    20.0    nan     0       11      75        
-2     mixed × explicit         0.400       43      140     56.0    14.0    nan     0       0       70        
-3     sindy × mixed            0.138       0       130     18.0    8.0     1.0     0       61      42        
-4     sindy × explicit         0.130       0       138     18.0    8.0     1.0     0       52      59        
-5     mixed × implicit         0.357       4       28      10.0    3.0     2.0     0       12      1         
-6     xlsindy × implicit       0.600       1       5       3.0     1.0     1.0     0       0       0         
-7     xlsindy × explicit       0.047       3       64      3.0     9.0     10.0    0       0       42        
-8     xlsindy × mixed          0.034       3       88      3.0     11.0    10.0    0       0       64        
-9     sindy × implicit         0.000       0       16      nan     nan     nan     0       16      0         
+1     mixed × mixed            0.595       26      116     69.0    22.0    nan     0       0       25        
+2     mixed × explicit         0.674       23      92      62.0    16.0    nan     0       0       14        
+3     sindy × explicit         0.239       1       92      22.0    8.0     1.0     0       16      45        
+4     sindy × mixed            0.170       1       112     19.0    11.0    1.0     0       43      38        
+5     mixed × implicit         0.625       4       16      10.0    3.0     2.0     0       0       1         
+6     xlsindy × explicit       0.054       3       92      5.0     35.0    12.0    2       0       38        
+7     xlsindy × mixed          0.043       3       115     5.0     37.0    14.0    0       0       59        
+8     xlsindy × implicit       0.600       1       5       3.0     1.0     1.0     0       0       0         
+9     sindy × implicit         0.000       0       24      nan     nan     nan     0       23      1         
 
 DETAILED BREAKDOWN BY COMBINATION
 ----------------------------------------
 
 Combination: mixed × mixed
-  Total Attempts: 169
-  Successful Rankings: 83
-  Timeout Failures: 11
-  Other Failures: 75
-  Total Failed Attempts: 86
-  First Place Wins: 63
-  Wins Without Competition: 46
-  Win Rate: 37.3%
+  Total Attempts: 116
+  Successful Rankings: 91
+  Timeout Failures: 0
+  Other Failures: 25
+  Total Failed Attempts: 25
+  First Place Wins: 69
+  Wins Without Competition: 26
+  Win Rate: 59.5%
   Rank Distribution:
-    1st place: 63.0 times (75.9%)
-    2nd place: 20.0 times (24.1%)
+    1st place: 69.0 times (75.8%)
+    2nd place: 22.0 times (24.2%)
 
 Combination: mixed × explicit
-  Total Attempts: 140
-  Successful Rankings: 70
+  Total Attempts: 92
+  Successful Rankings: 78
   Timeout Failures: 0
-  Other Failures: 70
-  Total Failed Attempts: 70
-  First Place Wins: 56
-  Wins Without Competition: 43
-  Win Rate: 40.0%
+  Other Failures: 14
+  Total Failed Attempts: 14
+  First Place Wins: 62
+  Wins Without Competition: 23
+  Win Rate: 67.4%
   Rank Distribution:
-    1st place: 56.0 times (80.0%)
-    2nd place: 14.0 times (20.0%)
-
-Combination: sindy × mixed
-  Total Attempts: 130
-  Successful Rankings: 27
-  Timeout Failures: 61
-  Other Failures: 42
-  Total Failed Attempts: 103
-  First Place Wins: 18
-  Wins Without Competition: 0
-  Win Rate: 13.8%
-  Rank Distribution:
-    1st place: 18.0 times (66.7%)
-    2nd place: 8.0 times (29.6%)
-    3rd place: 1.0 times (3.7%)
+    1st place: 62.0 times (79.5%)
+    2nd place: 16.0 times (20.5%)
 
 Combination: sindy × explicit
-  Total Attempts: 138
-  Successful Rankings: 27
-  Timeout Failures: 52
-  Other Failures: 59
-  Total Failed Attempts: 111
-  First Place Wins: 18
-  Wins Without Competition: 0
-  Win Rate: 13.0%
+  Total Attempts: 92
+  Successful Rankings: 31
+  Timeout Failures: 16
+  Other Failures: 45
+  Total Failed Attempts: 61
+  First Place Wins: 22
+  Wins Without Competition: 1
+  Win Rate: 23.9%
   Rank Distribution:
-    1st place: 18.0 times (66.7%)
-    2nd place: 8.0 times (29.6%)
-    3rd place: 1.0 times (3.7%)
+    1st place: 22.0 times (71.0%)
+    2nd place: 8.0 times (25.8%)
+    3rd place: 1.0 times (3.2%)
+
+Combination: sindy × mixed
+  Total Attempts: 112
+  Successful Rankings: 31
+  Timeout Failures: 43
+  Other Failures: 38
+  Total Failed Attempts: 81
+  First Place Wins: 19
+  Wins Without Competition: 1
+  Win Rate: 17.0%
+  Rank Distribution:
+    1st place: 19.0 times (61.3%)
+    2nd place: 11.0 times (35.5%)
+    3rd place: 1.0 times (3.2%)
 
 Combination: mixed × implicit
-  Total Attempts: 28
+  Total Attempts: 16
   Successful Rankings: 15
-  Timeout Failures: 12
+  Timeout Failures: 0
   Other Failures: 1
-  Total Failed Attempts: 13
+  Total Failed Attempts: 1
   First Place Wins: 10
   Wins Without Competition: 4
-  Win Rate: 35.7%
+  Win Rate: 62.5%
   Rank Distribution:
     1st place: 10.0 times (66.7%)
     2nd place: 3.0 times (20.0%)
     3rd place: 2.0 times (13.3%)
+
+Combination: xlsindy × explicit
+  Total Attempts: 92
+  Successful Rankings: 54
+  Timeout Failures: 0
+  Other Failures: 38
+  Total Failed Attempts: 38
+  First Place Wins: 5
+  Wins Without Competition: 3
+  Win Rate: 5.4%
+  Rank Distribution:
+    1st place: 5.0 times (9.3%)
+    2nd place: 35.0 times (64.8%)
+    3rd place: 12.0 times (22.2%)
+    4th place: 2.0 times (3.7%)
+
+Combination: xlsindy × mixed
+  Total Attempts: 115
+  Successful Rankings: 56
+  Timeout Failures: 0
+  Other Failures: 59
+  Total Failed Attempts: 59
+  First Place Wins: 5
+  Wins Without Competition: 3
+  Win Rate: 4.3%
+  Rank Distribution:
+    1st place: 5.0 times (8.9%)
+    2nd place: 37.0 times (66.1%)
+    3rd place: 14.0 times (25.0%)
 
 Combination: xlsindy × implicit
   Total Attempts: 5
@@ -157,40 +171,12 @@ Combination: xlsindy × implicit
     2nd place: 1.0 times (20.0%)
     3rd place: 1.0 times (20.0%)
 
-Combination: xlsindy × explicit
-  Total Attempts: 64
-  Successful Rankings: 22
-  Timeout Failures: 0
-  Other Failures: 42
-  Total Failed Attempts: 42
-  First Place Wins: 3
-  Wins Without Competition: 3
-  Win Rate: 4.7%
-  Rank Distribution:
-    1st place: 3.0 times (13.6%)
-    2nd place: 9.0 times (40.9%)
-    3rd place: 10.0 times (45.5%)
-
-Combination: xlsindy × mixed
-  Total Attempts: 88
-  Successful Rankings: 24
-  Timeout Failures: 0
-  Other Failures: 64
-  Total Failed Attempts: 64
-  First Place Wins: 3
-  Wins Without Competition: 3
-  Win Rate: 3.4%
-  Rank Distribution:
-    1st place: 3.0 times (12.5%)
-    2nd place: 11.0 times (45.8%)
-    3rd place: 10.0 times (41.7%)
-
 Combination: sindy × implicit
-  Total Attempts: 16
+  Total Attempts: 24
   Successful Rankings: 0
-  Timeout Failures: 16
-  Other Failures: 0
-  Total Failed Attempts: 16
+  Timeout Failures: 23
+  Other Failures: 1
+  Total Failed Attempts: 24
   First Place Wins: 0
   Wins Without Competition: 0
   Win Rate: 0.0%
@@ -199,25 +185,25 @@ Combination: sindy × implicit
 ANALYSIS BY CATALOG TYPE
 ------------------------------
 mixed:
-  Total First Place Wins: 129.0
-  Total Wins Without Competition: 93.0
-  Total Appearances: 168.0
-  Overall Win Rate: 76.8%
-  Average Win Rate: 37.7%
+  Total First Place Wins: 141.0
+  Total Wins Without Competition: 53.0
+  Total Appearances: 184.0
+  Overall Win Rate: 76.6%
+  Average Win Rate: 63.1%
 
 xlsindy:
-  Total First Place Wins: 9.0
+  Total First Place Wins: 13.0
   Total Wins Without Competition: 7.0
-  Total Appearances: 51.0
-  Overall Win Rate: 17.6%
-  Average Win Rate: 22.7%
+  Total Appearances: 115.0
+  Overall Win Rate: 11.3%
+  Average Win Rate: 23.3%
 
 sindy:
-  Total First Place Wins: 36.0
-  Total Wins Without Competition: 0.0
-  Total Appearances: 54.0
-  Overall Win Rate: 66.7%
-  Average Win Rate: 9.0%
+  Total First Place Wins: 41.0
+  Total Wins Without Competition: 2.0
+  Total Appearances: 62.0
+  Overall Win Rate: 66.1%
+  Average Win Rate: 13.6%
 
 ANALYSIS BY SOLUTION TYPE
 ------------------------------
@@ -226,19 +212,19 @@ implicit:
   Total Wins Without Competition: 5.0
   Total Appearances: 20.0
   Overall Win Rate: 65.0%
-  Average Win Rate: 31.9%
+  Average Win Rate: 40.8%
 
 explicit:
-  Total First Place Wins: 77.0
-  Total Wins Without Competition: 46.0
-  Total Appearances: 119.0
-  Overall Win Rate: 64.7%
-  Average Win Rate: 19.2%
+  Total First Place Wins: 89.0
+  Total Wins Without Competition: 27.0
+  Total Appearances: 163.0
+  Overall Win Rate: 54.6%
+  Average Win Rate: 32.2%
 
 mixed:
-  Total First Place Wins: 84.0
-  Total Wins Without Competition: 49.0
-  Total Appearances: 134.0
-  Overall Win Rate: 62.7%
-  Average Win Rate: 18.2%
+  Total First Place Wins: 93.0
+  Total Wins Without Competition: 30.0
+  Total Appearances: 178.0
+  Overall Win Rate: 52.2%
+  Average Win Rate: 26.9%
 

@@ -1,0 +1,220 @@
+# Failed Experiments - Align Commands to Rerun
+# Generated automatically from missing experiment combinations
+# Total experiments with failures: 15
+# Total missing combinations: 152
+# 
+# Usage: Copy and paste these commands to rerun failed experiments
+# Or use: bash failed_experiments_commands.txt
+
+
+# Experiment: 485a6be3b9a9b03101c6646cd5339490
+# Folder: cart_pole_double, Force type: non_zero
+# Missing 8 combinations:
+python -m data_generation.script.align_data --experiment-file results/485a6be3b9a9b03101c6646cd5339490 --algorithm sindy --regression-type explicit --noise-level 0.001 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/485a6be3b9a9b03101c6646cd5339490 --algorithm sindy --regression-type explicit --noise-level 0.1 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/485a6be3b9a9b03101c6646cd5339490 --algorithm sindy --regression-type mixed --noise-level 0.01 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/485a6be3b9a9b03101c6646cd5339490 --algorithm sindy --regression-type mixed --noise-level 0.0 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/485a6be3b9a9b03101c6646cd5339490 --algorithm sindy --regression-type mixed --noise-level 0.001 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/485a6be3b9a9b03101c6646cd5339490 --algorithm sindy --regression-type explicit --noise-level 0.01 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/485a6be3b9a9b03101c6646cd5339490 --algorithm sindy --regression-type mixed --noise-level 0.1 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/485a6be3b9a9b03101c6646cd5339490 --algorithm sindy --regression-type explicit --noise-level 0.0 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+
+# Experiment: 9976f5ebff722039ae32142ba9abf651
+# Folder: cart_pole, Force type: zero
+# Missing 8 combinations:
+python -m data_generation.script.align_data --experiment-file results/9976f5ebff722039ae32142ba9abf651 --algorithm sindy --regression-type implicit --noise-level 0.01 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/9976f5ebff722039ae32142ba9abf651 --algorithm sindy --regression-type mixed --noise-level 0.01 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/9976f5ebff722039ae32142ba9abf651 --algorithm sindy --regression-type implicit --noise-level 0.0 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/9976f5ebff722039ae32142ba9abf651 --algorithm sindy --regression-type mixed --noise-level 0.0 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/9976f5ebff722039ae32142ba9abf651 --algorithm sindy --regression-type mixed --noise-level 0.001 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/9976f5ebff722039ae32142ba9abf651 --algorithm sindy --regression-type implicit --noise-level 0.1 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/9976f5ebff722039ae32142ba9abf651 --algorithm sindy --regression-type implicit --noise-level 0.001 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/9976f5ebff722039ae32142ba9abf651 --algorithm sindy --regression-type mixed --noise-level 0.1 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+
+# Experiment: 13cfdbda00ad2841ab19d3d0a68ad25b
+# Folder: cart_pole, Force type: zero
+# Missing 8 combinations:
+python -m data_generation.script.align_data --experiment-file results/13cfdbda00ad2841ab19d3d0a68ad25b --algorithm sindy --regression-type implicit --noise-level 0.01 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/13cfdbda00ad2841ab19d3d0a68ad25b --algorithm sindy --regression-type mixed --noise-level 0.01 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/13cfdbda00ad2841ab19d3d0a68ad25b --algorithm sindy --regression-type implicit --noise-level 0.0 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/13cfdbda00ad2841ab19d3d0a68ad25b --algorithm sindy --regression-type mixed --noise-level 0.0 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/13cfdbda00ad2841ab19d3d0a68ad25b --algorithm sindy --regression-type mixed --noise-level 0.001 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/13cfdbda00ad2841ab19d3d0a68ad25b --algorithm sindy --regression-type implicit --noise-level 0.1 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/13cfdbda00ad2841ab19d3d0a68ad25b --algorithm sindy --regression-type implicit --noise-level 0.001 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/13cfdbda00ad2841ab19d3d0a68ad25b --algorithm sindy --regression-type mixed --noise-level 0.1 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+
+# Experiment: d50adfd610bfe0cfe0e304b75d58f8f9
+# Folder: cart_pole_double, Force type: non_zero
+# Missing 16 combinations:
+python -m data_generation.script.align_data --experiment-file results/d50adfd610bfe0cfe0e304b75d58f8f9 --algorithm xlsindy --regression-type explicit --noise-level 0.001 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/d50adfd610bfe0cfe0e304b75d58f8f9 --algorithm sindy --regression-type explicit --noise-level 0.001 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/d50adfd610bfe0cfe0e304b75d58f8f9 --algorithm xlsindy --regression-type explicit --noise-level 0.1 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/d50adfd610bfe0cfe0e304b75d58f8f9 --algorithm sindy --regression-type explicit --noise-level 0.1 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/d50adfd610bfe0cfe0e304b75d58f8f9 --algorithm xlsindy --regression-type mixed --noise-level 0.01 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/d50adfd610bfe0cfe0e304b75d58f8f9 --algorithm sindy --regression-type mixed --noise-level 0.01 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/d50adfd610bfe0cfe0e304b75d58f8f9 --algorithm xlsindy --regression-type mixed --noise-level 0.0 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/d50adfd610bfe0cfe0e304b75d58f8f9 --algorithm sindy --regression-type mixed --noise-level 0.0 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/d50adfd610bfe0cfe0e304b75d58f8f9 --algorithm xlsindy --regression-type mixed --noise-level 0.001 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/d50adfd610bfe0cfe0e304b75d58f8f9 --algorithm sindy --regression-type mixed --noise-level 0.001 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/d50adfd610bfe0cfe0e304b75d58f8f9 --algorithm xlsindy --regression-type explicit --noise-level 0.01 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/d50adfd610bfe0cfe0e304b75d58f8f9 --algorithm sindy --regression-type explicit --noise-level 0.01 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/d50adfd610bfe0cfe0e304b75d58f8f9 --algorithm xlsindy --regression-type mixed --noise-level 0.1 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/d50adfd610bfe0cfe0e304b75d58f8f9 --algorithm sindy --regression-type mixed --noise-level 0.1 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/d50adfd610bfe0cfe0e304b75d58f8f9 --algorithm xlsindy --regression-type explicit --noise-level 0.0 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/d50adfd610bfe0cfe0e304b75d58f8f9 --algorithm sindy --regression-type explicit --noise-level 0.0 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+
+# Experiment: ac4f507ffdfc73767146ace3105478db
+# Folder: cart_pole_double, Force type: non_zero
+# Missing 8 combinations:
+python -m data_generation.script.align_data --experiment-file results/ac4f507ffdfc73767146ace3105478db --algorithm sindy --regression-type explicit --noise-level 0.001 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/ac4f507ffdfc73767146ace3105478db --algorithm sindy --regression-type explicit --noise-level 0.1 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/ac4f507ffdfc73767146ace3105478db --algorithm sindy --regression-type mixed --noise-level 0.01 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/ac4f507ffdfc73767146ace3105478db --algorithm sindy --regression-type mixed --noise-level 0.0 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/ac4f507ffdfc73767146ace3105478db --algorithm sindy --regression-type mixed --noise-level 0.001 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/ac4f507ffdfc73767146ace3105478db --algorithm sindy --regression-type explicit --noise-level 0.01 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/ac4f507ffdfc73767146ace3105478db --algorithm sindy --regression-type mixed --noise-level 0.1 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/ac4f507ffdfc73767146ace3105478db --algorithm sindy --regression-type explicit --noise-level 0.0 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+
+# Experiment: d2f5406c4dbdbbf4eb47f6e49b3e77c8
+# Folder: double_pendulum_pm, Force type: zero
+# Missing 8 combinations:
+python -m data_generation.script.align_data --experiment-file results/d2f5406c4dbdbbf4eb47f6e49b3e77c8 --algorithm sindy --regression-type implicit --noise-level 0.01 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/d2f5406c4dbdbbf4eb47f6e49b3e77c8 --algorithm sindy --regression-type mixed --noise-level 0.01 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/d2f5406c4dbdbbf4eb47f6e49b3e77c8 --algorithm sindy --regression-type implicit --noise-level 0.0 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/d2f5406c4dbdbbf4eb47f6e49b3e77c8 --algorithm sindy --regression-type mixed --noise-level 0.0 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/d2f5406c4dbdbbf4eb47f6e49b3e77c8 --algorithm sindy --regression-type mixed --noise-level 0.001 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/d2f5406c4dbdbbf4eb47f6e49b3e77c8 --algorithm sindy --regression-type implicit --noise-level 0.1 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/d2f5406c4dbdbbf4eb47f6e49b3e77c8 --algorithm sindy --regression-type implicit --noise-level 0.001 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/d2f5406c4dbdbbf4eb47f6e49b3e77c8 --algorithm sindy --regression-type mixed --noise-level 0.1 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+
+# Experiment: 853372d8d80bbcfd72203c65d4213f7f
+# Folder: double_pendulum_pm, Force type: zero
+# Missing 8 combinations:
+python -m data_generation.script.align_data --experiment-file results/853372d8d80bbcfd72203c65d4213f7f --algorithm sindy --regression-type implicit --noise-level 0.01 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/853372d8d80bbcfd72203c65d4213f7f --algorithm sindy --regression-type mixed --noise-level 0.01 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/853372d8d80bbcfd72203c65d4213f7f --algorithm sindy --regression-type implicit --noise-level 0.0 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/853372d8d80bbcfd72203c65d4213f7f --algorithm sindy --regression-type mixed --noise-level 0.0 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/853372d8d80bbcfd72203c65d4213f7f --algorithm sindy --regression-type mixed --noise-level 0.001 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/853372d8d80bbcfd72203c65d4213f7f --algorithm sindy --regression-type implicit --noise-level 0.1 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/853372d8d80bbcfd72203c65d4213f7f --algorithm sindy --regression-type implicit --noise-level 0.001 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/853372d8d80bbcfd72203c65d4213f7f --algorithm sindy --regression-type mixed --noise-level 0.1 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+
+# Experiment: 332448707d37eb6fb65192125a1e3964
+# Folder: cart_pole_double, Force type: non_zero
+# Missing 8 combinations:
+python -m data_generation.script.align_data --experiment-file results/332448707d37eb6fb65192125a1e3964 --algorithm sindy --regression-type explicit --noise-level 0.001 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/332448707d37eb6fb65192125a1e3964 --algorithm sindy --regression-type explicit --noise-level 0.1 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/332448707d37eb6fb65192125a1e3964 --algorithm sindy --regression-type mixed --noise-level 0.01 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/332448707d37eb6fb65192125a1e3964 --algorithm sindy --regression-type mixed --noise-level 0.0 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/332448707d37eb6fb65192125a1e3964 --algorithm sindy --regression-type mixed --noise-level 0.001 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/332448707d37eb6fb65192125a1e3964 --algorithm sindy --regression-type explicit --noise-level 0.01 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/332448707d37eb6fb65192125a1e3964 --algorithm sindy --regression-type mixed --noise-level 0.1 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/332448707d37eb6fb65192125a1e3964 --algorithm sindy --regression-type explicit --noise-level 0.0 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+
+# Experiment: bb02636c42b159fe5c449ee96e5138a4
+# Folder: cart_pole_double, Force type: non_zero
+# Missing 8 combinations:
+python -m data_generation.script.align_data --experiment-file results/bb02636c42b159fe5c449ee96e5138a4 --algorithm sindy --regression-type explicit --noise-level 0.001 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/bb02636c42b159fe5c449ee96e5138a4 --algorithm sindy --regression-type explicit --noise-level 0.1 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/bb02636c42b159fe5c449ee96e5138a4 --algorithm sindy --regression-type mixed --noise-level 0.01 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/bb02636c42b159fe5c449ee96e5138a4 --algorithm sindy --regression-type mixed --noise-level 0.0 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/bb02636c42b159fe5c449ee96e5138a4 --algorithm sindy --regression-type mixed --noise-level 0.001 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/bb02636c42b159fe5c449ee96e5138a4 --algorithm sindy --regression-type explicit --noise-level 0.01 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/bb02636c42b159fe5c449ee96e5138a4 --algorithm sindy --regression-type mixed --noise-level 0.1 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/bb02636c42b159fe5c449ee96e5138a4 --algorithm sindy --regression-type explicit --noise-level 0.0 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+
+# Experiment: b1469063853c52bc47403aa4fcee74a1
+# Folder: cart_pole, Force type: zero
+# Missing 8 combinations:
+python -m data_generation.script.align_data --experiment-file results/b1469063853c52bc47403aa4fcee74a1 --algorithm sindy --regression-type implicit --noise-level 0.01 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/b1469063853c52bc47403aa4fcee74a1 --algorithm sindy --regression-type mixed --noise-level 0.01 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/b1469063853c52bc47403aa4fcee74a1 --algorithm sindy --regression-type implicit --noise-level 0.0 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/b1469063853c52bc47403aa4fcee74a1 --algorithm sindy --regression-type mixed --noise-level 0.0 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/b1469063853c52bc47403aa4fcee74a1 --algorithm sindy --regression-type mixed --noise-level 0.001 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/b1469063853c52bc47403aa4fcee74a1 --algorithm sindy --regression-type implicit --noise-level 0.1 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/b1469063853c52bc47403aa4fcee74a1 --algorithm sindy --regression-type implicit --noise-level 0.001 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/b1469063853c52bc47403aa4fcee74a1 --algorithm sindy --regression-type mixed --noise-level 0.1 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+
+# Experiment: 0e35cc88d4b1f5a82f5dc0e90725982d
+# Folder: cart_pole_double, Force type: non_zero
+# Missing 16 combinations:
+python -m data_generation.script.align_data --experiment-file results/0e35cc88d4b1f5a82f5dc0e90725982d --algorithm xlsindy --regression-type explicit --noise-level 0.001 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/0e35cc88d4b1f5a82f5dc0e90725982d --algorithm sindy --regression-type explicit --noise-level 0.001 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/0e35cc88d4b1f5a82f5dc0e90725982d --algorithm xlsindy --regression-type explicit --noise-level 0.1 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/0e35cc88d4b1f5a82f5dc0e90725982d --algorithm sindy --regression-type explicit --noise-level 0.1 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/0e35cc88d4b1f5a82f5dc0e90725982d --algorithm xlsindy --regression-type mixed --noise-level 0.01 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/0e35cc88d4b1f5a82f5dc0e90725982d --algorithm sindy --regression-type mixed --noise-level 0.01 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/0e35cc88d4b1f5a82f5dc0e90725982d --algorithm xlsindy --regression-type mixed --noise-level 0.0 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/0e35cc88d4b1f5a82f5dc0e90725982d --algorithm sindy --regression-type mixed --noise-level 0.0 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/0e35cc88d4b1f5a82f5dc0e90725982d --algorithm xlsindy --regression-type mixed --noise-level 0.001 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/0e35cc88d4b1f5a82f5dc0e90725982d --algorithm sindy --regression-type mixed --noise-level 0.001 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/0e35cc88d4b1f5a82f5dc0e90725982d --algorithm xlsindy --regression-type explicit --noise-level 0.01 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/0e35cc88d4b1f5a82f5dc0e90725982d --algorithm sindy --regression-type explicit --noise-level 0.01 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/0e35cc88d4b1f5a82f5dc0e90725982d --algorithm xlsindy --regression-type mixed --noise-level 0.1 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/0e35cc88d4b1f5a82f5dc0e90725982d --algorithm sindy --regression-type mixed --noise-level 0.1 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/0e35cc88d4b1f5a82f5dc0e90725982d --algorithm xlsindy --regression-type explicit --noise-level 0.0 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/0e35cc88d4b1f5a82f5dc0e90725982d --algorithm sindy --regression-type explicit --noise-level 0.0 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+
+# Experiment: c29a4c2600abec29fefecf6dc4d40ad9
+# Folder: cart_pole_double, Force type: non_zero
+# Missing 8 combinations:
+python -m data_generation.script.align_data --experiment-file results/c29a4c2600abec29fefecf6dc4d40ad9 --algorithm sindy --regression-type explicit --noise-level 0.001 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/c29a4c2600abec29fefecf6dc4d40ad9 --algorithm sindy --regression-type explicit --noise-level 0.1 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/c29a4c2600abec29fefecf6dc4d40ad9 --algorithm sindy --regression-type mixed --noise-level 0.01 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/c29a4c2600abec29fefecf6dc4d40ad9 --algorithm sindy --regression-type mixed --noise-level 0.0 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/c29a4c2600abec29fefecf6dc4d40ad9 --algorithm sindy --regression-type mixed --noise-level 0.001 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/c29a4c2600abec29fefecf6dc4d40ad9 --algorithm sindy --regression-type explicit --noise-level 0.01 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/c29a4c2600abec29fefecf6dc4d40ad9 --algorithm sindy --regression-type mixed --noise-level 0.1 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/c29a4c2600abec29fefecf6dc4d40ad9 --algorithm sindy --regression-type explicit --noise-level 0.0 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+
+# Experiment: 53a13f01fa151efbb5a58c2c9ce369f5
+# Folder: cart_pole_double, Force type: non_zero
+# Missing 16 combinations:
+python -m data_generation.script.align_data --experiment-file results/53a13f01fa151efbb5a58c2c9ce369f5 --algorithm xlsindy --regression-type explicit --noise-level 0.001 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/53a13f01fa151efbb5a58c2c9ce369f5 --algorithm sindy --regression-type explicit --noise-level 0.001 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/53a13f01fa151efbb5a58c2c9ce369f5 --algorithm xlsindy --regression-type explicit --noise-level 0.1 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/53a13f01fa151efbb5a58c2c9ce369f5 --algorithm sindy --regression-type explicit --noise-level 0.1 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/53a13f01fa151efbb5a58c2c9ce369f5 --algorithm xlsindy --regression-type mixed --noise-level 0.01 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/53a13f01fa151efbb5a58c2c9ce369f5 --algorithm sindy --regression-type mixed --noise-level 0.01 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/53a13f01fa151efbb5a58c2c9ce369f5 --algorithm xlsindy --regression-type mixed --noise-level 0.0 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/53a13f01fa151efbb5a58c2c9ce369f5 --algorithm sindy --regression-type mixed --noise-level 0.0 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/53a13f01fa151efbb5a58c2c9ce369f5 --algorithm xlsindy --regression-type mixed --noise-level 0.001 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/53a13f01fa151efbb5a58c2c9ce369f5 --algorithm sindy --regression-type mixed --noise-level 0.001 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/53a13f01fa151efbb5a58c2c9ce369f5 --algorithm xlsindy --regression-type explicit --noise-level 0.01 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/53a13f01fa151efbb5a58c2c9ce369f5 --algorithm sindy --regression-type explicit --noise-level 0.01 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/53a13f01fa151efbb5a58c2c9ce369f5 --algorithm xlsindy --regression-type mixed --noise-level 0.1 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/53a13f01fa151efbb5a58c2c9ce369f5 --algorithm sindy --regression-type mixed --noise-level 0.1 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/53a13f01fa151efbb5a58c2c9ce369f5 --algorithm xlsindy --regression-type explicit --noise-level 0.0 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/53a13f01fa151efbb5a58c2c9ce369f5 --algorithm sindy --regression-type explicit --noise-level 0.0 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+
+# Experiment: d243c454329ea90486a670c3fe9587ee
+# Folder: cart_pole_double, Force type: non_zero
+# Missing 16 combinations:
+python -m data_generation.script.align_data --experiment-file results/d243c454329ea90486a670c3fe9587ee --algorithm xlsindy --regression-type explicit --noise-level 0.001 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/d243c454329ea90486a670c3fe9587ee --algorithm sindy --regression-type explicit --noise-level 0.001 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/d243c454329ea90486a670c3fe9587ee --algorithm xlsindy --regression-type explicit --noise-level 0.1 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/d243c454329ea90486a670c3fe9587ee --algorithm sindy --regression-type explicit --noise-level 0.1 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/d243c454329ea90486a670c3fe9587ee --algorithm xlsindy --regression-type mixed --noise-level 0.01 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/d243c454329ea90486a670c3fe9587ee --algorithm sindy --regression-type mixed --noise-level 0.01 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/d243c454329ea90486a670c3fe9587ee --algorithm xlsindy --regression-type mixed --noise-level 0.0 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/d243c454329ea90486a670c3fe9587ee --algorithm sindy --regression-type mixed --noise-level 0.0 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/d243c454329ea90486a670c3fe9587ee --algorithm xlsindy --regression-type mixed --noise-level 0.001 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/d243c454329ea90486a670c3fe9587ee --algorithm sindy --regression-type mixed --noise-level 0.001 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/d243c454329ea90486a670c3fe9587ee --algorithm xlsindy --regression-type explicit --noise-level 0.01 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/d243c454329ea90486a670c3fe9587ee --algorithm sindy --regression-type explicit --noise-level 0.01 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/d243c454329ea90486a670c3fe9587ee --algorithm xlsindy --regression-type mixed --noise-level 0.1 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/d243c454329ea90486a670c3fe9587ee --algorithm sindy --regression-type mixed --noise-level 0.1 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/d243c454329ea90486a670c3fe9587ee --algorithm xlsindy --regression-type explicit --noise-level 0.0 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/d243c454329ea90486a670c3fe9587ee --algorithm sindy --regression-type explicit --noise-level 0.0 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+
+# Experiment: 7babcd3de7cc317e5406c2757ec614c1
+# Folder: double_pendulum_pm, Force type: non_zero
+# Missing 8 combinations:
+python -m data_generation.script.align_data --experiment-file results/7babcd3de7cc317e5406c2757ec614c1 --algorithm sindy --regression-type explicit --noise-level 0.001 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/7babcd3de7cc317e5406c2757ec614c1 --algorithm sindy --regression-type explicit --noise-level 0.1 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/7babcd3de7cc317e5406c2757ec614c1 --algorithm sindy --regression-type mixed --noise-level 0.01 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/7babcd3de7cc317e5406c2757ec614c1 --algorithm sindy --regression-type mixed --noise-level 0.0 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/7babcd3de7cc317e5406c2757ec614c1 --algorithm sindy --regression-type mixed --noise-level 0.001 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/7babcd3de7cc317e5406c2757ec614c1 --algorithm sindy --regression-type explicit --noise-level 0.01 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/7babcd3de7cc317e5406c2757ec614c1 --algorithm sindy --regression-type mixed --noise-level 0.1 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
+python -m data_generation.script.align_data --experiment-file results/7babcd3de7cc317e5406c2757ec614c1 --algorithm sindy --regression-type explicit --noise-level 0.0 --optimization-function lasso_regression --data-ratio 2 --random-seed 1
