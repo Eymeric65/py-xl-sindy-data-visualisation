@@ -335,7 +335,6 @@ if __name__ == "__main__":
             )
         )
 
-        trajectory_rng = np.random.default_rng(args.random_seed)
 
         (simulation_time_g, 
          simulation_qpos_g, 

@@ -9,7 +9,7 @@ def json_architecture(data, max_list_items=1):
         return None  # strip values
 
 # Example usage:
-with open("results/2b264f744ccebb6145eae69c0b46fef5.json") as f:
+with open("results/4bc5dfbca199f7fa3f88a2179c053f29.json") as f:
     raw = json.load(f)
 
 architecture = json_architecture(raw)

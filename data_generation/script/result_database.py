@@ -45,6 +45,45 @@ def extract_experiment_folder_name(experiment_folder: str) -> str:
     return Path(experiment_folder).name
 
 
+def compute_end_simulation_time(solution_data: Dict[str, Any]) -> Optional[float]:
+    """
+    Compute the end simulation time by finding the last non-zero time in the time array.
+    
+    Args:
+        solution_data: Dictionary containing the solution data with 'time' array at top level
+        
+    Returns:
+        The last non-zero time value, or None if no time data found
+    """
+    try:
+        # The time array is at the top level of the solution data
+        if 'time' not in solution_data:
+            return None
+            
+        time_array = solution_data['time']
+        if not isinstance(time_array, list) or len(time_array) == 0:
+            return None
+            
+        # Convert to numpy array and filter out None values
+        time_values = [t for t in time_array if t is not None]
+        if len(time_values) == 0:
+            return None
+            
+        time_array = np.array(time_values)
+        
+        # Find the last non-zero time (or use the last time if all are valid)
+        non_zero_times = time_array[time_array > 0]
+        if len(non_zero_times) > 0:
+            return float(np.max(non_zero_times))
+        else:
+            # If no positive times, use the last time value
+            return float(time_array[-1]) if len(time_array) > 0 else None
+        
+    except Exception as e:
+        logging.warning(f"Error computing end simulation time: {e}")
+        return None
+
+
 def compute_validation_error(solution_series: Dict[str, Any], 
                            validation_reference: Dict[str, Any]) -> Optional[float]:
     """
@@ -142,6 +181,11 @@ def extract_solution_data(experiment_id: str,
         )
     
     row_data['validation_error'] = validation_error
+    
+    # Compute end simulation time from the solution data
+    end_simulation_time = compute_end_simulation_time(solution_data)
+    
+    row_data['end_simulation_time'] = end_simulation_time
     
     return row_data
 
