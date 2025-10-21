@@ -1,0 +1,155 @@
+% Bibliography for XLSINDy paper
+% Add your references here
+
+@article{bruntonDiscoveringGoverningEquations2016,
+  title = {Discovering Governing Equations from Data: {{Sparse}} Identification of Nonlinear Dynamical Systems},
+  shorttitle = {Discovering Governing Equations from Data},
+  author = {Brunton, Steven L. and Proctor, Joshua L. and Kutz, J. Nathan},
+  year = {2016},
+  month = apr,
+  journal = {Proceedings of the National Academy of Sciences},
+  volume = {113},
+  number = {15},
+  eprint = {1509.03580},
+  primaryclass = {math},
+  pages = {3932--3937},
+  issn = {0027-8424, 1091-6490},
+  doi = {10.1073/pnas.1517384113},
+  urldate = {2024-11-08},
+  abstract = {The ability to discover physical laws and governing equations from data is one of humankind's greatest intellectual achievements. A quantitative understanding of dynamic constraints and balances in nature has facilitated rapid development of knowledge and enabled advanced technological achievements, including aircraft, combustion engines, satellites, and electrical power. In this work, we combine sparsity-promoting techniques and machine learning with nonlinear dynamical systems to discover governing physical equations from measurement data. The only assumption about the structure of the model is that there are only a few important terms that govern the dynamics, so that the equations are sparse in the space of possible functions; this assumption holds for many physical systems. In particular, we use sparse regression to determine the fewest terms in the dynamic governing equations required to accurately represent the data. The resulting models are parsimonious, balancing model complexity with descriptive ability while avoiding overfitting. We demonstrate the algorithm on a wide range of problems, from simple canonical systems, including linear and nonlinear oscillators and the chaotic Lorenz system, to the fluid vortex shedding behind an obstacle. The fluid example illustrates the ability of this method to discover the underlying dynamics of a system that took experts in the community nearly 30 years to resolve. We also show that this method generalizes to parameterized, time-varying, or externally forced systems.},
+  archiveprefix = {arXiv},
+  langid = {english},
+  keywords = {Mathematics - Dynamical Systems},
+  file = {C:\Users\eymer\Zotero\storage\FK27MANU\Brunton et al. - 2016 - Discovering governing equations from data Sparse identification of nonlinear dynamical systems.pdf}
+}
+
+@article{chuDiscoveringInterpretableDynamics2020,
+  title = {Discovering {{Interpretable Dynamics}} by {{Sparsity Promotion}} on {{Energy}} and the {{Lagrangian}}},
+  author = {Chu, Hoang K. and Hayashibe, Mitsuhiro},
+  year = {2020},
+  month = apr,
+  journal = {IEEE Robotics and Automation Letters},
+  volume = {5},
+  number = {2},
+  pages = {2154--2160},
+  issn = {2377-3766},
+  doi = {10.1109/LRA.2020.2970626},
+  urldate = {2025-02-03},
+  abstract = {Data-driven modeling frameworks that adopt sparse regression techniques, such as sparse identification of nonlinear dynamics (SINDy) and its modifications, are developed to resolve difficulties in extracting underlying dynamics from experimental data. In contrast to neural-network-based methods, these methods are designed to obtain white-box analytical models. In this work, we incorporate the concept of SINDy and knowledge in the field of classical mechanics to identify interpretable and sparse expressions of total energy and the Lagrangian that shelters the hidden dynamics. Moreover, our method (hereafter referred as Lagrangian-SINDy) is developed to use knowledge of simple systems that form the system being analyzed to ensure the likelihood of correct results and to improve the learning pace. Lagrangian-SINDy is highly accurate in discovering interpretable dynamics via energy-related physical quantities. Its performance is validated with three popular multi-DOF nonlinear dynamical systems, namely the spherical pendulum, double pendulum and cart-pendulum system. Comparisons with other SINDy-based methods are made and Lagrangian-SINDy is found to provide the most compact analytical models.},
+  keywords = {Analytical models,Biological neural networks,calibration and identification dynamics,Data mining,Data models,Dynamics,Force,model learning for control,Nonlinear dynamical systems,Task analysis},
+  file = {C\:\\Users\\eymer\\Zotero\\storage\\82YV3TFA\\Chu と Hayashibe - 2020 - Discovering Interpretable Dynamics by Sparsity Promotion on Energy and the Lagrangian.pdf;C\:\\Users\\eymer\\Zotero\\storage\\6RW6R4NX\\8977323.html}
+}
+
+@article{faselEnsembleSINDyRobustSparse2022,
+  title = {Ensemble-{{SINDy}}: {{Robust}} Sparse Model Discovery in the Low-Data, High-Noise Limit, with Active Learning and Control},
+  shorttitle = {Ensemble-{{SINDy}}},
+  author = {Fasel, Urban and Kutz, J. Nathan and Brunton, Bingni W. and Brunton, Steven L.},
+  year = {2022},
+  month = apr,
+  journal = {Proceedings of the Royal Society A: Mathematical, Physical and Engineering Sciences},
+  volume = {478},
+  number = {2260},
+  eprint = {2111.10992},
+  primaryclass = {math},
+  pages = {20210904},
+  issn = {1364-5021, 1471-2946},
+  doi = {10.1098/rspa.2021.0904},
+  urldate = {2025-02-04},
+  abstract = {Sparse model identification enables the discovery of nonlinear dynamical systems purely from data; however, this approach is sensitive to noise, especially in the low-data limit. In this work, we leverage the statistical approach of bootstrap aggregating (bagging) to robustify the sparse identification of nonlinear dynamics (SINDy) algorithm. First, an ensemble of SINDy models is identified from subsets of limited and noisy data. The aggregate model statistics are then used to produce inclusion probabilities of the candidate functions, which enables uncertainty quantification and probabilistic forecasts. We apply this ensemble-SINDy (E-SINDy) algorithm to several synthetic and real-world data sets and demonstrate substantial improvements to the accuracy and robustness of model discovery from extremely noisy and limited data. For example, E-SINDy uncovers partial differential equations models from data with more than twice as much measurement noise as has been previously reported. Similarly, E-SINDy learns the Lotka Volterra dynamics from remarkably limited data of yearly lynx and hare pelts collected from 1900-1920. E-SINDy is computationally efficient, with similar scaling as standard SINDy. Finally, we show that ensemble statistics from E-SINDy can be exploited for active learning and improved model predictive control.},
+  archiveprefix = {arXiv},
+  keywords = {Computer Science - Numerical Analysis,Mathematics - Dynamical Systems,Mathematics - Numerical Analysis,Mathematics - Optimization and Control},
+  file = {C\:\\Users\\eymer\\Zotero\\storage\\CM2YYW4E\\Fasel et al. - 2022 - Ensemble-SINDy Robust sparse model discovery in the low-data, high-noise limit, with active learnin.pdf;C\:\\Users\\eymer\\Zotero\\storage\\M4IP9E5H\\2111.html}
+}
+
+@article{kahemanSINDyPIRobustAlgorithm2020,
+  title = {{{SINDy-PI}}: {{A Robust Algorithm}} for {{Parallel Implicit Sparse Identification}} of {{Nonlinear Dynamics}}},
+  shorttitle = {{{SINDy-PI}}},
+  author = {Kaheman, Kadierdan and Kutz, J. Nathan and Brunton, Steven L.},
+  year = {2020},
+  month = oct,
+  journal = {Proceedings of the Royal Society A: Mathematical, Physical and Engineering Sciences},
+  volume = {476},
+  number = {2242},
+  eprint = {2004.02322},
+  primaryclass = {cs},
+  pages = {20200279},
+  issn = {1364-5021, 1471-2946},
+  doi = {10.1098/rspa.2020.0279},
+  urldate = {2024-11-08},
+  abstract = {Accurately modeling the nonlinear dynamics of a system from measurement data is a challenging yet vital topic. The sparse identification of nonlinear dynamics (SINDy) algorithm is one approach to discover dynamical systems models from data. Although extensions have been developed to identify implicit dynamics, or dynamics described by rational functions, these extensions are extremely sensitive to noise. In this work, we develop SINDy-PI (parallel, implicit), a robust variant of the SINDy algorithm to identify implicit dynamics and rational nonlinearities. The SINDy-PI framework includes multiple optimization algorithms and a principled approach to model selection. We demonstrate the ability of this algorithm to learn implicit ordinary and partial differential equations and conservation laws from limited and noisy data. In particular, we show that the proposed approach is several orders of magnitude more noise robust than previous approaches, and may be used to identify a class of ODE and PDE dynamics that were previously unattainable with SINDy, including for the double pendulum dynamics and simplified model for the Belousov--Zhabotinsky (BZ) reaction.},
+  archiveprefix = {arXiv},
+  langid = {english},
+  keywords = {Computer Science - Machine Learning,Physics - Computational Physics,Statistics - Machine Learning},
+  file = {C:\Users\eymer\Zotero\storage\J2EZI6NI\Kaheman et al. - 2020 - SINDy-PI A Robust Algorithm for Parallel Implicit Sparse Identification of Nonlinear Dynamics.pdf}
+}
+
+@article{purnomoSparseIdentificationLagrangian2023,
+  title = {Sparse Identification of {{Lagrangian}} for Nonlinear Dynamical Systems via Proximal Gradient Method},
+  author = {Purnomo, Adam and Hayashibe, Mitsuhiro},
+  year = {2023},
+  month = may,
+  journal = {Scientific Reports},
+  volume = {13},
+  number = {1},
+  pages = {7919},
+  publisher = {Nature Publishing Group},
+  issn = {2045-2322},
+  doi = {10.1038/s41598-023-34931-0},
+  urldate = {2024-11-08},
+  abstract = {The autonomous distillation of physical laws only from data is of great interest in many scientific fields. Data-driven modeling frameworks that adopt sparse regression techniques, such as sparse identification of nonlinear dynamics (SINDy) and its modifications, are developed to resolve difficulties in extracting underlying dynamics from experimental data. However, SINDy faces certain difficulties when the dynamics contain rational functions. The Lagrangian is substantially more concise than the actual equations of motion, especially for complex systems, and it does not usually contain rational functions for mechanical systems. Few proposed methods proposed to date, such as Lagrangian-SINDy we have proposed recently, can extract the true form of the Lagrangian of dynamical systems from data; however, these methods are easily affected by noise as a fact. In this study, we developed an extended version of Lagrangian-SINDy (xL-SINDy) to obtain the Lagrangian of dynamical systems from noisy measurement data. We incorporated the concept of SINDy and used the proximal gradient method to obtain sparse Lagrangian expressions. Further, we demonstrated the effectiveness of xL-SINDy against different noise levels using four mechanical systems. In addition, we compared its performance with SINDy-PI (parallel, implicit) which is a latest robust variant of SINDy that can handle implicit dynamics and rational nonlinearities. The experimental results reveal that xL-SINDy is much more robust than the existing methods for extracting the governing equations of nonlinear mechanical systems from data with noise. We believe this contribution is significant toward noise-tolerant computational method for explicit dynamics law extraction from data.},
+  copyright = {2023 The Author(s)},
+  langid = {english},
+  keywords = {Applied mathematics,Computational science,Mechanical engineering},
+  file = {C:\Users\eymer\Zotero\storage\V9E942VR\Purnomo and Hayashibe - 2023 - Sparse identification of Lagrangian for nonlinear dynamical systems via proximal gradient method.pdf}
+}
+
+@misc{zolmanSINDyRLInterpretableEfficient2024,
+  title = {{{SINDy-RL}}: {{Interpretable}} and {{Efficient Model-Based Reinforcement Learning}}},
+  shorttitle = {{{SINDy-RL}}},
+  author = {Zolman, Nicholas and Fasel, Urban and Kutz, J. Nathan and Brunton, Steven L.},
+  year = {2024},
+  month = mar,
+  number = {arXiv:2403.09110},
+  eprint = {2403.09110},
+  primaryclass = {cs},
+  publisher = {arXiv},
+  urldate = {2024-11-08},
+  abstract = {Deep reinforcement learning (DRL) has shown significant promise for uncovering sophisticated control policies that interact in environments with complicated dynamics, such as stabilizing the magnetohydrodynamics of a tokamak fusion reactor or minimizing the drag force exerted on an object in a fluid flow. However, these algorithms require an abundance of training examples and may become prohibitively expensive for many applications. In addition, the reliance on deep neural networks often results in an uninterpretable, black-box policy that may be too computationally expensive to use with certain embedded systems. Recent advances in sparse dictionary learning, such as the sparse identification of nonlinear dynamics (SINDy), have shown promise for creating efficient and interpretable data-driven models in the low-data regime. In this work we introduce SINDy-RL, a unifying framework for combining SINDy and DRL to create efficient, interpretable, and trustworthy representations of the dynamics model, reward function, and control policy. We demonstrate the effectiveness of our approaches on benchmark control environments and challenging fluids problems. SINDy-RL achieves comparable performance to state-of-the-art DRL algorithms using significantly fewer interactions in the environment and results in an interpretable control policy orders of magnitude smaller than a deep neural network policy.},
+  archiveprefix = {arXiv},
+  langid = {english},
+  keywords = {Computer Science - Machine Learning,Computer Science - Systems and Control,Electrical Engineering and Systems Science - Systems and Control,Mathematics - Dynamical Systems,Mathematics - Optimization and Control},
+  file = {C:\Users\eymer\Zotero\storage\47BEWLUU\Zolman et al. - 2024 - SINDy-RL Interpretable and Efficient Model-Based Reinforcement Learning.pdf}
+}
+
+
+
+
+
+
+@misc{methods,
+  title={Supplementary Materials},
+  note={See Materials and Methods section}
+}
+
+@misc{xlsindy_code,
+  title={XLSINDy: Simultaneous Lagrangian and Newtonian Identification Software},
+  author={Your Name},
+  year={2025},
+  howpublished={\url{https://github.com/Eymeric65/py-xl-sindy-data-visualisation}},
+  note={Software implementation and analysis scripts}
+}
+
+@misc{xlsindy_data,
+  title={XLSINDy Benchmark Datasets},
+  author={Your Name},
+  year={2025},
+  howpublished={DOI: [to be filled]},
+  note={Complete simulation datasets and results}
+}
+
+% Add more references as needed:
+% - Original SINDy papers
+% - System identification literature  
+% - Lagrangian mechanics references
+% - Sparse regression methods
+% - Benchmark mechanical systems papers

@@ -135,9 +135,9 @@
 
 % The first paragraph does NOT have a heading, as per Science style.
 \noindent
-The ability to distill natural laws from observational data into concise mathematical equations is a cornerstone of scientific progress. Recently, data-driven methods, particularly the Sparse Identification of Nonlinear Dynamics (SINDy) framework, have shown great promise in automating this discovery process \cite{Brunton2016_SINDy}. SINDy operates on the assumption of parsimony: that most physical systems are governed by equations with only a few active terms. However, the original SINDy formulation is best suited for explicit, ordinary differential equations in the form $\dot{\mathbf{x}} = f(\mathbf{x})$.
+The ability to distill natural laws from observational data into concise mathematical equations is a cornerstone of scientific progress. Recently, data-driven methods, particularly the Sparse Identification of Nonlinear Dynamics (SINDy) framework, have shown great promise in automating this discovery process \cite{bruntonDiscoveringGoverningEquations2016}. SINDy operates on the assumption of parsimony: that most physical systems are governed by equations with only a few active terms. However, the original SINDy formulation is best suited for explicit, ordinary differential equations in the form $\dot{\mathbf{x}} = f(\mathbf{x})$.
 
-This has led to the development of specialized variants to handle different physical paradigms. For instance, Lagrangian SINDy focuses on identifying the scalar Lagrangian of a system, a more concise representation for many mechanical systems \cite{Chu2020_LagrangianSINDy, Purnomo2023_xLSINDy}. Other variants like SINDy-PI were developed to handle implicit dynamics ($\mathbf{f}(\mathbf{x}, \dot{\mathbf{x}}) = 0$), which are common in constrained mechanical systems or models with rational dynamics, though they can be sensitive to noise \cite{Kaheman2020_SINDyPI}. These methods, while powerful, exist as distinct algorithms, making it difficult to model hybrid systems that might involve, for example, a core Lagrangian structure with additional non-conservative forces best described in a classical framework. In addition, it is likely to find on system an implicit and explict subspace, specificaly concerning robot where not all coordinate are activated. Furthermore, scaling these discovery methods to handle large datasets and enabling their use in modern applications like reinforcement learning requires a focus on computational efficiency.
+This has led to the development of specialized variants to handle different physical paradigms. For instance, Lagrangian SINDy focuses on identifying the scalar Lagrangian of a system, a more concise representation for many mechanical systems \cite{chuchuDiscoveringInterpretableDynamics2020,purnomoSparseIdentificationLagrangian2023}. Other variants like SINDy-PI were developed to handle implicit dynamics ($\mathbf{f}(\mathbf{x}, \dot{\mathbf{x}}) = 0$), which are common in constrained mechanical systems or models with rational dynamics, though they can be sensitive to noise \cite{kahemanSINDyPIRobustAlgorithm2020}. These methods, while powerful, exist as distinct algorithms, making it difficult to model hybrid systems that might involve, for example, a core Lagrangian structure with additional non-conservative forces best described in a classical framework. In addition, it is likely to find on system an implicit and explict subspace, specificaly concerning robot where not all coordinate are activated. Furthermore, scaling these discovery methods to handle large datasets and enabling their use in modern applications like reinforcement learning requires a focus on computational efficiency.
 
 Here, we introduce \frameworkname, a comprehensive and extensible Python framework that unifies these disparate approaches and addresses their limitations. Our main contributions are:
 \begin{itemize}
@@ -154,9 +154,25 @@ This work is a combinaison of previously developped algorithm and new addition f
 
 \subsection*{SINDy catalog}
 
-\TODO{General SINDY catalog definition}
+Before talking about the unified catalog framework, it is important to understand how the classical SINDy catalog is working. When talking about SINDy we are refering to the original SINDy algorithm developped in \cite{bruntonDiscoveringGoverningEquations2016}. The main idea of SINDy is to discover the governing equation of a system from data. The system is assumed to be govern by an ordinary differential equation of the form :
+\begin{equation}
+	\dot{\mathbf{x}}(t) = f(\mathbf{x}(t))
+\end{equation}
+To recover this ordinary differential equation from data, SINDy is using a library of candidate function to build an experimental matrix $\mathbf{\Theta}(\mathbf{X})$ where each column represent the evaluation of a candidate function on the data. The goal is then to find the sparse vector of coefficient $\mathbf{\Xi}$ that verify the following equation :
+\begin{equation}
+	\dot{\mathbf{X}} = \mathbf{\Theta}(\mathbf{X})\mathbf{\Xi}
+\end{equation}
+
+From this catalog definition we can also infer the implicit catalog definition where the goal is to find the sparse vector of coefficient $\mathbf{\Xi}$ that verify the following equation :
+\begin{equation}
+	\mathbf{0} = \mathbf{\Theta}(\mathbf{X}, \dot{\mathbf{X}})\mathbf{\Xi}
+\end{equation}
 
 \subsection*{The Unified Catalog Framework}
+
+From the base SINDy catalog definition, we could create an unified catalog system able to mix different physical formalism.
+
+By applying a transformation step between the candidate function library and the experimental matrix construction, we can define different catalog category that will handle differently the construction of the experimental matrix. Using this approach, we can take advantage of the strenght of each physical formalism.
 
 The core of \frameworkname\ is its modular catalog system. We implemented three main categories:
 \begin{itemize}
@@ -168,22 +184,46 @@ The `CatalogRepartition` class combines instances of these categories into a sin
 
 \subsection*{Explicit regression}
 
-\TODO{Talk about LassoCV and explicit regression}
+After building the experimental matrix using the unified catalog framework, we can now perform the regression to find the sparse coefficient vector $\mathbf{\Xi}$ that satisfy the following equation :
+\begin{equation}
+	\dot{\mathbf{X}} = \mathbf{\Theta}(\mathbf{X})\mathbf{\Xi}
+\end{equation}
+
+In order to perform this operation multiple sparse regression optimizer are available :
+\begin{itemize}
+	\item Lasso : Lasso regression and LassoCV an enhanced version which automatically find the best regularization parameter.
+	\item Hard tresholding : The method mainly studied by \cite{Brunton2016_SINDy} where at each iteration the small coefficient are tresholded to zero and a least square regression is performed on the remaining coefficient.
+	\item Proximal gradient method : Method that enable parallelization of the regression step \cite{purnomoSparseIdentificationLagrangian2023}.
+\end{itemize}
+
+Lasso is theoretically the most robust method but it is also the slowest one. However in our case, since we used compact catalog using our unified catalog framework, we could use Lasso without running into performance issue.
+
 
 \subsection*{Implicit regression}
 
-\TODO{Talk about Implicit regression and CVxPY}
+In the same manner after building the experimental matrix using the unified catalog framework, we can also perform the regression to find the sparse coefficient vector $\mathbf{\Xi}$ that satisfy the following equation :
+
+\begin{equation}
+	\mathbf{0} = \mathbf{\Theta}(\mathbf{X}, \dot{\mathbf{X}})\mathbf{\Xi}
+\end{equation}
+
+For this implicit regression we have implemented the method used in SINdy-PI \cite{kahemanSINDyPIRobustAlgorithm2020}, using the CVxPY library to solve the constrained optimization problem. We have however changed the solution identification phase to make it more efficient on our system. The original paper retrieve the sparse solution by looking at the column of the solution matrix with the lowest l0 norm. 
+We have decided to implement a post-processing step that will look for cluster of homothetic column in the solution matrix. The main idea is that the true solution will be represented by multiple homothetic column in the solution matrix, because of the noise and the constrained optimization problem. By looking at the cluster of homothetic column we can average them to retrieve a robust solution.
+This decision has been motivated by the fact that in mechanical system, multiple independent sub system can exist, leading to multiple independent implicit equation. By looking only at the sparset columns we usually missed some of these independent equation.
+
+\TODO{ Graph to explain solution clustering}
 
 \subsection*{mixed regression}
 
-\TODO{Talk about the agregation of explicit and implicit regression method}
+In addition to the explicit and implicit regression method, we have also implemented a mixed regression method that can handle both explicit and implicit dynamic in the same time. This provides to the end user a unified framework for regression. The main idea is to split the experimental matrix into two part : one for the explicit dynamic and one for the implicit dynamic.
 
+\TODO{Create a graph to explain the force propagation}
 
 \section*{Results}
 
 \subsection*{Catalog generation}
 
-In order to compare regression that uses different base catalog it is important to generate equivalent catalog following a criteria. For the xlsindy catalog we have generated all the combination of the following polynome : 
+In order to compare regression that uses different base catalog it is important to generate equivalent catalog following a rule. For the xlsindy catalog we have generated all the combination of the following polynome : 
 \TODO{list polynome}
 
 Concerning the sindy catalog, we have decided to help it as much as possible and we have decided to choose the minimum polynome generate that lead to a catalog that include all the polynome formed by euler lagrange equation in the xlsindy case (we have the catalog of the mininum size that include the catalog resulted by the euler lagrange transform of the xlsindy catalog)\TODO{not really clear right now.......}
@@ -214,7 +254,19 @@ The list of framework is the following:
 	\item classical catalog X implicit solver 
 \end{enumerate}
 
-After obtaining the different models, we have generated a validation trajectory with Mujoco and compared the trajectory of the discorvered model with the one of Mujoco. Using this metric we have ranked the different configuration of \frameworkname. 
+After obtaining the different models, we have generated a validation trajectory with Mujoco and compared the trajectory of the discovered model with the one of Mujoco. Using this metric we have ranked the different configuration of \frameworkname.
+
+We will now study in detail some of the results obtained from the different configuration before giving an overall performance comparison.
+
+\subsubsection*{Explicit identification of a cart-pole}
+
+
+\subsubsection*{Other results}
+
+All the other experiments results are available on the visualisation website \url{https://eymeric65.github.io/py-xl-sindy-data-visualisation/}. On this website you can find the detailed results of each training and validation trajectory. There is also the coefficient of each discovered model.
+
+\subsubsection*{Overall Performance Comparison}
+
 
 For each of the trajectory (with a fixed noise level) the different framework configuration are compared with each other, and ranked from best to worst. A special award is given if a configuration is the only one to find a valid model (able to create a validation trajectory that doesn't diverge) called "Wins without competition" (Wins WC). The results are summarized in Table \ref{tab:results_summary} and ranked by number of 1st place wins.
 
@@ -223,22 +275,24 @@ For each of the trajectory (with a fixed noise level) the different framework co
 \caption{Overall Performance Ranking (by number of 1st place wins)}
 \label{tab:results_summary}
 \small
-\begin{tabular}{clccccccccc}
+\begin{tabular}{lrrrrrrrr}
 \hline
-\textbf{Rank} & \textbf{Combo} & \textbf{Win Rate} & \textbf{Wins WC} & \textbf{Total} & \textbf{1st} & \textbf{2nd} & \textbf{3rd} & \textbf{$>$ 3rd} & \textbf{Timeout} & \textbf{Other Fail} \\
+combo type & invalid & timeout & uncompleted & 1st & 2nd & 2nd$>$ & Wins WC & success rate \\
 \hline
-1 & mixed $\times$ mixed (our)& 0.595 & 26 & 116 & 69.0 & 22.0 & --- & 0 & 0 & 25 \\
-2 & mixed $\times$ explicit& 0.674 & 23 & 92 & 62.0 & 16.0 & --- & 0 & 0 & 14 \\
-3 & sindy $\times$ explicit & 0.239 & 1 & 92 & 22.0 & 8.0 & 1.0 & 0 & 16 & 45 \\
-4 & sindy $\times$ mixed & 0.170 & 1 & 112 & 19.0 & 11.0 & 1.0 & 0 & 43 & 38 \\
-5 & mixed $\times$ implicit & 0.625 & 4 & 16 & 10.0 & 3.0 & 2.0 & 0 & 0 & 1 \\
-6 & xlsindy $\times$ explicit & 0.054 & 3 & 92 & 5.0 & 35.0 & 12.0 & 2 & 0 & 38 \\
-7 & xlsindy $\times$ mixed & 0.043 & 3 & 115 & 5.0 & 37.0 & 14.0 & 0 & 0 & 59 \\
-8 & xlsindy $\times$ implicit & 0.600 & 1 & 5 & 3.0 & 1.0 & 1.0 & 0 & 0 & 0 \\
-9 & sindy $\times$ implicit & 0.000 & 0 & 24 & --- & --- & --- & 0 & 23 & 1 \\
+mixed x mixed (our) & 25 & 0 & 20 & 59 & 12 & 0 & 45 & 0.612069 \\
+mixed x explicit (our) & 14 & 0 & 17 & 53 & 8 & 0 & 42 & 0.663043 \\
+sindy x mixed & 81 & 43 & 11 & 12 & 8 & 0 & 3 & 0.178571 \\
+sindy x explicit & 61 & 16 & 11 & 12 & 8 & 0 & 3 & 0.217391 \\
+mixed x implicit (our)& 1 & 0 & 1 & 10 & 2 & 2 & 6 & 0.875000 \\
+xlsindy x mixed & 59 & 0 & 43 & 3 & 6 & 4 & 3 & 0.113043 \\
+xlsindy x explicit & 38 & 0 & 43 & 3 & 3 & 5 & 3 & 0.119565 \\
+xlsindy x implicit & 0 & 0 & 1 & 2 & 1 & 1 & 0 & 0.800000 \\
+sindy x implicit & 24 & 23 & 0 & 0 & 0 & 0 & 0 & 0.000000 \\
 \hline
 \end{tabular}
 \end{table}
+
+
 
 Our developped method (mixed catalog X mixed implicit/explicit solver) is the best performing one, winning 69 out of 116 trajectory (59.5\% win rate) and being the only one to find a valid model on 26 trajectory. The second best method (mixed catalog X explicit solver) is also using the mixed catalog but only the explicit solver. The third best method (classical catalog X explicit solver) is using only the classical catalog, as it can been seen the greater size of catalog usually leads to more timeouts. 
 The main reason of why xlsindy is not performing well is because it is not able to handle well the friction term and majority of the experiment have friction.
@@ -299,7 +353,7 @@ Limitations of our current framework include the need for the user to design the
 \clearpage % Clear all remaining figures and tables then start a new page
 
 % Bibliography - replace with your .bib file
-\bibliography{UNI_Sindy.bib} % for a file named science_template.bib
+\bibliography{bibliography.bib} % for a file named science_template.bib
 \bibliographystyle{sciencemag}
 
 
