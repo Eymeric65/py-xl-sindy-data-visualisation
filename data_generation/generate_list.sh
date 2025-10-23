@@ -709,3 +709,4 @@ python -m data_generation.script.generate_data \
     --forces-period 3 \
     --forces-period-shift 0.5 \
     --sample-number 3000  
+

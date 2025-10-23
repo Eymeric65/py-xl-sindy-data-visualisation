@@ -242,17 +242,11 @@ We have focused on three main systems:
 On these three systems, we have generated multiple trajectory with different friction coefficient, and different input forces profile. We have divided the input forces into implicit (no forces on the system, only initial condition), explicit (forces on every actuated joint) and mixed (forces on a subset of the joint). 
 On this dataset we have added multiple level of gaussian noise to the position, velocity and acceleration. Finally we have run the different configuration of \frameworkname\ to identify the system. The same level of resources has been allocated to each configuration and a timeout of 1h has been set for each run.
 The list of framework is the following: 
-\begin{enumerate}
-	\item mixed catalog (Lagrange + classical) X mixed implicit/explicit solver
-	\item mixed catalog (Lagrange + classical) X explicit solver
-	\item mixed catalog (Lagrange + classical) X implicit solver
-	\item Lagrange catalog X mixed implicit/explicit solver
-	\item Lagrange catalog X explicit solver
-	\item Lagrange catalog X implicit solver
-	\item classical catalog X mixed implicit/explicit solver
-	\item classical catalog X explicit solver
-	\item classical catalog X implicit solver 
-\end{enumerate}
+\begin{itemize}
+	\item \textbf{Mixed catalog} (Lagrange + classical) with: mixed implicit/explicit solver, explicit solver, or implicit solver
+	\item \textbf{Lagrange catalog} with: mixed implicit/explicit solver, explicit solver, or implicit solver
+	\item \textbf{Classical catalog} with: mixed implicit/explicit solver, explicit solver, or implicit solver
+\end{itemize}
 
 After obtaining the different models, we have generated a validation trajectory with Mujoco and compared the trajectory of the discovered model with the one of Mujoco. Using this metric we have ranked the different configuration of \frameworkname.
 
