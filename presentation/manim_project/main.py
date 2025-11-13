@@ -8,15 +8,51 @@ import math
 from manim import *
 from manim_slides import Slide
 
+import functools
+
 DEFAULT_COLOR = ManimColor.from_rgb([0.01,0.01,0.01])  # Almost black
 
-def default_color(func):
+THETA_COLOR = RED
+THETA_DOT_COLOR = GREEN
+THETA_DDOT_COLOR = BLUE
+
+def dep_default_color(func):
     """Sets default color to Default color"""
 
     def wrapper(*args, color=DEFAULT_COLOR, **kwargs):
         return func(*args, color=color, **kwargs)
 
     return wrapper
+
+def default_color(cls):
+    """Sets default color to Default color for class initializers"""
+
+    init_func = cls.__init__
+
+    @functools.wraps(init_func)
+    def new_init(self, *args, color=DEFAULT_COLOR, **kwargs):
+        init_func(self, *args, color=color, **kwargs)
+
+    return new_init
+
+def color_mathtext(cls:MathTex):
+    """Sets default color to Default color for MathTex and Tex"""
+
+    init_func = cls.__init__
+
+    @functools.wraps(init_func)
+    def new_init(self, *args, substrings_to_isolate=[], **kwargs):
+        # Need to report bug to Manim about the substrings_to_isolate creating issue with Tex class (DVI convert)
+        init_func(self, *args, substrings_to_isolate=substrings_to_isolate+[r"\ddot{\theta}",r"\dot{\theta}",r"\theta"], **kwargs)
+
+        self.set_color_by_tex(r"\theta",THETA_COLOR)
+        self.set_color_by_tex(r"\dot{\theta}",THETA_DOT_COLOR)
+        self.set_color_by_tex(r"\ddot{\theta}",THETA_DDOT_COLOR)
+
+
+
+
+    return new_init
 
 def Paragraph(*strs, alignment=LEFT, direction=DOWN, **kwargs):
     texts = VGroup(*[Text(s, **kwargs) for s in strs]).arrange(direction)
@@ -175,17 +211,20 @@ class Pendulum:
         return f"Time: {self.time:.2f}s, Angle: {angle_deg:.2f}°, Velocity: {velocity_rads:.2f} rad/s"
 
 
-Tex = default_color(Tex)
-Text = default_color(Text)
-MathTex = default_color(MathTex)
-Line = default_color(Line)
-Dot = default_color(Dot)
-Brace = default_color(Brace)
-Arrow = default_color(Arrow)
-Angle = default_color(Angle)
-Integer = default_color(Integer)
-Paragraph = default_color(Paragraph)
-DecimalNumber = default_color(DecimalNumber)
+Tex.__init__ = default_color(Tex)
+Text.__init__ = default_color(Text)
+
+MathTex.__init__ = default_color(MathTex)
+MathTex.__init__ = color_mathtext(MathTex)
+
+Line.__init__ = default_color(Line)
+Dot.__init__ = default_color(Dot)
+Brace.__init__ = default_color(Brace)
+Arrow.__init__ = default_color(Arrow)
+Angle.__init__ = default_color(Angle)
+Integer.__init__ = default_color(Integer)
+Paragraph.__init__ = default_color(Paragraph)
+DecimalNumber.__init__ = default_color(DecimalNumber)
 
 global_slide_counter = 0
 
@@ -382,11 +421,22 @@ class WIP(BaseSlide):
         self.next_slide(notes=" # What is SINDy")
         self.new_clean_slide("1.2 What is SINDy",contents=contents)
 
-        self.next_slide(notes=" Our pendulum is govern by a simple ODE")
+        self.next_slide(notes=" Our pendulum is govern by equation following a paradigm")
 
-        ode_equation = MathTex(r"\ddot{\theta} + \frac{g}{L} \sin(\theta) = 0",color=DEFAULT_COLOR).shift(RIGHT*2)
+        newton_equation = MathTex(r"F \left( \theta , \dot{\theta} \right)",r"=", r"m \ddot{\theta} ").shift(RIGHT*2)
 
-        self.play(PendulumGroup.animate.shift(LEFT*1.5),Write(ode_equation))
+        self.play(
+            PendulumGroup.animate.shift(LEFT*1.5),
+            Write(newton_equation)
+            )
+
+        self.next_slide(notes=" There is our pendulum equation")
+
+        ode_equation = MathTex(r"\ddot{\theta} + \frac{g}{L} \sin(\theta)",r"=",r"0").move_to(newton_equation)
+
+        self.play(
+            TransformMatchingTex(newton_equation,ode_equation),
+            )
 
         self.next_slide(notes=" Let's give a pinch of energy to the pendulum",loop=True)
 
@@ -444,7 +494,7 @@ class WIP(BaseSlide):
 
         axes_label= axes.get_axis_labels(
             x_label=Tex("Time (s)",color=DEFAULT_COLOR).scale(0.5),
-            y_label=Tex(r"$\theta$ (rad)",color=DEFAULT_COLOR).scale(0.5),
+            y_label=MathTex(r"\theta \mathrm{(rad)}",color=DEFAULT_COLOR).scale(0.5),
         )
 
         # The curve that will be traced when pendulum moves
@@ -460,7 +510,7 @@ class WIP(BaseSlide):
             
             last_line_end = theta_curve[-1].get_end()
             new_point = np.array([x_scale*PendulumObject.get_time(), PendulumObject.get_theta()/math.pi*y_scale, 0])
-            new_line = Line(last_line_end,axes.get_origin()+new_point,color=RED)
+            new_line = Line(last_line_end,axes.get_origin()+new_point,color=THETA_COLOR)
             theta_curve.add(new_line)
             return theta_curve
         
@@ -507,10 +557,10 @@ class WIP(BaseSlide):
 
         theta_dot_axes_label= theta_dot_axes.get_axis_labels(
             x_label=Tex("Time (s)",color=DEFAULT_COLOR).scale(0.5),
-            y_label=Tex(r"$\dot{\theta}$ (rad/s)",color=DEFAULT_COLOR).scale(0.5),
+            y_label=MathTex(r"\dot{\theta} \mathrm{(rad/s)}",color=DEFAULT_COLOR).scale(0.5),
         )
 
-        theta_dot_curve = theta_dot_axes.plot_line_graph(PendulumObject.get_times(),PendulumObject.get_thetas_dot(),line_color=GREEN,add_vertex_dots=False)
+        theta_dot_curve = theta_dot_axes.plot_line_graph(PendulumObject.get_times(),PendulumObject.get_thetas_dot(),line_color=THETA_DOT_COLOR,add_vertex_dots=False)
 
         theta_ddot_axes = Axes(
             x_range=[0, simulation_time, 1],
@@ -533,10 +583,10 @@ class WIP(BaseSlide):
 
         theta_ddot_axes_label= theta_ddot_axes.get_axis_labels(
             x_label=Tex("Time (s)",color=DEFAULT_COLOR).scale(0.5),
-            y_label=Tex(r"$\ddot{\theta}$ (rad/s$^2$)",color=DEFAULT_COLOR).scale(0.5),
+            y_label=MathTex(r"\ddot{\theta} \mathrm{(rad/s^2)}",color=DEFAULT_COLOR).scale(0.5),
         )
 
-        theta_ddot_curve = theta_ddot_axes.plot_line_graph(PendulumObject.get_times(),PendulumObject.get_thetas_ddot(),line_color=BLUE,add_vertex_dots=False)
+        theta_ddot_curve = theta_ddot_axes.plot_line_graph(PendulumObject.get_times(),PendulumObject.get_thetas_ddot(),line_color=THETA_DDOT_COLOR,add_vertex_dots=False)
 
         self.play(
             MoveToTarget(ThetaAxesGroup),
@@ -557,8 +607,50 @@ class WIP(BaseSlide):
                 theta_ddot_axes,
                 theta_ddot_curve,
                 theta_ddot_axes_label,
-            ).animate.scale(0.5).to_corner(UR)
+            ).animate.scale(0.5).to_corner(UR),
+            self.next_slide_number_animation()
         )
+
+        self.next_slide(notes="Let's get back to our paradigm newton")
+
+        newton_equation = MathTex(r"F \left( \theta , \dot{\theta} \right)",r"=", r"m \ddot{\theta} ")
+
+        self.play(
+            Write(newton_equation)
+        )
+
+        self.next_slide(notes="We want to model a system and not only match our data")
+
+        force_term = newton_equation[0:5]
+        other_term = newton_equation[5:]
+
+        force_equation_box = SurroundingRectangle(force_term,color=YELLOW,buff=0.2)
+
+        self.play(
+            Create(force_equation_box)
+        )
+
+        self.next_slide(notes="Let's reformulate what is a system")
+
+        system_box = Rectangle(color=YELLOW,height=2,width=3)
+        input_arrow = Arrow(start=system_box.get_left()+LEFT*3,end=system_box.get_left(),buff=0.0)
+        output_arrow = Arrow(start=system_box.get_right(),end=system_box.get_right()+RIGHT*3,buff=0.0)
+        system_label = Text("System").move_to(system_box.get_center())
+
+        input_label = MathTex(r"\theta , \dot{\theta}").next_to(input_arrow,UP)
+        output_label = MathTex(r"\ddot{\theta}").next_to(output_arrow,UP)
+
+        system = VGroup(system_box,input_arrow,output_arrow,system_label,input_label,output_label)
+
+        # Until now 1mn from the start of the construct
+
+        self.play(
+            FadeOut(other_term),
+            Transform(VGroup(force_term,force_equation_box),system)
+        )
+
+
+
 
 
 
