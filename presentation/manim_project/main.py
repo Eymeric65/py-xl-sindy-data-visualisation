@@ -16,6 +16,9 @@ THETA_COLOR = RED
 THETA_DOT_COLOR = GREEN
 THETA_DDOT_COLOR = BLUE
 
+# Skip all the parametric waiting time ( slow down incremental development)
+DEBUG = True
+
 def dep_default_color(func):
     """Sets default color to Default color"""
 
@@ -43,6 +46,7 @@ def color_mathtext(cls:MathTex):
     @functools.wraps(init_func)
     def new_init(self, *args, substrings_to_isolate=[], **kwargs):
         # Need to report bug to Manim about the substrings_to_isolate creating issue with Tex class (DVI convert)
+        # Highly unstable +[r"\ddot{\theta}",r"\dot{\theta}",r"\theta"]
         init_func(self, *args, substrings_to_isolate=substrings_to_isolate+[r"\ddot{\theta}",r"\dot{\theta}",r"\theta"], **kwargs)
 
         self.set_color_by_tex(r"\theta",THETA_COLOR)
@@ -404,7 +408,7 @@ class WIP(BaseSlide):
 
         pendulum_L = 1
 
-        PendulumObject = Pendulum(theta0=math.pi-0.03,L=pendulum_L,g=15,theta_dot0=.0)
+        PendulumObject = Pendulum(theta0=math.pi-0.05,L=pendulum_L,g=15,theta_dot0=.0)
 
 
         PendulumOrigin = Dot(radius=0.1,color=BLUE)
@@ -419,7 +423,44 @@ class WIP(BaseSlide):
         contents = [PendulumGroup]
 
         self.next_slide(notes=" # What is SINDy")
-        self.new_clean_slide("1.2 What is SINDy",contents=contents)
+        self.new_clean_slide(r"1.2 What is SINDy")
+
+        sindy_text = self.slide_title[-5:-1].copy()
+
+        sindy_text_deployed = VGroup(Text("Sparse"),Text("Identification of"),Text("Nonlinear"),Text("Dynamics")).arrange_in_grid(rows=4,cols=1,col_alignments="l").shift(LEFT*3)
+
+        self.next_slide(notes="What does SINDy stand for ?")
+
+        self.play(
+            LaggedStart(
+                *[ letter.animate.move_to(sindy_text_deployed[i][0].get_center()) for i,letter in enumerate(sindy_text) ],
+                lag_ratio=0.25
+            )
+            )
+        
+        for i,text in enumerate(sindy_text_deployed):
+            self.play(AddTextLetterByLetter(text),FadeOut(sindy_text[i]) )
+
+        self.next_slide(notes="Now we will focus on Identification of Nonlinear Dynamics")
+
+        sindy_text_unified = Text("Sparse Identification of Nonlinear Dynamics").scale(0.5).next_to(self.slide_title,DOWN,aligned_edge=LEFT)
+
+        text_indices = [(0,6),(6,21),(21,30),(30,39)]
+
+        self.play(
+            *[
+                word.animate.move_to(sindy_text_unified[start:end] ).scale(0.5)
+                for word,(start,end) in zip(sindy_text_deployed,text_indices)
+            ]
+            )
+        
+        self.play(
+            *[word.animate.set_color(RED_E)  for word in sindy_text_deployed[1:]]
+        )
+
+        self.next_slide(notes=" Let's introduce our pendulum")
+
+        self.play(Create(PendulumGroup))
 
         self.next_slide(notes=" Our pendulum is govern by equation following a paradigm")
 
@@ -451,7 +492,10 @@ class WIP(BaseSlide):
         PendulumExtreme.add_updater(update_pendulum)
         PendulumRod.add_updater(update_rod)
 
-        self.wait(4*PendulumObject.get_period(),stop_condition=lambda: (PendulumObject.get_theta() > math.pi-0.05) and (PendulumObject.get_time()>3) )
+        if DEBUG:
+            self.wait(3)
+        else:
+            self.wait(4*PendulumObject.get_period(),stop_condition=lambda: (PendulumObject.get_theta() > math.pi-0.1) and (PendulumObject.get_time()>3) )
 
         PendulumObject.deactivate()
         PendulumExtreme.remove_updater(update_pendulum)
@@ -460,7 +504,7 @@ class WIP(BaseSlide):
         self.next_slide(notes=" Let's analyze the data of our pendulum")
 
         PendulumGroup.generate_target()
-        PendulumGroup.target.to_edge(UL).shift(RIGHT*pendulum_L+DOWN*pendulum_L)
+        PendulumGroup.target.next_to(sindy_text_deployed,DOWN,aligned_edge=LEFT).shift(RIGHT*0.5+DOWN*0.5)
 
         self.play(
             ode_equation.animate.move_to(PendulumGroup.target.get_center()).align_to(self.UR,RIGHT).shift(LEFT*0.5),
@@ -523,7 +567,10 @@ class WIP(BaseSlide):
         ThetaCurve = always_redraw(get_curve)
 
         self.add(ThetaCurve)
-        self.wait(simulation_time,stop_condition=lambda: PendulumObject.get_time()>=simulation_time )
+        if DEBUG:
+            self.wait(simulation_time)
+        else:
+            self.wait(simulation_time,stop_condition=lambda: PendulumObject.get_time()>=simulation_time )
 
         PendulumObject.deactivate()
         PendulumExtreme.remove_updater(update_pendulum)
@@ -596,10 +643,7 @@ class WIP(BaseSlide):
 
         self.next_slide(notes=" We have now all the data to perform SINDy")
 
-        self.play(
-            FadeOut(PendulumGroup),
-            FadeOut(ode_equation),
-            VGroup(
+        Data_Group = VGroup(
                 ThetaAxesGroup,
                 theta_dot_axes,
                 theta_dot_curve,
@@ -607,7 +651,12 @@ class WIP(BaseSlide):
                 theta_ddot_axes,
                 theta_ddot_curve,
                 theta_ddot_axes_label,
-            ).animate.scale(0.5).to_corner(UR),
+            )
+
+        self.play(
+            FadeOut(PendulumGroup),
+            FadeOut(ode_equation),
+            Data_Group.animate.scale(0.5).to_corner(UR),
             self.next_slide_number_animation()
         )
 
@@ -632,22 +681,87 @@ class WIP(BaseSlide):
 
         self.next_slide(notes="Let's reformulate what is a system")
 
-        system_box = Rectangle(color=YELLOW,height=2,width=3)
+        system_box = Rectangle(color=YELLOW_E,height=2,width=3)
         input_arrow = Arrow(start=system_box.get_left()+LEFT*3,end=system_box.get_left(),buff=0.0)
         output_arrow = Arrow(start=system_box.get_right(),end=system_box.get_right()+RIGHT*3,buff=0.0)
-        system_label = Text("System").move_to(system_box.get_center())
+        system_label = Text("System",color=YELLOW_E).move_to(system_box.get_center())
 
         input_label = MathTex(r"\theta , \dot{\theta}").next_to(input_arrow,UP)
         output_label = MathTex(r"\ddot{\theta}").next_to(output_arrow,UP)
 
-        system = VGroup(system_box,input_arrow,output_arrow,system_label,input_label,output_label)
+        system = VGroup(system_box,input_arrow,output_arrow,system_label,input_label,output_label).shift(DOWN*1.8)
 
         # Until now 1mn from the start of the construct
 
         self.play(
             FadeOut(other_term),
-            Transform(VGroup(force_term,force_equation_box),system)
+            ReplacementTransform(VGroup(force_term,force_equation_box),system)
         )
+
+        self.next_slide(notes="Let's reformulate what is a system")
+
+        data_surrounding = SurroundingRectangle(Data_Group,color=PURPLE,buff=0.3)
+
+        sindy_explanation = Text("SINDy generates system from data",t2c={"system":YELLOW_E,"data":PURPLE}).shift(LEFT*1)
+
+        self.play(
+            Create(data_surrounding),
+            Write(sindy_explanation)
+        )
+
+        self.next_slide(notes="Now we can dive into the sparse argument of SINDy")
+
+        self.play(
+            FadeOut(sindy_explanation),
+            FadeOut(data_surrounding),
+            FadeOut(system),
+            sindy_text_deployed[0].animate.set_color(RED_E),
+            self.next_slide_number_animation(),
+            *[word.animate.set_color(DEFAULT_COLOR)  for word in sindy_text_deployed[1:]]
+        )
+
+        sin_theta =MathTex(r"\sin(\theta)")
+        cos_theta =MathTex(r"\cos(\theta)")
+        theta_dot =MathTex(r"\dot{\theta}")
+        theta_dot2 =MathTex(r"\dot{\theta}^2")
+
+        catalog = MobjectMatrix(
+            [[sin_theta],
+             [cos_theta],
+             [theta_dot],
+             [theta_dot2],
+            ] ,
+            h_buff=1,
+            v_buff=0.5,
+        ).shift(LEFT*2+UP*0.5)
+
+        self.play(
+            Create(catalog)
+        )
+
+        self.next_slide(notes="We need to take a few of these term to reconstruct our system")
+
+        sin_theta_axes = Rectangle(color=YELLOW_E,height=2,width=2).move_to(sin_theta.get_center())
+
+        catalog_new = MobjectMatrix(
+            [[sin_theta_axes],
+             [cos_theta],
+             [theta_dot],
+             [theta_dot2],
+            ] ,
+            h_buff=1,
+            v_buff=1,
+        ).shift(LEFT*2+UP*0.5)
+
+        self.play(
+            Transform(catalog,catalog_new)
+        )
+
+
+
+
+
+
 
 
 
