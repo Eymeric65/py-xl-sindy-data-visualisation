@@ -4,3 +4,5 @@ data-archive/
 plots/
 backup/
 graphs_analysis/
+.venv/
+__pycache__/
