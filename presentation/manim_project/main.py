@@ -47,11 +47,24 @@ def color_mathtext(cls:MathTex):
     def new_init(self, *args, substrings_to_isolate=[], **kwargs):
         # Need to report bug to Manim about the substrings_to_isolate creating issue with Tex class (DVI convert)
         # Highly unstable +[r"\ddot{\theta}",r"\dot{\theta}",r"\theta"]
-        init_func(self, *args, substrings_to_isolate=substrings_to_isolate+[r"\ddot{\theta}",r"\dot{\theta}",r"\theta"], **kwargs)
+        
+        special_substring = [
+            r"\ddot{\theta}",
+            r"\dot{\theta}",
+            r"\theta",
+            r"q",
+            r"\dot{q}",
+            r"\ddot{q}"]
+
+        init_func(self, *args, substrings_to_isolate=substrings_to_isolate+special_substring, **kwargs)
 
         self.set_color_by_tex(r"\theta",THETA_COLOR)
         self.set_color_by_tex(r"\dot{\theta}",THETA_DOT_COLOR)
         self.set_color_by_tex(r"\ddot{\theta}",THETA_DDOT_COLOR)
+
+        self.set_color_by_tex(r"q",THETA_COLOR)
+        self.set_color_by_tex(r"\dot{q}",THETA_DOT_COLOR)
+        self.set_color_by_tex(r"\ddot{q}",THETA_DDOT_COLOR)
 
     return new_init
 
@@ -427,7 +440,7 @@ class BaseSlide(Slide):
         else:
             return Transform(
                 self.slide_title,
-                Text(title, font_size=self.TITLE_FONT_SIZE)
+                Text(title, font_size=self.TITLE_FONT_SIZE,**kwargs)
                 .move_to(self.slide_title)
                 .align_to(self.slide_title, LEFT),
             )
@@ -1140,6 +1153,7 @@ class Main(BaseSlide):
 
     def construct_sindy_type(self):
 
+
         self.next_slide(notes=" # What are the different type of Sindy ?")
 
         def one_line_title_wrapper(text,i,j):
@@ -1364,10 +1378,10 @@ class Main(BaseSlide):
         equal = MathTex(r"=").scale(1)
 
         coefficient_matrix = Matrix(
-            [[r"0",r"{{b}}_{1}",r"{{c}}_{1}",r"{{d}}_{1}"],
-            [r"{{a}}_{2}",r"0",r"{{c}}_{2}",r"{{d}}_{2}"],
-            [r"{{a}}_{3}",r"{{b}}_{3}",r"0",r"{{d}}_{3}"],
-            [r"{{a}}_{4}",r"{{b}}_{4}",r"{{c}}_{4}",r"0"]],
+            [[r"0",r"{{a}}_{2}",r"{{a}}_{3}",r"{{a}}_{4}"],
+            [r"{{b}}_{1}",r"0",r"{{b}}_{3}",r"{{b}}_{4}"],
+            [r"{{c}}_{1}",r"{{c}}_{2}",r"0",r"{{c}}_{4}"],
+            [r"{{d}}_{1}",r"{{d}}_{2}",r"{{d}}_{3}",r"0"]],
         ).scale(0.75)
 
         classical_sindy_matrix_2 = SindyMatrix(
@@ -1391,20 +1405,20 @@ class Main(BaseSlide):
         self.play(
             Create(coefficient_matrix.get_brackets()),
             Write(coefficient_matrix.get_entries()[0]),
-            TransformMatchingTex(coefficient_1[1],coefficient_matrix.get_entries()[1]),
-            TransformMatchingTex(coefficient_1[2],coefficient_matrix.get_entries()[2]),
-            TransformMatchingTex(coefficient_1[3],coefficient_matrix.get_entries()[3]),
-            TransformMatchingTex(coefficient_2[0],coefficient_matrix.get_entries()[4]),
+            TransformMatchingTex(coefficient_2[0],coefficient_matrix.get_entries()[1]),
+            TransformMatchingTex(coefficient_3[0],coefficient_matrix.get_entries()[2]),
+            TransformMatchingTex(coefficient_4[0],coefficient_matrix.get_entries()[3]),
+            TransformMatchingTex(coefficient_1[1],coefficient_matrix.get_entries()[4]),
             Write(coefficient_matrix.get_entries()[5]),
-            TransformMatchingTex(coefficient_2[2],coefficient_matrix.get_entries()[6]),
-            TransformMatchingTex(coefficient_2[3],coefficient_matrix.get_entries()[7]),
-            TransformMatchingTex(coefficient_3[0],coefficient_matrix.get_entries()[8]),
-            TransformMatchingTex(coefficient_3[1],coefficient_matrix.get_entries()[9]),
+            TransformMatchingTex(coefficient_3[1],coefficient_matrix.get_entries()[6]),
+            TransformMatchingTex(coefficient_4[1],coefficient_matrix.get_entries()[7]),
+            TransformMatchingTex(coefficient_1[2],coefficient_matrix.get_entries()[8]),
+            TransformMatchingTex(coefficient_2[2],coefficient_matrix.get_entries()[9]),
             Write(coefficient_matrix.get_entries()[10]),
-            TransformMatchingTex(coefficient_3[3],coefficient_matrix.get_entries()[11]),
-            TransformMatchingTex(coefficient_4[0],coefficient_matrix.get_entries()[12]),
-            TransformMatchingTex(coefficient_4[1],coefficient_matrix.get_entries()[13]),
-            TransformMatchingTex(coefficient_4[2],coefficient_matrix.get_entries()[14]),
+            TransformMatchingTex(coefficient_4[2],coefficient_matrix.get_entries()[11]),
+            TransformMatchingTex(coefficient_1[3],coefficient_matrix.get_entries()[12]),
+            TransformMatchingTex(coefficient_2[3],coefficient_matrix.get_entries()[13]),
+            TransformMatchingTex(coefficient_3[3],coefficient_matrix.get_entries()[14]),
             Write(coefficient_matrix.get_entries()[15]),
         )
 
@@ -1416,6 +1430,48 @@ class Main(BaseSlide):
             Write(equal),
             Write(sindy_pi_text)
             )
+        
+        # Addition for the sparsity
+
+        self.next_slide(notes=" Now let's apply our sparse regression algorithm")
+
+        def change_number(entry,new_value):
+            return Transform(entry,MathTex(new_value).move_to(entry).scale(0.75)
+            )
+
+        self.play(
+            change_number(coefficient_matrix.get_entries()[1],"0"),
+            change_number(coefficient_matrix.get_entries()[2],"0.3"),
+            change_number(coefficient_matrix.get_entries()[3],"0.0"),
+            change_number(coefficient_matrix.get_entries()[4],"0.5"),
+
+            change_number(coefficient_matrix.get_entries()[6],"0.3"),
+            change_number(coefficient_matrix.get_entries()[7],"2.0"),
+            change_number(coefficient_matrix.get_entries()[8],"0.1"),
+            change_number(coefficient_matrix.get_entries()[9],"0.0"),
+
+            change_number(coefficient_matrix.get_entries()[11],"0.0"),
+            change_number(coefficient_matrix.get_entries()[12],"0.3"),
+            change_number(coefficient_matrix.get_entries()[13],"0.5"),
+            change_number(coefficient_matrix.get_entries()[14],"0.7"),
+        )
+
+        self.next_slide(notes=" Not sparse entry are eliminated")
+
+        lines = classical_sindy_matrix.get_lines()
+        lines_2 = classical_sindy_matrix_2.get_lines()
+
+        self.play(
+            lines[0][0].animate.set_opacity(0.2),
+            lines[0][3].animate.set_opacity(0.2),
+            lines_2[0][0].animate.set_opacity(0.2),
+            lines_2[0][3].animate.set_opacity(0.2),
+            coefficient_matrix.get_entries()[5].animate.set_color(RED_E),
+            coefficient_matrix.get_entries()[7].animate.set_color(RED_E),
+            coefficient_matrix.get_entries()[13].animate.set_color(RED_E),
+            coefficient_matrix.get_entries()[15].animate.set_color(RED_E),
+
+        )
 
     def construct(self):
 
@@ -1431,282 +1487,34 @@ class WIP(BaseSlide):
 
     def construct(self):
 
-        self.next_slide(notes=" # What are the different type of Sindy ?")
+        self.next_slide(notes=" # The Lab SINDy")
 
-        def one_line_title_wrapper(text,i,j):
-            return f"\\boldsymbol{{{text}_{{{j+1}}}}}"
-        
-        def no_title_wrapper(text,i,j):
-            return f"\\boldsymbol{{{text}}}"
+        intro_text = Paragraph(
+            "Until now, I showed one coordinate system",
+            "But in Newton formulation we have one equation per coordinate"
+            ,t2c={"one":RED_E,"per":RED_E},font_size=self.CONTENT_FONT_SIZE).to_corner(UL).shift(DOWN*1)
 
+        catalog_list = MathTex(r"\sin(q)",r",",r"\cos(q)",r",",r"\ddot{q}",r",",r"\dot{q}").next_to(intro_text,DOWN,buff=0.5).set_x(0)
 
-        classical_sindy_matrix = SindyMatrix(
-            [
-                [1,1,1,1],
-            ],
-            title_wrapper=one_line_title_wrapper,
-        )
+        self.new_clean_slide("3.1 The Lab SINDy",contents=VGroup(intro_text,catalog_list),t2c={"SINDy":RED_E})
 
-        coefficient_matrix = Matrix(
-            [[r"a"],
-            [r"b"],
-            [r"c"],
-            [r"d"]],
-        ).scale(0.75)
+        catalog_list_1 = MathTex(r"\sin(q_1{{)}}",r",",r"\cos(q_1{{)}}",r",",r"\ddot{q}_1",r",",r"\dot{q}_1")
+        catalog_list_2 = MathTex(r",",r"\sin(q_2{{)}}",r",",r"\cos(q_2{{)}}",r",",r"\ddot{q}_2",r",",r"\dot{q}_2")
 
-        force_vector = SindyMatrix(
-            [
-                [1],
-            ],
-            base_name=r"F_{ext}",
-            title_wrapper=no_title_wrapper,
-            reverse_color=True,
-        )
+        VGroup(catalog_list_1,catalog_list_2).arrange(RIGHT,buff=SMALL_BUFF ).next_to(intro_text,DOWN,buff=1).set_x(0).shift(DOWN*0.5)
 
-        equal = MathTex(r"=").scale(1)
-
-        sindy_equation = VGroup(
-            classical_sindy_matrix,
-            coefficient_matrix,
-            equal,
-            force_vector
-        ).arrange(RIGHT,buff=0.5)
-
-        self.new_clean_slide("2.1 Sindy type : classic SINDy",contents=sindy_equation,t2c={"SINDy-PI":RED_E})
-
-        self.next_slide(notes="SINDy-PI introduces implicit formulations")
-
-        zero = MathTex(r"0").scale(1).move_to(force_vector.get_contents())
+        self.next_slide(notes=" Term per term")
 
         self.play(
-            Transform(force_vector.get_contents(),zero),
-            self.next_slide_title_animation("2.2 Sindy type : SINDy-PI",t2c={"SINDy-PI":RED_E}),
-            self.next_slide_number_animation()
+            TransformMatchingTex(catalog_list,catalog_list_1),
+            TransformMatchingTex(catalog_list.copy(),catalog_list_2)
         )
-
-        subtitle_text = Text("Null space optimization is HARD",t2c={"Null space":RED_E,"HARD":RED_E},font_size=self.CONTENT_FONT_SIZE).next_to(self.slide_title,DOWN,aligned_edge=LEFT)
-
-        self.next_slide(notes=" Null space optimization is hard")
-
         self.play(
-            Write(subtitle_text)
+            VGroup(catalog_list_1,catalog_list_2).animate.arrange(RIGHT,buff=SMALL_BUFF ).next_to(intro_text,DOWN,buff=0.5).set_x(0)
         )
 
-        catalog_line = classical_sindy_matrix.get_lines()[0]
-
-        catalog_line.generate_target()
-
-        catalog_line.target[:-1].arrange(RIGHT,buff=0.7).move_to(catalog_line)
-        catalog_line.target[-1].move_to(force_vector)
-
-        coefficient_matrix.generate_target()
-        coefficient_matrix.target.get_entries()[:-1].arrange(DOWN,buff=0.5).move_to(coefficient_matrix)
-        coefficient_matrix.target.get_entries()[-1].set_opacity(0).move_to(coefficient_matrix)
-
-        self.next_slide(notes=" Rearranging catalog line")
-
-        self.play(
-            Unwrite(subtitle_text),
-            MoveToTarget(catalog_line),
-            MoveToTarget(coefficient_matrix),
-            FadeOut(force_vector.get_contents())
-        )
-
-        # Clean force vector from the zero
-        force_vector.remove_matrix_content()
 
 
-
-        self.next_slide(notes="What if this contender is not inside our solution ?")
-
-        question_text = Text("What if the right term is not in our catalog ?",t2c={"right term":RED_E,"not":RED_E,"catalog":RED_E},font_size=self.CONTENT_FONT_SIZE).next_to(sindy_equation,DOWN,aligned_edge=LEFT)
-
-        self.play(
-            Write(question_text)
-        )
-
-        self.next_slide(notes=" We can try different combination of terms")
-
-        self.play(
-            sindy_equation.animate.scale(0.5).to_corner(UR).set_y(0).shift(LEFT*0.25),
-            Unwrite(question_text)
-        )
-
-        def copy_sindy_equation(copy=True):
-
-            if copy:
-                new_sindy_equation = sindy_equation.copy()
-            else:
-                new_sindy_equation = sindy_equation
-
-            
-
-            new_sindy_equation.generate_target(use_deepcopy=True)
-
-            new_sindy_equation_target = new_sindy_equation.target
-
-            new_lines_matrix_target = new_sindy_equation_target[0]
-            new_coefficient_matrix_target = new_sindy_equation_target[1]
-
-            new_catalog_line_target = new_lines_matrix_target.get_lines()[0]
-            new_coefficient_target = new_coefficient_matrix_target.get_entries()
-
-
-            new_lines_matrix = new_sindy_equation[0]
-            new_coefficient_matrix = new_sindy_equation[1]
-
-            new_catalog_line = new_lines_matrix.get_lines()[0]
-            new_coefficient = new_coefficient_matrix.get_entries()
-
-            return (
-                new_sindy_equation,
-                new_sindy_equation_target,
-                new_catalog_line_target, 
-                new_coefficient_target,
-                new_catalog_line,
-                new_coefficient,
-            )
-        
-
-
-        
-        # First other group
-        new_sindy_equation_1, new_sindy_equation_target_1, new_catalog_line_target_1, new_coefficient_target_1, new_catalog_line_1, new_coefficient_1 = copy_sindy_equation()
-
-        # second other group
-        new_sindy_equation_2, new_sindy_equation_target_2, new_catalog_line_target_2, new_coefficient_target_2, new_catalog_line_2, new_coefficient_2 = copy_sindy_equation()
-
-        # third other group
-        new_sindy_equation_3, new_sindy_equation_target_3, new_catalog_line_target_3, new_coefficient_target_3, new_catalog_line_3, new_coefficient_3 = copy_sindy_equation()
-
-        # fourth other group
-        new_sindy_equation_4, new_sindy_equation_target_4, new_catalog_line_target_4, new_coefficient_target_4, new_catalog_line_4, new_coefficient_4 = copy_sindy_equation(copy=False)
-        
-        
-        # first group - f1,f2,f4 - f3
-        new_catalog_line_target_1[3].move_to(new_catalog_line_1[0])
-        new_catalog_line_target_1[0].move_to(new_catalog_line_1[3])
-        new_coefficient_target_1[3].move_to(new_coefficient_1[0]).set_opacity(1)
-        new_coefficient_target_1[0].move_to(new_coefficient_1[3]).set_opacity(0)
-
-        # second group - f1,f4,f3 - f2
-        new_catalog_line_target_2[3].move_to(new_catalog_line_2[1])
-        new_catalog_line_target_2[1].move_to(new_catalog_line_2[3])
-        new_coefficient_target_2[3].move_to(new_coefficient_2[1]).set_opacity(1)
-        new_coefficient_target_2[1].move_to(new_coefficient_2[3]).set_opacity(0)
-
-        # third group - f4,f2,f3 - f1
-        new_catalog_line_target_3[3].move_to(new_catalog_line_3[2])
-        new_catalog_line_target_3[2].move_to(new_catalog_line_3[3])
-        new_coefficient_target_3[3].move_to(new_coefficient_3[2]).set_opacity(1)
-        new_coefficient_target_3[2].move_to(new_coefficient_3[3]).set_opacity(0)
-
-        # arrange group
-
-        all_sindy_equations = VGroup(
-            new_sindy_equation_target_1,
-            new_sindy_equation_target_2,
-            new_sindy_equation_target_3,
-            new_sindy_equation_target_4,
-        ).arrange_in_grid(rows=2,cols=2,buff=0.5).next_to(sindy_equation,LEFT)
-
-        
-
-        self.play(
-            LaggedStart(
-            MoveToTarget(new_sindy_equation_1),
-            MoveToTarget(new_sindy_equation_2),
-            MoveToTarget(new_sindy_equation_3),
-            MoveToTarget(new_sindy_equation_4),
-            lag_ratio=0.5)
-        )
-
-        all_sindy_equations = VGroup(
-            new_sindy_equation_1,
-            new_sindy_equation_2,
-            new_sindy_equation_3,
-            new_sindy_equation_4,
-        )
-
-        self.play(
-            all_sindy_equations.animate.scale(1.25).next_to(self.slide_title,DOWN).set_x(0),
-        )
-
-        self.next_slide(notes=" This is extremely costly in term of time")
-
-        # first group - f1,f2,f4 - f3
-        # second group - f1,f4,f3 - f2
-        # third group - f4,f2,f3 - f1
-
-        coefficient_1 = new_coefficient_1.copy()
-        coefficient_2 = new_coefficient_2.copy()
-        coefficient_3 = new_coefficient_3.copy()
-        coefficient_4 = new_coefficient_4.copy()
-
-        self.add(coefficient_1,coefficient_2,coefficient_3,coefficient_4)
-
-        classical_sindy_matrix = SindyMatrix(
-            [
-                [1,1,1,1],
-            ],
-            title_wrapper=one_line_title_wrapper,
-        )
-
-        equal = MathTex(r"=").scale(1)
-
-        coefficient_matrix = Matrix(
-            [[r"0",r"{{b}}_{1}",r"{{c}}_{1}",r"{{d}}_{1}"],
-            [r"{{a}}_{2}",r"0",r"{{c}}_{2}",r"{{d}}_{2}"],
-            [r"{{a}}_{3}",r"{{b}}_{3}",r"0",r"{{d}}_{3}"],
-            [r"{{a}}_{4}",r"{{b}}_{4}",r"{{c}}_{4}",r"0"]],
-        ).scale(0.75)
-
-        classical_sindy_matrix_2 = SindyMatrix(
-            [
-                [1,1,1,1],
-            ],
-            title_wrapper=one_line_title_wrapper,
-        )
-
-        sindy_pi_equation = VGroup(
-            classical_sindy_matrix.scale(0.75),
-            coefficient_matrix,
-            equal,
-            classical_sindy_matrix_2.scale(0.75),
-        ).arrange(RIGHT,buff=0.5)
-
-        self.play(
-            FadeOut(all_sindy_equations)
-        )
-
-        self.play(
-            Create(coefficient_matrix.get_brackets()),
-            Write(coefficient_matrix.get_entries()[0]),
-            TransformMatchingTex(coefficient_1[1],coefficient_matrix.get_entries()[1]),
-            TransformMatchingTex(coefficient_1[2],coefficient_matrix.get_entries()[2]),
-            TransformMatchingTex(coefficient_1[3],coefficient_matrix.get_entries()[3]),
-            TransformMatchingTex(coefficient_2[0],coefficient_matrix.get_entries()[4]),
-            Write(coefficient_matrix.get_entries()[5]),
-            TransformMatchingTex(coefficient_2[2],coefficient_matrix.get_entries()[6]),
-            TransformMatchingTex(coefficient_2[3],coefficient_matrix.get_entries()[7]),
-            TransformMatchingTex(coefficient_3[0],coefficient_matrix.get_entries()[8]),
-            TransformMatchingTex(coefficient_3[1],coefficient_matrix.get_entries()[9]),
-            Write(coefficient_matrix.get_entries()[10]),
-            TransformMatchingTex(coefficient_3[3],coefficient_matrix.get_entries()[11]),
-            TransformMatchingTex(coefficient_4[0],coefficient_matrix.get_entries()[12]),
-            TransformMatchingTex(coefficient_4[1],coefficient_matrix.get_entries()[13]),
-            TransformMatchingTex(coefficient_4[2],coefficient_matrix.get_entries()[14]),
-            Write(coefficient_matrix.get_entries()[15]),
-        )
-
-        sindy_pi_text = Text("The SINDy-Parallel-Implicit formulation",t2c={"SINDy-Parallel-Implicit":RED_E},font_size=self.CONTENT_FONT_SIZE).next_to(sindy_pi_equation,DOWN,aligned_edge=LEFT)
-
-        self.play(
-            Create(classical_sindy_matrix),
-            Create(classical_sindy_matrix_2),
-            Write(equal),
-            Write(sindy_pi_text)
-            )
 
 
 
