@@ -11,10 +11,14 @@ from manim_slides import Slide
 import functools
 
 DEFAULT_COLOR = ManimColor.from_rgb([0.01,0.01,0.01])  # Almost black
+DEFAULT_BACKGROUND_COLOR = WHITE
 
-THETA_COLOR = RED
-THETA_DOT_COLOR = GREEN
-THETA_DDOT_COLOR = BLUE
+#DEFAULT_COLOR = WHITE
+#DEFAULT_BACKGROUND_COLOR = ManimColor.from_rgb([0.01,0.01,0.01])  # Almost white
+
+POSITION_COLOR = RED
+VELOCITY_COLOR = GREEN
+ACCELERATION_COLOR = BLUE
 
 # Skip all the parametric waiting time ( slow down incremental development)
 DEBUG = False
@@ -44,27 +48,42 @@ def color_mathtext(cls:MathTex):
     init_func = cls.__init__
 
     @functools.wraps(init_func)
-    def new_init(self, *args, substrings_to_isolate=[], **kwargs):
+    def new_init(self, *args, substrings_to_isolate=[], fragile_substring = True, **kwargs):
         # Need to report bug to Manim about the substrings_to_isolate creating issue with Tex class (DVI convert)
         # Highly unstable +[r"\ddot{\theta}",r"\dot{\theta}",r"\theta"]
         
-        special_substring = [
-            r"\ddot{\theta}",
-            r"\dot{\theta}",
-            r"\theta",
-            r"{q}",
-            r"\dot{q}",
-            r"\ddot{q}"]
+        tex_template = TexTemplate()
+        tex_template.add_to_preamble(
+            r"""
+        \usepackage{siunitx}
+        \usepackage{amsmath}
+        \newcommand{\ts}{\textstyle}
+        \newcommand{\qcoordinate}{q}
+        """
+        )
 
-        init_func(self, *args, substrings_to_isolate=substrings_to_isolate+special_substring, **kwargs)
+        if fragile_substring:
+            special_substring = [
+                r"\ddot{\theta}",
+                r"\dot{\theta}",
+                r"\theta",
+                r"\qcoordinate",
+                r"\dot{\qcoordinate}",
+                r"\ddot{\qcoordinate}"]
+        else:
+            special_substring = []
+        
 
-        self.set_color_by_tex(r"\theta",THETA_COLOR)
-        self.set_color_by_tex(r"\dot{\theta}",THETA_DOT_COLOR)
-        self.set_color_by_tex(r"\ddot{\theta}",THETA_DDOT_COLOR)
+        init_func(self, *args, substrings_to_isolate=substrings_to_isolate+special_substring,tex_template=tex_template, **kwargs)
 
-        self.set_color_by_tex(r"{q}",THETA_COLOR)
-        self.set_color_by_tex(r"\dot{q}",THETA_DOT_COLOR)
-        self.set_color_by_tex(r"\ddot{q}",THETA_DDOT_COLOR)
+        if fragile_substring:
+            self.set_color_by_tex(r"\theta",POSITION_COLOR)
+            self.set_color_by_tex(r"\dot{\theta}",VELOCITY_COLOR)
+            self.set_color_by_tex(r"\ddot{\theta}",ACCELERATION_COLOR)
+
+            self.set_color_by_tex(r"\qcoordinate",POSITION_COLOR)
+            self.set_color_by_tex(r"\dot{\qcoordinate}",VELOCITY_COLOR)
+            self.set_color_by_tex(r"\ddot{\qcoordinate}",ACCELERATION_COLOR)
 
     return new_init
 
@@ -246,11 +265,17 @@ class SindyMatrix(VMobject):
     def _default_title_wrapper(text,i,j):
         return f"\\boldsymbol{{{text}_{{{i+1},{j+1}}}}}"
 
-    def __init__(self,unit_matrix,base_name="f",color_matrix=None,title_wrapper=_default_title_wrapper,reverse_color=False,arrow_title=None,**kwargs):
+    def __init__(self,unit_matrix,base_name="f",color_matrix=None,title_scale=0.75,fragile_substring=True,title_wrapper=_default_title_wrapper,reverse_color=False,arrow_title=None,**kwargs):
         super().__init__(**kwargs)
 
 
-        self._create_sindy_matrix(unit_matrix,base_name=base_name,color_matrix=color_matrix,title_wrapper=title_wrapper,reverse_color=reverse_color)
+        self._create_sindy_matrix(unit_matrix,
+                                  base_name=base_name,
+                                  color_matrix=color_matrix,
+                                  title_wrapper=title_wrapper,
+                                  reverse_color=reverse_color,
+                                  title_scale=title_scale,
+                                  fragile_substring=fragile_substring)
 
         if arrow_title is not None:
 
@@ -308,13 +333,13 @@ class SindyMatrix(VMobject):
         #arrow_group.next_to(self.get_lines()[line],LEFT,buff=0.1)
         self.arrows.add(arrow_group)
 
-    def _create_sindy_line(self,color=DEFAULT_COLOR,divide=1,title=""):
+    def _create_sindy_line(self,color=DEFAULT_COLOR,divide=1,title="",title_scale=0.75,fragile_substring=True):
 
         #line = Line(start=ORIGIN,end=DOWN*SINDY_LINE_LENGHT/divide+RIGHT*0.01,buff=0,stroke_width=SINDY_LINE_WIDTH,color=color)
         line = RoundedRectangle(height=SINDY_LINE_LENGHT/divide,width=SINDY_LINE_WIDTH,fill_color=color,color=color,corner_radius=SINDY_LINE_WIDTH/4).set_fill(color,opacity=1)
 
         if title != "":
-            title_mob = MathTex(title,color=color).scale(0.75).next_to(line,UP,buff=0.1)
+            title_mob = MathTex(title,color=color,fragile_substring=fragile_substring).scale(title_scale).next_to(line,UP,buff=0.1)
         else:
             title_mob = VMobject()
 
@@ -327,7 +352,7 @@ class SindyMatrix(VMobject):
 
        self.matrix.get_entries().set_opacity(0)
     
-    def _create_sindy_matrix(self,unit_matrix,base_name="f",color_matrix=None,title_wrapper=_default_title_wrapper,reverse_color=False):
+    def _create_sindy_matrix(self,unit_matrix,base_name="f",color_matrix=None,title_scale=0.75,fragile_substring=True,title_wrapper=_default_title_wrapper,reverse_color=False):
 
         color_list = ["BLUE","TEAL","GREEN","GOLD","RED","MAROON","PURPLE"]
         letter_list = ["A","B","C","D","E"]
@@ -355,7 +380,7 @@ class SindyMatrix(VMobject):
                     else:
                         color = eval(color_list[ -j-1 if reverse_color else j]+"_"+letter_list[i])
 
-                    line,(height,width) = self._create_sindy_line(color=color,divide= rows,title=title_wrapper(base_name,i,j))
+                    line,(height,width) = self._create_sindy_line(color=color,divide= rows,title=title_wrapper(base_name,i,j),title_scale=title_scale,fragile_substring=fragile_substring)
                     max_height = max(max_height,height)
                     max_width = max(max_width,width)
                     self.lines[i][j] = line
@@ -434,7 +459,7 @@ class BaseSlide(Slide):
         self.IMAGE_COLOR = "#636463"
         self.X_COLOR = DARK_BROWN
 
-        self.camera.background_color = WHITE 
+        self.camera.background_color = DEFAULT_BACKGROUND_COLOR 
 
         # Coordinates
         self.UL = Dot().to_corner(UL).get_center()
@@ -455,15 +480,6 @@ class BaseSlide(Slide):
         ).to_corner(UL)
         self.add_to_canvas(slide_number=self.slide_number)
 
-        self.tex_template = TexTemplate()
-        self.tex_template.add_to_preamble(
-            r"""
-        \usepackage{siunitx}
-        \usepackage{amsmath}
-        \newcommand{\ts}{\textstyle}
-        """
-        )
-
     def next_slide_number_animation(self):
         global global_slide_counter
         global_slide_counter = global_slide_counter + 1
@@ -475,7 +491,7 @@ class BaseSlide(Slide):
     def next_slide_title_animation(self, title,t2c=None, **kwargs):
         if self.slide_title.text == "":
             self.slide_title = Text(
-                title, color=DEFAULT_COLOR, font_size=self.TITLE_FONT_SIZE,t2c={"SINDy":RED_E} if t2c is None else t2c+{"SINDy":RED_E}, **kwargs
+                title, color=DEFAULT_COLOR, font_size=self.TITLE_FONT_SIZE,t2c={"SINDy":RED_E} if t2c is None else t2c|{"SINDy":RED_E}, **kwargs
             ).to_corner(UL)
             self.add_to_canvas(slide_title=self.slide_title)
             return FadeIn(
@@ -485,7 +501,7 @@ class BaseSlide(Slide):
         else:
             return Transform(
                 self.slide_title,
-                Text(title, font_size=self.TITLE_FONT_SIZE,t2c={"SINDy":RED_E} if t2c is None else t2c+{"SINDy":RED_E},**kwargs)
+                Text(title, font_size=self.TITLE_FONT_SIZE,t2c={"SINDy":RED_E} if t2c is None else t2c|{"SINDy":RED_E},**kwargs)
                 .move_to(self.slide_title)
                 .align_to(self.slide_title, LEFT),
             )
@@ -715,7 +731,7 @@ class Main(BaseSlide):
             
             last_line_end = theta_curve[-1].get_end()
             new_point = np.array([x_scale*PendulumObject.get_time(), PendulumObject.get_theta()/math.pi*y_scale, 0])
-            new_line = Line(last_line_end,theta_axes.get_origin()+new_point,color=THETA_COLOR)
+            new_line = Line(last_line_end,theta_axes.get_origin()+new_point,color=POSITION_COLOR)
             theta_curve.add(new_line)
             return theta_curve
         
@@ -772,7 +788,7 @@ class Main(BaseSlide):
             y_label=theta_dot_text,
         )
 
-        theta_dot_curve = theta_dot_axes.plot_line_graph(PendulumObject.get_times(),PendulumObject.get_thetas_dot(),line_color=THETA_DOT_COLOR,add_vertex_dots=False)
+        theta_dot_curve = theta_dot_axes.plot_line_graph(PendulumObject.get_times(),PendulumObject.get_thetas_dot(),line_color=VELOCITY_COLOR,add_vertex_dots=False)
 
         theta_ddot_axes = Axes(
             x_range=[0, simulation_time, 1],
@@ -802,7 +818,7 @@ class Main(BaseSlide):
             y_label=ddot_theta,
         )
 
-        theta_ddot_curve = theta_ddot_axes.plot_line_graph(PendulumObject.get_times(),PendulumObject.get_thetas_ddot(),line_color=THETA_DDOT_COLOR,add_vertex_dots=False)
+        theta_ddot_curve = theta_ddot_axes.plot_line_graph(PendulumObject.get_times(),PendulumObject.get_thetas_ddot(),line_color=ACCELERATION_COLOR,add_vertex_dots=False)
 
         theta_ddot_axes_group = VGroup(theta_ddot_axes,theta_ddot_curve,ddot_theta)
         
@@ -812,7 +828,7 @@ class Main(BaseSlide):
             Create(theta_ddot_axes),Create(theta_ddot_curve),Create(ddot_theta),
         )
 
-        theta_curve_simplified = theta_axes.plot_line_graph(PendulumObject.get_times(),PendulumObject.get_thetas(),line_color=THETA_COLOR,add_vertex_dots=False)
+        theta_curve_simplified = theta_axes.plot_line_graph(PendulumObject.get_times(),PendulumObject.get_thetas(),line_color=POSITION_COLOR,add_vertex_dots=False)
 
         # Simplify structure of the curve
         self.remove(theta_curve)
@@ -1065,7 +1081,7 @@ class Main(BaseSlide):
 
         cos_theta_curve = axes_cos_theta.plot_line_graph(PendulumObject.get_times(),np.cos(PendulumObject.get_thetas()),line_color=GOLD,add_vertex_dots=False)
 
-        theta_dot_2_curve = axes_theta_dot_2.plot_line_graph(PendulumObject.get_times(),PendulumObject.get_thetas_dot(),line_color=THETA_DOT_COLOR,add_vertex_dots=False)
+        theta_dot_2_curve = axes_theta_dot_2.plot_line_graph(PendulumObject.get_times(),PendulumObject.get_thetas_dot(),line_color=VELOCITY_COLOR,add_vertex_dots=False)
 
         theta_dot_sqr_curve = axes_theta_dot_sqr.plot_line_graph(PendulumObject.get_times(),PendulumObject.get_thetas_dot()**2,line_color=MAROON,add_vertex_dots=False)
 
@@ -1105,7 +1121,7 @@ class Main(BaseSlide):
 
         line_sin_theta = Line(start=ORIGIN,end=DOWN*line_lenght,buff=0,stroke_width=line_width,color=TEAL)
         line_cos_theta = Line(start=ORIGIN,end=DOWN*line_lenght,buff=0,stroke_width=line_width,color=GOLD)
-        line_theta_dot = Line(start=ORIGIN,end=DOWN*line_lenght,buff=0,stroke_width=line_width,color=THETA_DOT_COLOR)
+        line_theta_dot = Line(start=ORIGIN,end=DOWN*line_lenght,buff=0,stroke_width=line_width,color=VELOCITY_COLOR)
         line_theta_dot_sqr = Line(start=ORIGIN,end=DOWN*line_lenght,buff=0,stroke_width=line_width,color=MAROON)
         
         lines_matrix = MobjectMatrix(
@@ -1121,7 +1137,7 @@ class Main(BaseSlide):
             bracket_v_buff=0.5
         )
 
-        line_theta_ddot = Line(start=ORIGIN,end=DOWN*line_lenght,buff=0,stroke_width=line_width,color=THETA_DDOT_COLOR)
+        line_theta_ddot = Line(start=ORIGIN,end=DOWN*line_lenght,buff=0,stroke_width=line_width,color=ACCELERATION_COLOR)
 
         theta_ddot_matrix = MobjectMatrix(
             [line_theta_ddot],
@@ -1240,7 +1256,7 @@ class Main(BaseSlide):
             force_vector
         ).arrange(RIGHT,buff=0.5)
 
-        self.new_clean_slide("2.1 Sindy type : classic SINDy",contents=sindy_equation,t2c={"SINDy-PI":RED_E})
+        self.new_clean_slide("2.1 Sindy type : classic SINDy",contents=sindy_equation,t2c={"-PI":RED_E})
 
         self.next_slide(notes="SINDy-PI introduces implicit formulations")
 
@@ -1248,7 +1264,7 @@ class Main(BaseSlide):
 
         self.play(
             Transform(force_vector.get_contents(),zero),
-            self.next_slide_title_animation("2.2 Sindy type : SINDy-PI",t2c={"SINDy-PI":RED_E}),
+            self.next_slide_title_animation("2.2 Sindy type : SINDy-PI",t2c={"-PI":RED_E}),
             self.next_slide_number_animation()
         )
 
@@ -1527,12 +1543,12 @@ class Main(BaseSlide):
             "But in Newton formulation we have one equation per coordinate"
             ,t2c={"one":RED_E,"per":RED_E},font_size=self.CONTENT_FONT_SIZE).to_corner(UL).shift(DOWN*1)
 
-        catalog_list = MathTex(r"\sin({q})",r",",r"\cos({q})",r",",r"\ddot{q}",r",",r"\dot{q}").next_to(intro_text,DOWN,buff=0.5).set_x(0)
+        catalog_list = MathTex(r"\sin(\qcoordinate)",r",",r"\cos(\qcoordinate)",r",",r"\ddot{\qcoordinate}",r",",r"\dot{\qcoordinate}").next_to(intro_text,DOWN,buff=0.5).set_x(0)
 
-        self.new_clean_slide("3.1 SINDy limitation",contents=VGroup(intro_text,catalog_list),t2c={"SINDy":RED_E})
+        self.new_clean_slide("3.1 SINDy limitation",contents=VGroup(intro_text,catalog_list))
 
-        catalog_list_1 = MathTex(r"\sin({q}_1{{)}}",r",",r"\cos({q}_1{{)}}",r",",r"\ddot{q}_1",r",",r"\dot{q}_1")
-        catalog_list_2 = MathTex(r",",r"\sin({q}_2{{)}}",r",",r"\cos({q}_2{{)}}",r",",r"\ddot{q}_2",r",",r"\dot{q}_2")
+        catalog_list_1 = MathTex(r"\sin({\qcoordinate}_1{{)}}",r",",r"\cos({\qcoordinate}_1{{)}}",r",",r"\ddot{\qcoordinate}_1",r",",r"\dot{\qcoordinate}_1")
+        catalog_list_2 = MathTex(r",",r"\sin({\qcoordinate}_2{{)}}",r",",r"\cos({\qcoordinate}_2{{)}}",r",",r"\ddot{\qcoordinate}_2",r",",r"\dot{\qcoordinate}_2")
 
         VGroup(catalog_list_1,catalog_list_2).arrange(RIGHT,buff=SMALL_BUFF ).next_to(intro_text,DOWN,buff=1).set_x(0).shift(DOWN*0.5)
 
@@ -1662,7 +1678,7 @@ class Main(BaseSlide):
                 [0,0,0,0,BLUE_B,TEAL_B,GREEN_B,GOLD_B],
             ],
             title_wrapper=sindy_newton_header,
-            arrow_title=[r"\textrm{Time} \ {q}_1",r"\textrm{Time} \ {q}_2"],
+            arrow_title=[r"\textrm{Time} \ {\qcoordinate}_1",r"\textrm{Time} \ {\qcoordinate}_2"],
         ).scale(0.75).next_to(intro_text,DOWN,buff=0.5).set_x(0)
 
         sindy_newton_lines = sindy_newton_matrix.get_lines()
@@ -1677,21 +1693,7 @@ class Main(BaseSlide):
             ReplacementTransform(function_couples_2,second_line),
         )
 
-    def construct(self):
-
-        self.construct_intro()
-        self.construct_introduction()
-        self.construct_what_is_sindy()
-        self.construct_sindy_type()
-        self.construct_sindy_limitation()
-
-
-
-class WIP(BaseSlide):
-
-
-    def construct(self):
-
+    def construct_lagrangian(self):
 
         self.next_slide(notes=" # The Lab SINDy")
 
@@ -1714,8 +1716,99 @@ class WIP(BaseSlide):
 
         self.next_slide(notes=" The Euler-Lagrange equation")
 
-        euler_lagrange_1 = MathTex(r"\frac{d}{dt} \left( \frac{\partial \mathcal{L}}{\partial \dot{q}_1} \right) - \frac{\partial \mathcal{L}}{\partial q_1} = 0")
-        euler_lagrange_2 = MathTex(r"\frac{d}{dt} \left( \frac{\partial \mathcal{L}}{\partial \dot{q}_2} \right) - \frac{\partial \mathcal{L}}{\partial q_2} = 0")
+        lagrangian_group = VGroup(lagrangian_formula,extra_text)
+
+        euler_lagrange_1 = MathTex(r"\frac{d}{dt} \left( \frac{\partial \mathcal{L}}{\partial \dot{\qcoordinate}_1} \right) - \frac{\partial \mathcal{L}}{\partial {\qcoordinate}_1} = 0",fragile_substring=False).scale(0.5)
+        euler_lagrange_2 = MathTex(r"\frac{d}{dt} \left( \frac{\partial \mathcal{L}}{\partial \dot{\qcoordinate}_2} \right) - \frac{\partial \mathcal{L}}{\partial {\qcoordinate}_2} = 0",fragile_substring=False).scale(0.5)
+
+        euler_lagrange_1[0][9:11].set_color(VELOCITY_COLOR)
+        euler_lagrange_1[0][18].set_color(POSITION_COLOR)
+
+        euler_lagrange_2[0][9:11].set_color(VELOCITY_COLOR)
+        euler_lagrange_2[0][18].set_color(POSITION_COLOR)
+
+        euler_lagrange_group = VGroup(euler_lagrange_1,euler_lagrange_2).arrange(DOWN,buff=0.2)
+
+        euler_arrow = Arrow(start=ORIGIN,end=DOWN*1,buff=0,color=DEFAULT_COLOR)
+
+        lagrangian_group.generate_target(use_deepcopy=True)
+        lagrangian_group.target[0].scale(0.5)
+
+
+        VGroup(lagrangian_group.target,euler_arrow,euler_lagrange_group).arrange(DOWN,buff=0.2).next_to(explanation,DOWN,buff=0.4).set_x(0)
+
+        euler_text = Text("Euler-Lagrange equation",t2c={"Euler-Lagrange":RED_E},font_size=self.CONTENT_FONT_SIZE).scale(0.75).next_to(euler_arrow,LEFT,buff=0.2)
+
+        self.play(
+            MoveToTarget(lagrangian_group),
+            Create(euler_arrow),
+            Write(euler_text),
+            Write(euler_lagrange_group)
+        )
+
+        #Debug for color
+        #self.add(index_labels(euler_lagrange_1[0],background_stroke_width=0.5,label_height=0.1,background_stroke_color=WHITE))
+
+        lagrange_space_line = Line(start=ORIGIN,end=DOWN*lagrangian_group.height,buff=0.1,color=GREEN).next_to(lagrangian_group,LEFT,buff=0.5)
+
+        newton_space_line = Line(start=ORIGIN,end=DOWN*euler_lagrange_group.height,buff=0.1,color=GREEN).next_to(euler_lagrange_group,LEFT,buff=0.5)
+
+        lagrange_space_text = Text("Lagrange space",t2c={"Lagrange":GREEN},font_size=self.CONTENT_FONT_SIZE).next_to(lagrange_space_line,LEFT,buff=0.2)
+
+        newton_space_text = Text("Newton space",t2c={"Newton":GREEN},font_size=self.CONTENT_FONT_SIZE).next_to(newton_space_line,LEFT,buff=0.2)
+
+        self.next_slide(notes=" From Lagrange to Newton space")
+
+        self.play(
+            Create(lagrange_space_line),
+            Write(lagrange_space_text),
+            Create(newton_space_line),
+            Write(newton_space_text)
+        )
+
+    def construct(self):
+
+        self.construct_intro()
+        self.construct_introduction()
+        self.construct_what_is_sindy()
+        self.construct_sindy_type()
+        self.construct_sindy_limitation()
+        self.construct_lagrangian()
+
+
+
+class WIP(BaseSlide):
+
+    def construct(self):
+
+        self.next_slide(notes=" # The Lab SINDy")
+
+        def lagrangian_term(text,i,j):
+
+            return f"\\boldsymbol{{ \\frac{{d}}{{dt}} \\left( \\frac{{\\partial  {text}_{{{j+1}}} }}{{\\partial \\dot{{\\qcoordinate}}_{{{i+1}}} }} \\right) - \\frac{{\\partial {text}_{{{j+1}}} }}{{\\partial \\qcoordinate_{{{i+1}}} }} }}"
+
+        print( lagrangian_term("f",0,0))
+
+        sindy_lagrangian_matrix = SindyMatrix(
+            [
+                [1,1,1,1],
+                [1,1,1,1],
+            ],
+            title_wrapper=lagrangian_term,
+            title_scale=0.33,
+            fragile_substring=False
+        )
+
+
+        self.new_clean_slide("3.3 The Lab SINDy formulation",contents=sindy_lagrangian_matrix)        
+
+        lines = sindy_lagrangian_matrix.get_lines()
+
+        # # Debug for fragile substring manually index the color
+        # for row in lines:
+        #     for line in row:
+        #         self.add(index_labels(line[0]))
+
 
 
 
