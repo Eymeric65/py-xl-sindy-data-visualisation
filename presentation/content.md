@@ -34,14 +34,14 @@ Here I present my work on SINDy what I added.
 
 I release a bit the tension by doing a canva on entropy and information presenting phase portrait. -->
 
-## 7: 4 Implicit and explicit system
+<!-- ## 7: 4 Implicit and explicit system
 ### 7: 4.1 Implicit and Explicit System 
 
 I explain what is implicit and explicit system
 
 ### 8: 4.2 What implicit and explicit implies in Robotic ?
 
-I open the canva of before, to robotic discussion only 
+I open the canva of before, to robotic discussion only  -->
 
 ### 9: 4.3 A mixed Implicit and explicit framework tailored to robotic
 

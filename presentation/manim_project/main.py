@@ -52,7 +52,7 @@ def color_mathtext(cls:MathTex):
             r"\ddot{\theta}",
             r"\dot{\theta}",
             r"\theta",
-            r"q",
+            r"{q}",
             r"\dot{q}",
             r"\ddot{q}"]
 
@@ -62,7 +62,7 @@ def color_mathtext(cls:MathTex):
         self.set_color_by_tex(r"\dot{\theta}",THETA_DOT_COLOR)
         self.set_color_by_tex(r"\ddot{\theta}",THETA_DDOT_COLOR)
 
-        self.set_color_by_tex(r"q",THETA_COLOR)
+        self.set_color_by_tex(r"{q}",THETA_COLOR)
         self.set_color_by_tex(r"\dot{q}",THETA_DOT_COLOR)
         self.set_color_by_tex(r"\ddot{q}",THETA_DDOT_COLOR)
 
@@ -233,19 +233,37 @@ class SindyMatrix(VMobject):
 
     # Matrix of the lines contains Vgroup of the title and the line
     lines= None
+
+    max_height = None
+    max_width = None
     
     # Matrix MObjectMatrix
     matrix = None
 
+    # arrow
+    arrows = None
+
     def _default_title_wrapper(text,i,j):
         return f"\\boldsymbol{{{text}_{{{i+1},{j+1}}}}}"
 
-    def __init__(self,unit_matrix,base_name="f",title_wrapper=_default_title_wrapper,reverse_color=False,**kwargs):
+    def __init__(self,unit_matrix,base_name="f",color_matrix=None,title_wrapper=_default_title_wrapper,reverse_color=False,arrow_title=None,**kwargs):
         super().__init__(**kwargs)
 
 
-        self._create_sindy_matrix(unit_matrix,base_name=base_name,title_wrapper=title_wrapper,reverse_color=reverse_color)
-        
+        self._create_sindy_matrix(unit_matrix,base_name=base_name,color_matrix=color_matrix,title_wrapper=title_wrapper,reverse_color=reverse_color)
+
+        if arrow_title is not None:
+
+            self.arrows = VGroup()
+
+            for i,title in enumerate(arrow_title):
+
+                self._create_arrow(title,line=i)
+
+            self.add(self.arrows)
+
+    def get_arrows(self):
+        return self.arrows
 
     def get_brackets(self):
 
@@ -269,6 +287,26 @@ class SindyMatrix(VMobject):
             lines_vgroup.add(line)
 
         return lines_vgroup
+    
+    def _create_arrow(self,title,line):
+
+        arrow = Arrow(
+            start=ORIGIN,
+            end=DOWN*self.max_height,
+            buff=0.1,
+            color=DEFAULT_COLOR
+        )
+
+        if title != "":
+            title_mob = MathTex(title,color=DEFAULT_COLOR).scale(0.75).next_to(arrow,LEFT,buff=0.1)
+        else:
+            title_mob = VMobject()
+
+        arrow_group = VGroup(title_mob,arrow)
+
+        arrow_group.next_to(self.matrix,LEFT,buff=0.1).set_y(self.get_lines()[line].get_y())
+        #arrow_group.next_to(self.get_lines()[line],LEFT,buff=0.1)
+        self.arrows.add(arrow_group)
 
     def _create_sindy_line(self,color=DEFAULT_COLOR,divide=1,title=""):
 
@@ -289,18 +327,18 @@ class SindyMatrix(VMobject):
 
        self.matrix.get_entries().set_opacity(0)
     
-    def _create_sindy_matrix(self,unit_matrix,base_name="f",title_wrapper=_default_title_wrapper,reverse_color=False):
+    def _create_sindy_matrix(self,unit_matrix,base_name="f",color_matrix=None,title_wrapper=_default_title_wrapper,reverse_color=False):
 
         color_list = ["BLUE","TEAL","GREEN","GOLD","RED","MAROON","PURPLE"]
         letter_list = ["A","B","C","D","E"]
 
         rows = len(unit_matrix)
         cols = len(unit_matrix[0])
-
-        if rows>=len(letter_list) :
-            raise ValueError("Too many rows for letter representation")
-        if cols>=len(color_list):
-            raise ValueError("Too many columns for color representation")
+        if color_matrix is None:
+            if rows>=len(letter_list) :
+                raise ValueError("Too many rows for letter representation")
+            if cols>=len(color_list):
+                raise ValueError("Too many columns for color representation")
         
         self.lines = np.zeros((rows,cols),dtype=object)
 
@@ -312,7 +350,12 @@ class SindyMatrix(VMobject):
 
                 if unit_matrix[i][j] == 1:
 
-                    line,(height,width) = self._create_sindy_line(color=eval(color_list[ -j-1 if reverse_color else j]+"_"+letter_list[i]),divide= rows,title=title_wrapper(base_name,i,j))
+                    if color_matrix is not None:
+                        color = color_matrix[i][j]
+                    else:
+                        color = eval(color_list[ -j-1 if reverse_color else j]+"_"+letter_list[i])
+
+                    line,(height,width) = self._create_sindy_line(color=color,divide= rows,title=title_wrapper(base_name,i,j))
                     max_height = max(max_height,height)
                     max_width = max(max_width,width)
                     self.lines[i][j] = line
@@ -320,6 +363,8 @@ class SindyMatrix(VMobject):
 
                     self.lines[i][j] = VMobject()
 
+        self.max_height = max_height
+        self.max_width = max_width
 
         self.matrix = MobjectMatrix(
             self.lines,
@@ -427,10 +472,10 @@ class BaseSlide(Slide):
             global_slide_counter
         )
     
-    def next_slide_title_animation(self, title, **kwargs):
+    def next_slide_title_animation(self, title,t2c=None, **kwargs):
         if self.slide_title.text == "":
             self.slide_title = Text(
-                title, color=DEFAULT_COLOR, font_size=self.TITLE_FONT_SIZE, **kwargs
+                title, color=DEFAULT_COLOR, font_size=self.TITLE_FONT_SIZE,t2c={"SINDy":RED_E} if t2c is None else t2c+{"SINDy":RED_E}, **kwargs
             ).to_corner(UL)
             self.add_to_canvas(slide_title=self.slide_title)
             return FadeIn(
@@ -440,7 +485,7 @@ class BaseSlide(Slide):
         else:
             return Transform(
                 self.slide_title,
-                Text(title, font_size=self.TITLE_FONT_SIZE,**kwargs)
+                Text(title, font_size=self.TITLE_FONT_SIZE,t2c={"SINDy":RED_E} if t2c is None else t2c+{"SINDy":RED_E},**kwargs)
                 .move_to(self.slide_title)
                 .align_to(self.slide_title, LEFT),
             )
@@ -458,7 +503,7 @@ class BaseSlide(Slide):
                 ),
             )
         else:
-            self.play(self.next_slide_number_animation(),self.next_slide_title_animation(title))
+            self.play(self.next_slide_number_animation(),self.next_slide_title_animation(title,**kwargs))
 
 
 
@@ -1473,19 +1518,7 @@ class Main(BaseSlide):
 
         )
 
-    def construct(self):
-
-        self.construct_intro()
-        self.construct_introduction()
-        self.construct_what_is_sindy()
-        self.construct_sindy_type()
-
-
-
-class WIP(BaseSlide):
-
-
-    def construct(self):
+    def construct_sindy_limitation(self):
 
         self.next_slide(notes=" # The Lab SINDy")
 
@@ -1494,12 +1527,12 @@ class WIP(BaseSlide):
             "But in Newton formulation we have one equation per coordinate"
             ,t2c={"one":RED_E,"per":RED_E},font_size=self.CONTENT_FONT_SIZE).to_corner(UL).shift(DOWN*1)
 
-        catalog_list = MathTex(r"\sin(q)",r",",r"\cos(q)",r",",r"\ddot{q}",r",",r"\dot{q}").next_to(intro_text,DOWN,buff=0.5).set_x(0)
+        catalog_list = MathTex(r"\sin({q})",r",",r"\cos({q})",r",",r"\ddot{q}",r",",r"\dot{q}").next_to(intro_text,DOWN,buff=0.5).set_x(0)
 
-        self.new_clean_slide("3.1 The Lab SINDy",contents=VGroup(intro_text,catalog_list),t2c={"SINDy":RED_E})
+        self.new_clean_slide("3.1 SINDy limitation",contents=VGroup(intro_text,catalog_list),t2c={"SINDy":RED_E})
 
-        catalog_list_1 = MathTex(r"\sin(q_1{{)}}",r",",r"\cos(q_1{{)}}",r",",r"\ddot{q}_1",r",",r"\dot{q}_1")
-        catalog_list_2 = MathTex(r",",r"\sin(q_2{{)}}",r",",r"\cos(q_2{{)}}",r",",r"\ddot{q}_2",r",",r"\dot{q}_2")
+        catalog_list_1 = MathTex(r"\sin({q}_1{{)}}",r",",r"\cos({q}_1{{)}}",r",",r"\ddot{q}_1",r",",r"\dot{q}_1")
+        catalog_list_2 = MathTex(r",",r"\sin({q}_2{{)}}",r",",r"\cos({q}_2{{)}}",r",",r"\ddot{q}_2",r",",r"\dot{q}_2")
 
         VGroup(catalog_list_1,catalog_list_2).arrange(RIGHT,buff=SMALL_BUFF ).next_to(intro_text,DOWN,buff=1).set_x(0).shift(DOWN*0.5)
 
@@ -1512,6 +1545,179 @@ class WIP(BaseSlide):
         self.play(
             VGroup(catalog_list_1,catalog_list_2).animate.arrange(RIGHT,buff=SMALL_BUFF ).next_to(intro_text,DOWN,buff=0.5).set_x(0)
         )
+
+        sin_q1 = catalog_list_1[0:4]
+        cos_q1 = catalog_list_1[5:9]
+        ddot_q1 = catalog_list_1[10:12]
+        dot_q1 = catalog_list_1[13:]
+
+        sin_q2 = catalog_list_2[1:5]
+        cos_q2 = catalog_list_2[6:10]
+        ddot_q2 = catalog_list_2[11:13]
+        dot_q2 = catalog_list_2[14:]
+
+        function_list = [
+            sin_q1,
+            cos_q1,
+            ddot_q1,
+            dot_q1,
+            sin_q2,
+            cos_q2,
+            ddot_q2,
+            dot_q2,
+        ]
+
+        def sqr_format(term):
+            """Format a term as squared, e.g., sin(q) -> sin²(q)"""
+            return VGroup(term.copy(), MathTex("^2").scale(0.7).next_to(term, RIGHT, buff=0.05,aligned_edge=UP)).set_opacity(0)
+
+        def create_function_couples(function_list):
+            """
+            Creates all unique couples from function_list.
+            For (x, x) pairs, applies sqr_format(x).
+            For (x, y) pairs where x != y, creates VGroup(x, y).
+            Permutations (x, y) and (y, x) are considered the same.
+            """
+            couples = VGroup()
+            n = len(function_list)
+            
+            for i in range(n):
+                for j in range(i, n):  # Start from i to avoid duplicate permutations
+                    if i == j:
+                        # Same element: apply sqr_format
+                        couples.add(sqr_format(function_list[i]))
+                    else:
+                        # Different elements: create VGroup
+                        couples.add(VGroup(function_list[i].copy(), function_list[j].copy()))
+            
+            return couples
+
+        
+        # Create all couples
+        function_couples = create_function_couples(function_list)
+
+        function_couples_target = VGroup(*[couple.generate_target() for couple in function_couples])
+
+        for couple in function_couples_target:
+            couple.arrange(RIGHT,buff=0.05).set_opacity(1)
+
+        function_couples_target.arrange_in_grid(rows=6,cols=6,buff=0.2).scale(0.66).next_to(VGroup(catalog_list_1,catalog_list_2),DOWN,buff=0.5).set_x(0)
+
+        self.next_slide(notes=" All the possible couples for an 8 term catalog and a 2 degree polynome")
+
+        self.play(
+            LaggedStart(
+                *[MoveToTarget(couple) for couple in function_couples[::-1]],
+                lag_ratio=0.1
+            )
+        )
+        
+        function_couples.generate_target()
+
+        function_couples.target.next_to(intro_text,DOWN,buff=1).set_x(0)
+
+        term_text = Text("This lead to 36 terms to consider for only 8 bases function",t2c={"36 terms": RED_E,"8 bases":RED_E},font_size=self.CONTENT_FONT_SIZE).next_to(function_couples.target,DOWN,buff=0.5).set_x(0)
+
+        self.play(
+            Unwrite(VGroup(catalog_list_1,catalog_list_2)),
+            MoveToTarget(function_couples),
+            Write(term_text),
+            self.next_slide_number_animation()
+        )
+
+
+        self.next_slide(notes="And we double again when we put everything in the SINDy matrix")
+
+        function_couples_2 = function_couples.copy()
+
+        function_couples_2.generate_target()
+        function_couples.generate_target()
+
+        VGroup(function_couples.target,function_couples_2.target).scale(0.5).arrange(DR,buff=0.1).next_to(intro_text,DOWN,buff=1).set_x(0)
+
+        self.play(
+            MoveToTarget(function_couples),
+            MoveToTarget(function_couples_2),
+            Unwrite(term_text)
+        )
+
+        self.next_slide(notes=" Finally we can build the SINDy-Newton matrix")
+
+        def sindy_newton_header(text,i,j):
+
+            if j%4==2:
+                return r"\boldsymbol{\dotsb}"
+            elif j%4==3:
+                return r"\boldsymbol{f_{36}}"
+            else:
+                return f"\\boldsymbol{{{text}_{{{(j%4+1)}}}}}"
+
+        sindy_newton_matrix = SindyMatrix(
+            [
+                [1,1,1,1,0,0,0,0],
+                [0,0,0,0,1,1,1,1],
+            ],
+            color_matrix=[
+                [BLUE_A,TEAL_A,GREEN_A,GOLD_A,0,0,0,0],
+                [0,0,0,0,BLUE_B,TEAL_B,GREEN_B,GOLD_B],
+            ],
+            title_wrapper=sindy_newton_header,
+            arrow_title=[r"\textrm{Time} \ {q}_1",r"\textrm{Time} \ {q}_2"],
+        ).scale(0.75).next_to(intro_text,DOWN,buff=0.5).set_x(0)
+
+        sindy_newton_lines = sindy_newton_matrix.get_lines()
+
+        first_line = sindy_newton_lines[0][:]
+        second_line = sindy_newton_lines[1][:]
+
+        self.play(
+            Create(sindy_newton_matrix.get_brackets()),
+            Create(sindy_newton_matrix.get_arrows()),
+            ReplacementTransform(function_couples,first_line),
+            ReplacementTransform(function_couples_2,second_line),
+        )
+
+    def construct(self):
+
+        self.construct_intro()
+        self.construct_introduction()
+        self.construct_what_is_sindy()
+        self.construct_sindy_type()
+        self.construct_sindy_limitation()
+
+
+
+class WIP(BaseSlide):
+
+
+    def construct(self):
+
+
+        self.next_slide(notes=" # The Lab SINDy")
+
+        intro_text = Text("One solution, the lagrangian formulation",t2c={"lagrangian":RED_E},font_size=self.CONTENT_FONT_SIZE).to_corner(UL).shift(DOWN*1)
+
+        lagrangian = intro_text[15:25].copy()
+
+        self.new_clean_slide("3.2 The Lab SINDy",contents=intro_text)
+
+        self.next_slide(notes=" The lagrangian formula")
+
+        lagrangian_formula = MathTex(r"\mathcal{L} = T - V")
+
+        explanation = Text("One equation per system",t2c={"per system":RED_E},font_size=self.CONTENT_FONT_SIZE).scale(0.75).next_to(intro_text,DOWN,buff=0.5,aligned_edge=LEFT)
+
+        extra_text = Text("with T the kinetic energy and V the potential energy",font_size=self.CONTENT_FONT_SIZE).scale(0.5).next_to(lagrangian_formula,DOWN,buff=0.1)
+
+        self.play(Write(explanation),lagrangian.animate.move_to(lagrangian_formula))
+        self.play(ReplacementTransform(lagrangian,lagrangian_formula),Write(extra_text))
+
+        self.next_slide(notes=" The Euler-Lagrange equation")
+
+        euler_lagrange_1 = MathTex(r"\frac{d}{dt} \left( \frac{\partial \mathcal{L}}{\partial \dot{q}_1} \right) - \frac{\partial \mathcal{L}}{\partial q_1} = 0")
+        euler_lagrange_2 = MathTex(r"\frac{d}{dt} \left( \frac{\partial \mathcal{L}}{\partial \dot{q}_2} \right) - \frac{\partial \mathcal{L}}{\partial q_2} = 0")
+
+
 
 
 
