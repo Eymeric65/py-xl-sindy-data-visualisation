@@ -246,7 +246,7 @@ class Pendulum:
 
 SINDY_LINE_LENGHT = 3
 SINDY_LINE_WIDTH = 0.25
-SINDY_MATRIX_CLEARANCE = 0.1
+SINDY_MATRIX_CLEARANCE = 0.15
 
 class SindyMatrix(VMobject):
 
@@ -333,18 +333,26 @@ class SindyMatrix(VMobject):
         #arrow_group.next_to(self.get_lines()[line],LEFT,buff=0.1)
         self.arrows.add(arrow_group)
 
-    def _create_sindy_line(self,color=DEFAULT_COLOR,divide=1,title="",title_scale=0.75,fragile_substring=True):
+    def _create_sindy_line(self,color=DEFAULT_COLOR,divide=1,title="",title_scale=0.75,fragile_substring=True,opacity=1):
 
         #line = Line(start=ORIGIN,end=DOWN*SINDY_LINE_LENGHT/divide+RIGHT*0.01,buff=0,stroke_width=SINDY_LINE_WIDTH,color=color)
-        line = RoundedRectangle(height=SINDY_LINE_LENGHT/divide,width=SINDY_LINE_WIDTH,fill_color=color,color=color,corner_radius=SINDY_LINE_WIDTH/4).set_fill(color,opacity=1)
+        line = RoundedRectangle(height=SINDY_LINE_LENGHT/divide,width=SINDY_LINE_WIDTH,color=color,corner_radius=SINDY_LINE_WIDTH/4)
+
+        if opacity == 0:
+            line.set_fill(DEFAULT_BACKGROUND_COLOR,1)
+        else:
+            line.set_fill(color,1)
 
         if title != "":
-            title_mob = MathTex(title,color=color,fragile_substring=fragile_substring).scale(title_scale).next_to(line,UP,buff=0.1)
+            if opacity == 0:
+                title_mob = MathTex(title,color=DEFAULT_BACKGROUND_COLOR,fragile_substring=fragile_substring).scale(title_scale).next_to(line,UP,buff=0.1)
+            else:
+                title_mob = MathTex(title,color=color,fragile_substring=fragile_substring).scale(title_scale).next_to(line,UP,buff=0.1)
         else:
             title_mob = VMobject()
 
-        height = SINDY_LINE_LENGHT/divide  + title_mob.height + 0.1
-        width = SINDY_LINE_WIDTH + title_mob.width + 0.1
+        height = SINDY_LINE_LENGHT/divide  + title_mob.height 
+        width = SINDY_LINE_WIDTH + title_mob.width 
 
         return VGroup(title_mob,line),(height,width)
     
@@ -373,20 +381,16 @@ class SindyMatrix(VMobject):
         for i in range(len(unit_matrix)):
             for j in range(len(unit_matrix[0])):
 
-                if unit_matrix[i][j] == 1:
-
-                    if color_matrix is not None:
-                        color = color_matrix[i][j]
-                    else:
-                        color = eval(color_list[ -j-1 if reverse_color else j]+"_"+letter_list[i])
-
-                    line,(height,width) = self._create_sindy_line(color=color,divide= rows,title=title_wrapper(base_name,i,j),title_scale=title_scale,fragile_substring=fragile_substring)
-                    max_height = max(max_height,height)
-                    max_width = max(max_width,width)
-                    self.lines[i][j] = line
+                if color_matrix is not None:
+                    color = color_matrix[i][j]
                 else:
+                    color = eval(color_list[ -j-1 if reverse_color else j]+"_"+letter_list[i])
 
-                    self.lines[i][j] = VMobject()
+                line,(height,width) = self._create_sindy_line(color=color,divide= rows,title=title_wrapper(base_name,i,j),title_scale=title_scale,fragile_substring=fragile_substring,opacity=unit_matrix[i][j])
+                max_height = max(max_height,height)
+                max_width = max(max_width,width)
+                self.lines[i][j] = line
+
 
         self.max_height = max_height
         self.max_width = max_width
@@ -418,13 +422,13 @@ DecimalNumber.__init__ = default_color(DecimalNumber)
 global_slide_counter = 0
 
 section_name = [
-    "Introduction",
-    "SINDY",
-    "Entropy and input information",
-    "Implicit and explicit system",
-    "Results",
-    "Future works",
-    "QA time",
+    "1. What is SINDy",
+    "2. SINDy types",
+    "3. The Lab SINDy",
+    "4. New additions",
+    "5. Results",
+    "6. Questions and answers",
+
 ]
 
 
@@ -532,12 +536,13 @@ class Main(BaseSlide):
             "Discovering Nonlinear Dynamics by Simultaneous Lagrangian and Newtonian"
         ).scale(0.5)
         title_2 = Text ("Identification for Implicit and Explicit Sparse Identification").scale(0.5)
+        lab_title = Text("Tohoku University - School of engineering - NeuroRobotics Laboratory").scale(0.3)
         author_date = (
             Text("Eymeric Chauchat C4TM1417 - 18th November 2025")
             .scale(0.3)
         )
 
-        intro_group = VGroup(title,title_2,author_date).arrange(DOWN)
+        intro_group = VGroup(title,title_2,lab_title,author_date).arrange(DOWN)
 
         self.play(
             self.next_slide_number_animation(),
@@ -575,12 +580,12 @@ class Main(BaseSlide):
             font_size=self.CONTENT_FONT_SIZE,
         ).align_to(self.UL, LEFT).shift(RIGHT*1)
 
-        self.new_clean_slide("1.1 Introduction",contents=contents)
+        self.new_clean_slide("1 Introduction",contents=contents)
 
     def construct_what_is_sindy(self):
 
         self.next_slide(notes=" # What is SINDy")
-        self.new_clean_slide(r"1.2 What is SINDy")
+        self.new_clean_slide(r"1 What is SINDy")
 
 
         pendulum_L = 1
@@ -600,7 +605,7 @@ class Main(BaseSlide):
 
         sindy_text = self.slide_title[-5:-1].copy()
 
-        sindy_text_deployed = VGroup(Text("Sparse"),Text("Identification of"),Text("Nonlinear"),Text("Dynamics")).arrange_in_grid(rows=4,cols=1,col_alignments="l").shift(LEFT*3)
+        sindy_text_deployed = VGroup(Text("Sparse",t2c={"S":RED_E}),Text("Identification of",t2c={"I":RED_E}),Text("Nonlinear",t2c={"N":RED_E}),Text("Dynamics",t2c={"D":RED_E})).arrange_in_grid(rows=4,cols=1,col_alignments="l").shift(LEFT*3)
 
         self.next_slide(notes="What does SINDy stand for ?")
 
@@ -1683,8 +1688,8 @@ class Main(BaseSlide):
 
         sindy_newton_lines = sindy_newton_matrix.get_lines()
 
-        first_line = sindy_newton_lines[0][:]
-        second_line = sindy_newton_lines[1][:]
+        first_line = sindy_newton_lines[0][:4]
+        second_line = sindy_newton_lines[1][4:]
 
         self.play(
             Create(sindy_newton_matrix.get_brackets()),
@@ -1701,7 +1706,7 @@ class Main(BaseSlide):
 
         lagrangian = intro_text[15:25].copy()
 
-        self.new_clean_slide("3.2 The Lab SINDy",contents=intro_text)
+        self.new_clean_slide("3.2 The Lab SINDy introduction",contents=intro_text)
 
         self.next_slide(notes=" The lagrangian formula")
 
@@ -1766,20 +1771,7 @@ class Main(BaseSlide):
             Write(newton_space_text)
         )
 
-    def construct(self):
-
-        self.construct_intro()
-        self.construct_introduction()
-        self.construct_what_is_sindy()
-        self.construct_sindy_type()
-        self.construct_sindy_limitation()
-        self.construct_lagrangian()
-
-
-
-class WIP(BaseSlide):
-
-    def construct(self):
+    def construct_lab_sindy(self):
 
         self.next_slide(notes=" # The Lab SINDy")
 
@@ -1787,7 +1779,7 @@ class WIP(BaseSlide):
 
             return f"\\boldsymbol{{ \\frac{{d}}{{dt}} \\left( \\frac{{\\partial  {text}_{{{j+1}}} }}{{\\partial \\dot{{\\qcoordinate}}_{{{i+1}}} }} \\right) - \\frac{{\\partial {text}_{{{j+1}}} }}{{\\partial \\qcoordinate_{{{i+1}}} }} }}"
 
-        print( lagrangian_term("f",0,0))
+        intro_text=Text("Let's take our catalog function again",font_size=self.CONTENT_FONT_SIZE).to_corner(UL).shift(DOWN*1)
 
         sindy_lagrangian_matrix = SindyMatrix(
             [
@@ -1795,19 +1787,533 @@ class WIP(BaseSlide):
                 [1,1,1,1],
             ],
             title_wrapper=lagrangian_term,
-            title_scale=0.33,
+            title_scale=0.25,
             fragile_substring=False
-        )
+        ).next_to(intro_text,DOWN,buff=0.6).set_x(0)
 
-
-        self.new_clean_slide("3.3 The Lab SINDy formulation",contents=sindy_lagrangian_matrix)        
 
         lines = sindy_lagrangian_matrix.get_lines()
+        for row in lines:
+            for line in row:
+                line[0][0].set_color(DEFAULT_COLOR)
+                line[0][0][10:12].set_color(VELOCITY_COLOR)
+                line[0][0][20].set_color(POSITION_COLOR)
+                line[0][0][6:8].set_color(line[1].get_color())
+                line[0][0][16:18].set_color(line[1].get_color())
+                #self.add(index_labels(line[0][0],background_stroke_width=0.5,label_height=0.1,background_stroke_color=WHITE))
 
-        # # Debug for fragile substring manually index the color
+        f_object = VGroup()
+        f_persistant = VGroup()
+
+        for i,row in enumerate(lines):
+            for j,line in enumerate(row):
+
+                f_1= line[0][0][6:8].set_opacity(0).copy()
+
+                f_1.set_opacity(1).generate_target()
+                f_1.move_to(lines[0][j]).scale(3)
+
+                f_2= line[0][0][16:18].set_opacity(0).copy()
+
+                f_2.set_opacity(1).generate_target()
+                f_2.move_to(lines[0][j]).scale(3)
+
+                f_object.add( f_1 )
+                f_object.add( f_2 )
+
+                if i==0:
+                    f_persistant.add( f_1.copy() )
+                    f_persistant.add( f_2.copy() )
+
+
+        f_group = VGroup(f_object,f_persistant)
+
+
+        self.new_clean_slide("3.3 The Lab SINDy formulation",contents=[intro_text,f_group])        
+
+        self.next_slide(notes=" # The Lab SINDy")
+
+        self.play(
+            f_group.animate.next_to(intro_text,DOWN,buff=0.1).set_x(0),
+        )
+
+        curved_arrow = CurvedArrow(
+            start_point=ORIGIN,
+            end_point=UP*(sindy_lagrangian_matrix.get_y()-f_group.get_y()),
+            angle=PI/6,
+            color=DEFAULT_COLOR
+        ).next_to(sindy_lagrangian_matrix,LEFT,buff=0.1).set_y((sindy_lagrangian_matrix.get_y()+f_group.get_y())/2)
+
+        euler_lagrange_text = Text("Euler-Lagrange",t2c={"Euler-Lagrange":RED_E},font_size=self.CONTENT_FONT_SIZE).next_to(curved_arrow,LEFT,buff=0.2)
+
+
+        #Debug for fragile substring manually index the color
         # for row in lines:
         #     for line in row:
-        #         self.add(index_labels(line[0]))
+        #         self.add(index_labels(line[0][0],background_stroke_width=0.5,label_height=0.1,background_stroke_color=WHITE))
+
+        self.play(
+            Create(curved_arrow),
+            Write(euler_lagrange_text),
+            Create(sindy_lagrangian_matrix.get_brackets())
+        )
+
+        self.play(
+            LaggedStart(
+              *[MoveToTarget(f) for f in f_object]
+            ),
+            Create(sindy_lagrangian_matrix.get_contents()),
+        )
+
+        explanation_text= Text("XL-SINDy formulation, more compact !",t2c={"XL-SINDy":RED_E},font_size=self.CONTENT_FONT_SIZE).next_to(sindy_lagrangian_matrix,DOWN,aligned_edge=LEFT,buff=0.1)
+
+        self.play(Create(explanation_text))
+
+    def construct_addition_1(self):
+
+        self.next_slide(notes=" # Addition 1")
+
+        def lagrangian_term(text,i,j):
+            
+            if j < 3:
+                return f"\\boldsymbol{{ \\frac{{d}}{{dt}} \\left( \\frac{{\\partial  {text}_{{{j+1}}} }}{{\\partial \\dot{{\\qcoordinate}}_{{{i+1}}} }} \\right) - \\frac{{\\partial {text}_{{{j+1}}} }}{{\\partial \\qcoordinate_{{{i+1}}} }} }}"
+            else:
+                return r"\boldsymbol{f_4}"
+            
+        intro_text=Text("How could we have a compact catalog with the advantages of newton ?",t2c={"compact":RED_E,"advantages":RED_E},font_size=self.CONTENT_FONT_SIZE).to_corner(UL).shift(DOWN*1)
+
+        uni_sindy_matrix = SindyMatrix(
+            [
+                [1,1,1,1,0],
+                [1,1,1,0,1],
+            ],
+            title_wrapper=lagrangian_term,
+            title_scale=0.25,
+            fragile_substring=False
+        ).next_to(intro_text,DOWN,buff=0.5).set_x(0)
+
+        lagrange_line= VGroup()
+        newton_line= VGroup()
+
+
+        uni_sindy_lines = uni_sindy_matrix.get_lines()
+        for row in uni_sindy_lines:
+            for j,line in enumerate(row):
+
+                
+
+                if j < 3:
+                    line[0][0].set_color(DEFAULT_COLOR)
+                    line[0][0][10:12].set_color(VELOCITY_COLOR)
+                    line[0][0][20].set_color(POSITION_COLOR)
+                    line[0][0][6:8].set_color(line[1].get_color())
+                    line[0][0][16:18].set_color(line[1].get_color())
+                    
+                    lagrange_line.add(line)
+                else:
+                    newton_line.add(line)
+
+                line.generate_target()
+
+                #Debug for color
+                #self.add(index_labels(line[0][0],background_stroke_width=0.5,label_height=0.1,background_stroke_color=WHITE))
+
+
+        bracket_left,bracket_right = uni_sindy_matrix.get_brackets()
+
+        bracket_left.generate_target()
+        bracket_right.generate_target()
+
+        fake_bracket_left = bracket_left.copy()
+        fake_bracket_right = bracket_right.copy()
+
+        bi_matrix = VGroup(VGroup(
+            bracket_left,
+            lagrange_line,
+            fake_bracket_right).arrange(RIGHT,buff=SINDY_MATRIX_CLEARANCE*2),
+            VGroup(
+            fake_bracket_left,
+            newton_line,
+            bracket_right,
+        ).arrange(RIGHT,buff=SINDY_MATRIX_CLEARANCE*2)
+        ).arrange(RIGHT,buff=1).next_to(intro_text,DOWN,buff=0.5).set_x(0)
+
+        self.new_clean_slide("4.1 First addition",contents=[intro_text,bi_matrix])
+
+        self.next_slide(notes=" The lagrangian formula")
+
+        self.play(
+            FadeOut(fake_bracket_left),
+            FadeOut(fake_bracket_right),
+        )
+
+        explanation_text= Text("An unified Lagrange-Newton SINDy matrix",t2c={"Lagrange-Newton":RED_E},font_size=self.CONTENT_FONT_SIZE).next_to(bi_matrix,DOWN,aligned_edge=LEFT,buff=0.1)
+
+        self.play(
+            MoveToTarget(bracket_left),
+            MoveToTarget(bracket_right),
+            *[MoveToTarget(line) for line in lagrange_line],
+            *[MoveToTarget(line) for line in newton_line],
+            Write(explanation_text)
+            )
+
+    def construct_addition_2(self):
+
+        self.next_slide(notes=" # Addition 2")
+
+        extra_description_text= Text("How can we guess implicit and explicit in complex system ?",t2c={"complex":RED_E,"implicit":RED_E,"explicit":RED_E},font_size=self.CONTENT_FONT_SIZE).to_corner(UL).shift(DOWN*1)
+
+        complex_sindy_matrix = SindyMatrix(
+            [
+                [1,0,0,0,0],
+                [0,1,1,0,1],
+                [0,1,0,1,0]
+            ],
+            arrow_title=[r"\textrm{Time} \ {\qcoordinate}_1",r"\textrm{Time} \ {\qcoordinate}_2",r"\textrm{Time} \ {\qcoordinate}_3"],
+        )
+
+        def forces_header(text,i,j):
+            return f"\\boldsymbol{{ {text}_{{{i+1}}} }}"
+
+        forces_matrix = SindyMatrix(
+            [
+                [0],
+                [0],
+                [1],
+            ],
+            title_wrapper=forces_header,
+            base_name=r"{F_{ext}}",
+            reverse_color=True,
+        )
+
+        coefficient = MathTex(r"\Xi").scale(1)
+
+        equal = MathTex(r"=").scale(1)
+
+        sindy_equation = VGroup(
+            complex_sindy_matrix,
+            coefficient,
+            equal,
+            forces_matrix
+        ).arrange(RIGHT,buff=0.5).scale(0.75).next_to(extra_description_text,DOWN,buff=0.5).set_x(0)
+
+        self.new_clean_slide("4.2 Second addition",contents=[extra_description_text,sindy_equation])
+
+        sindy_equation.generate_target()
+
+        first_step = Text("1. Where are external forces ?",t2c={"external forces":RED_E},font_size=self.CONTENT_FONT_SIZE)
+        second_step = Text("2. What functions are activated ?",t2c={"activated":RED_E},font_size=self.CONTENT_FONT_SIZE).next_to(first_step,DOWN,aligned_edge=LEFT,buff=0.5)
+        third_step = Text("3. What coordinate activate these functions ? ",t2c={"coordinate":RED_E},font_size=self.CONTENT_FONT_SIZE).next_to(second_step,DOWN,aligned_edge=LEFT,buff=0.5)
+        fourth_step = Text("4. Loop until no more discovery",t2c={"no more discovery":RED_E},font_size=self.CONTENT_FONT_SIZE).next_to(third_step,DOWN,aligned_edge=LEFT,buff=0.5)
+        fifth_step = Text("5. Execute SINDy on this sub-system",t2c={"SINDy":RED_E,"sub-system":RED_E},font_size=self.CONTENT_FONT_SIZE).next_to(fourth_step,DOWN,aligned_edge=LEFT,buff=0.5)
+        sixth_step = Text("6. Execute SINDy-PI on non-discovered coordinate",t2c={"SINDy-PI":RED_E,"non-discovered":RED_E},font_size=self.CONTENT_FONT_SIZE).next_to(fifth_step,DOWN,aligned_edge=LEFT,buff=0.5)
+        seventh_step = Text("7. Combine everything",t2c={"Combine":RED_E},font_size=self.CONTENT_FONT_SIZE).next_to(sixth_step,DOWN,aligned_edge=LEFT,buff=0.5)
+
+
+        text_group = VGroup(
+            first_step,
+            second_step,
+            third_step,
+            fourth_step,
+            fifth_step,
+            sixth_step,
+            seventh_step
+        ).scale(0.75).next_to(sindy_equation.target,RIGHT,buff=0.2)
+
+        explanation_group = VGroup(sindy_equation.target,text_group)
+        explanation_group.scale(0.8).next_to(extra_description_text,DOWN,buff=0.5).set_x(0)
+
+        self.next_slide(notes=" I will explain the algorithm, first we isolate external forces")
+        
+        self.play(
+            MoveToTarget(sindy_equation),
+        )
+
+        complex_sindy_matrix_lines = complex_sindy_matrix.get_lines()
+        forces_matrix_lines = forces_matrix.get_lines()
+
+        DIM_OPACITY = 0.1
+
+        self.play(
+            Write(first_step),
+            forces_matrix_lines[0].animate.set_opacity(DIM_OPACITY),
+            forces_matrix_lines[1].animate.set_opacity(DIM_OPACITY),
+            complex_sindy_matrix_lines.animate.set_opacity(DIM_OPACITY)
+        )
+
+        self.next_slide(notes=" Second we propagate on the left side")
+
+        self.play(
+            Write(second_step),
+            complex_sindy_matrix_lines[2].animate.set_opacity(1)
+        )
+
+        self.next_slide(notes=" Second and half we propagathe the function")
+
+        self.play(
+            complex_sindy_matrix_lines[1][1].animate.set_opacity(1)
+        )
+
+        self.next_slide(notes=" Third propagate to the coordinate")
+
+        self.play(
+            Write(third_step),
+            complex_sindy_matrix_lines[1].animate.set_opacity(1),
+            forces_matrix_lines[1].animate.set_opacity(1)
+        )
+
+        self.next_slide(notes=" Fourth loop")
+
+        self.play(
+            Write(fourth_step),
+        )
+
+        self.next_slide(notes=" Fifth execute SINDy")
+
+        complex_sindy_matrix_lines.generate_target(use_deepcopy=True).set_opacity(DIM_OPACITY)
+        complex_sindy_matrix_lines.target[2][3].set_opacity(1)
+
+        self.play(
+            Write(fifth_step),
+            MoveToTarget(complex_sindy_matrix_lines),
+            forces_matrix_lines.animate.set_opacity(DIM_OPACITY)
+        )
+
+        self.next_slide(notes=" Sixth execute SINDy-PI on non discovered coordinate")
+
+        self.play(
+            Write(sixth_step),
+            complex_sindy_matrix_lines[0].animate.set_opacity(1),
+            complex_sindy_matrix_lines[1].animate.set_opacity(1),
+            complex_sindy_matrix_lines[2].animate.set_opacity(DIM_OPACITY)
+        )
+
+        self.next_slide(notes=" Seventh combine everything")
+
+        complex_sindy_matrix_lines.generate_target(use_deepcopy=True).set_opacity(DIM_OPACITY)
+        complex_sindy_matrix_lines.target[0][0].set_opacity(1)
+        complex_sindy_matrix_lines.target[1][4].set_opacity(1)
+        complex_sindy_matrix_lines.target[2][3].set_opacity(1)
+
+        self.play(
+            Write(seventh_step),
+            MoveToTarget(complex_sindy_matrix_lines)
+        )
+
+    def construct_result_protocol(self):
+
+        self.next_slide(notes=" # Result")
+
+        intro_text = Text("Test protocol has been established to evaluate the performance of the algorithm",font_size=self.CONTENT_FONT_SIZE).to_corner(UL).shift(DOWN*1)
+
+        image_double_pendulum = ImageMobject("image/double_pendulum.png")
+        double_pendulum_text= Text("Double Pendulum",t2c={"Double Pendulum":RED_E},font_size=self.CONTENT_FONT_SIZE).next_to(image_double_pendulum,DOWN,buff=0.1)
+
+        image_cartpole = ImageMobject("image/cartpole.png").scale_to_fit_height(image_double_pendulum.height)
+        cartpole_text= Text("Cartpole",t2c={"Cartpole":RED_E},font_size=self.CONTENT_FONT_SIZE).next_to(image_cartpole,DOWN,buff=0.1)
+
+        image_double_cartpole = ImageMobject("image/double_cartpole.png").scale_to_fit_height(image_double_pendulum.height)
+        double_cartpole_text= Text("Double Cartpole",t2c={"Double Cartpole":RED_E},font_size=self.CONTENT_FONT_SIZE).next_to(image_double_cartpole,DOWN,buff=0.1)
+
+        image_group = Group(
+            Group(image_double_pendulum,double_pendulum_text),
+            Group(image_cartpole,cartpole_text),
+            Group(image_double_cartpole,double_cartpole_text)
+        ).arrange(RIGHT,buff=1).scale(0.5)
+
+        
+
+
+        self.new_clean_slide("5.1 Result gathering",contents=[intro_text,image_group])
+
+        self.next_slide(notes=" let's take example of double cartpole")
+
+        double_cartpole_group = Group(image_double_cartpole,double_cartpole_text)
+        double_cartpole_group.generate_target()
+
+        double_cartpole_group.target.scale(0.5)
+
+        force_input = ImageMobject("image/force_input.png").scale(0.25)
+
+        result_image = ImageMobject("image/result_comparison.png").scale(0.25)
+
+        system_box = Rectangle(color=YELLOW_E,height=2,width=3)
+        input_arrow = Arrow(start=system_box.get_left()+LEFT*3,end=system_box.get_left(),buff=0.0)
+        output_arrow = Arrow(start=system_box.get_right(),end=system_box.get_right()+RIGHT*3,buff=0.0)
+        system_label = Text("System",color=YELLOW_E).move_to(system_box.get_center())
+
+        input_label = MathTex(r"\qcoordinate,\dots , \dot{\qcoordinate},\dots").next_to(input_arrow,UP)
+        output_label = MathTex(r"\ddot{\qcoordinate},\dots").next_to(output_arrow,UP)
+
+        system = VGroup(system_box,input_arrow,output_arrow,system_label,input_label,output_label).scale(0.33).next_to(double_cartpole_group,RIGHT,buff=0.5)
+
+        Group(force_input,result_image,double_cartpole_group.target,system).scale(1.33).arrange_in_grid(cols=2,rows=2,buff=1).next_to(intro_text,DOWN,buff=0.5).set_x(0)
+        force_input_text = Text("Force input",t2c={"Force input":RED_E},font_size=self.CONTENT_FONT_SIZE).scale(0.66).next_to(force_input,DOWN,buff=0.1)
+        result_text = Text("Comparison between real and discovered",t2c={"real":RED_E,"discovered":RED_E},font_size=self.CONTENT_FONT_SIZE).scale(0.66).next_to(result_image,DOWN,buff=0.1)
+
+        function_arrow = CurvedArrow(
+            end_point=double_cartpole_group.target.get_left()+LEFT*0.2,
+            start_point=force_input.get_left()+LEFT*0.2,
+            angle=PI/3,
+            color=DEFAULT_COLOR
+        )
+
+        self.play(
+            FadeOut(Group(image_double_pendulum,double_pendulum_text,image_cartpole,cartpole_text)),
+        )
+
+        self.play(
+            MoveToTarget(double_cartpole_group),
+            FadeIn(force_input),
+            Create(function_arrow),
+            Write(force_input_text)
+        )
+
+        self.next_slide(notes="Create a system from the data gathered")
+
+        function_arrow_2 = CurvedArrow(
+            end_point=system.get_bottom()+DOWN*0.2,
+            start_point=double_cartpole_group.get_bottom()+DOWN*0.2,
+            angle=PI/3,
+            color=DEFAULT_COLOR
+        )
+
+        self.play(
+            Create(function_arrow_2),
+            Create(system)
+        )
+
+        self.next_slide(notes=" compare real system and discovered system")
+
+        function_arrow_3 = CurvedArrow(
+            end_point=result_image.get_right()+RIGHT*0.2,
+            start_point=system.get_right()+RIGHT*0.2,
+            angle=PI/3,
+            color=DEFAULT_COLOR
+        )
+
+        self.play(  
+            Create(function_arrow_3),
+            FadeIn(result_image),
+            Write(result_text)
+        )
+
+    def construct_result(self):
+
+        self.next_slide(notes=" # Result")
+
+
+        intro_text_1 = Text("SINDy-PI vs SINDy vs Mixed SINDy has been compared on",t2c={"-PI":RED_E,"SINDy":RED_E,"Mixed":RED_E},font_size=self.CONTENT_FONT_SIZE).to_corner(UL).shift(DOWN*1)
+        intro_text_2 = Text("3 systems,3 levels of damping and every combinaison of implicit explicit",t2c={"3":RED_E,"every combinaison":RED_E},font_size=self.CONTENT_FONT_SIZE).next_to(intro_text_1,DOWN,buff=0.1,aligned_edge=LEFT)
+
+
+        self.new_clean_slide("5.2 Result table",contents=[  intro_text_1,intro_text_2])
+
+        table = Tex(r"""
+\small
+\begin{tabular}{lrrrrrrrr}
+\hline
+combo type & invalid & timeout & uncompleted & 1st & 2nd & 2nd$>$ & Wins WC & success rate \\
+\hline
+mixed x mixed (our) & 25 & 0 & 20 & 59 & 12 & 0 & 45 & 0.61 \\
+mixed x explicit (our) & 14 & 0 & 17 & 53 & 8 & 0 & 42 & 0.66 \\
+sindy x mixed & 81 & 43 & 11 & 12 & 8 & 0 & 3 & 0.18 \\
+sindy x explicit & 61 & 16 & 11 & 12 & 8 & 0 & 3 & 0.22 \\
+mixed x implicit (our)& 1 & 0 & 1 & 10 & 2 & 2 & 6 & 0.88 \\
+xlsindy x mixed & 59 & 0 & 43 & 3 & 6 & 4 & 3 & 0.11 \\
+xlsindy x explicit & 38 & 0 & 43 & 3 & 3 & 5 & 3 & 0.12 \\
+xlsindy x implicit & 0 & 0 & 1 & 2 & 1 & 1 & 0 & 0.80 \\
+sindy x implicit & 24 & 23 & 0 & 0 & 0 & 0 & 0 & 0.00 \\
+\hline
+\end{tabular}
+""").scale(0.5).next_to(intro_text_2,DOWN,buff=0.5).set_x(0)
+
+        self.next_slide(notes=" Table of results")
+
+        self.play(
+            Write(table)
+        )
+
+    def construct_conclusion(self):
+
+        self.next_slide(notes=" # Conclusion")
+
+        conclusion_paragraph = Paragraph(
+            "Unified SINDy enables the use of more compact catalogs,",
+            "keep the advantages of both Newton and Lagrange formulation,",
+            "open the door to complex system identification.",
+            "Real world mixed implicit and explicit systems can also be identified",
+            t2c={"Unified SINDy":RED_E,"Newton":RED_E,"Lagrange":RED_E,"complex":RED_E,"real world":RED_E},
+            font_size=self.CONTENT_FONT_SIZE
+        ).align_to(self.UL,LEFT).shift(RIGHT*1)
+
+        self.new_clean_slide("6 Conclusion",contents=conclusion_paragraph)
+
+    def construct_qa(self):
+
+        self.next_slide(notes=" # QA")
+
+        main_library_text = Text("Main library can be found here :",font_size=self.CONTENT_FONT_SIZE)
+
+        main_library_link = Text("github.com/Eymeric65/py-xl-sindy",t2c={"github.com/Eymeric65/py-xl-sindy":BLUE_E},font_size=self.CONTENT_FONT_SIZE).next_to(main_library_text,DOWN,buff=0.1)
+
+        auxiliary_content = Text("Presentation slide code, experiment data, batch generation code can be found here :",font_size=self.CONTENT_FONT_SIZE).next_to(main_library_link,DOWN,buff=0.5)
+        auxiliary_content_link = Text("github.com/Eymeric65/py-xl-sindy-data-visualisation",t2c={"github.com/Eymeric65/py-xl-sindy-data-visualisation":BLUE_E},font_size=self.CONTENT_FONT_SIZE).next_to(auxiliary_content,DOWN,buff=0.1)
+
+        live_demo_text = Text("Experiment visualisation website can be found here :",font_size=self.CONTENT_FONT_SIZE).next_to(auxiliary_content_link,DOWN,buff=0.5)
+        live_demo_link = Text("eymeric65.github.io/py-xl-sindy-data-visualisation/",t2c={"eymeric65.github.io/py-xl-sindy-data-visualisation/":BLUE_E},font_size=self.CONTENT_FONT_SIZE).next_to(live_demo_text,DOWN,buff=0.1)
+
+        content_group = VGroup(
+            main_library_text,
+            main_library_link,
+            auxiliary_content,
+            auxiliary_content_link,
+            live_demo_text,
+            live_demo_link
+        ).move_to(ORIGIN)
+
+        self.new_clean_slide("7 Questions and answers",contents=content_group)
+
+    def construct(self):
+
+        self.construct_intro()
+        #self.construct_introduction()
+        self.construct_what_is_sindy()
+        self.construct_sindy_type()
+        self.construct_sindy_limitation()
+        self.construct_lagrangian()
+        self.construct_lab_sindy() # 8mn until here
+        self.construct_addition_1() # 9mn until here
+        self.construct_addition_2() # 11mn until here (probable)
+        self.construct_result_protocol() # 12mn until here
+        self.construct_result() # 13mn until here
+        self.construct_conclusion() # 14mn until here
+        self.construct_qa() # 15mn until here
+
+
+
+class WIP(BaseSlide):
+
+    def construct(self):
+
+        pass
+
+
+
+        
+
+        
+        
+
+
+
+
+
+
+        
+
+
+
 
 
 
