@@ -85,36 +85,38 @@ const TimeSlider: React.FC<TimeSliderProps> = ({ times, onChange }) => {
   }, [playing, speed, times.length]);
 
   return (
-    <div className="w-full flex flex-col items-center my-4 px-4">
-      {/* Controls row */}
-      <div className="flex items-center justify-center gap-4 mb-2">
-        <button
-          className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 flex-shrink-0"
-          onClick={() => setPlaying((p) => !p)}
+    <div className="w-full flex items-center gap-3 px-2">
+      {/* Play button */}
+      <button
+        className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 flex-shrink-0 text-sm"
+        onClick={() => setPlaying((p) => !p)}
+      >
+        {playing ? "Pause" : "Play"}
+      </button>
+      
+      {/* Speed selector */}
+      <div className="flex items-center gap-1 flex-shrink-0">
+        <span className="text-xs text-gray-600">Speed:</span>
+        <select
+          value={speed}
+          onChange={(e) => setSpeed(Number(e.target.value))}
+          className="text-xs px-1 py-0.5 border rounded"
         >
-          {playing ? "Pause" : "Play"}
-        </button>
-        <div className="flex items-center gap-1 flex-shrink-0">
-          <span className="text-xs text-gray-600">Speed:</span>
-          <select
-            value={speed}
-            onChange={(e) => setSpeed(Number(e.target.value))}
-            className="text-xs px-1 py-0.5 border rounded"
-          >
-            <option value={0.25}>0.25x</option>
-            <option value={0.5}>0.5x</option>
-            <option value={1}>1x</option>
-            <option value={2}>2x</option>
-            <option value={4}>4x</option>
-          </select>
-        </div>
-        <span className="text-right text-sm text-gray-700 font-mono">
-          {(typeof times[current] === 'number' ? times[current].toFixed(3) : '0.000')} s
-        </span>
+          <option value={0.25}>0.25x</option>
+          <option value={0.5}>0.5x</option>
+          <option value={1}>1x</option>
+          <option value={2}>2x</option>
+          <option value={4}>4x</option>
+        </select>
       </div>
       
-      {/* Slider row - full width */}
-      <div className="w-full max-w-4xl">
+      {/* Time display */}
+      <span className="text-sm text-gray-700 font-mono flex-shrink-0">
+        {(typeof times[current] === 'number' ? times[current].toFixed(3) : '0.000')} s
+      </span>
+      
+      {/* Slider - takes remaining space */}
+      <div className="flex-1">
         <input
           type="range"
           min={0}

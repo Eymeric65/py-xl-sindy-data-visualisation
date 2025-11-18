@@ -55,7 +55,7 @@ const SolutionControlTable: React.FC<SolutionControlTableProps> = ({ groups, onS
               id: solutionId,
               groupName: groupName,
               solutionType: solutionType,
-              isVisible: visibilityMap.get(solutionId) ?? true
+              isVisible: visibilityMap.get(solutionId) ?? false
             });
           }
         }
@@ -192,9 +192,14 @@ const SolutionControlTable: React.FC<SolutionControlTableProps> = ({ groups, onS
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-lg font-semibold text-gray-900">Solution Control Center</h2>
-            <p className="text-sm text-gray-600 mt-1">
-              {visibleCount} of {totalCount} solutions visible
-            </p>
+            <div className="flex items-center gap-3 mt-1">
+              <p className="text-sm text-gray-600">
+                {visibleCount} of {totalCount} solutions visible
+              </p>
+              <p className="text-xs text-red-600">
+                ⚠️ Toggling all solutions at once may slow down your browser
+              </p>
+            </div>
           </div>
           <div className="flex gap-2">
             <button

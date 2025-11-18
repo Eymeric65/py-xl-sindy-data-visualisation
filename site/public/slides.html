@@ -1,0 +1,673 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <title>Manim Slides</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.2.0/reveal.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.2.0/theme/black.min.css">
+
+    <!-- Theme used for syntax highlighting of code -->
+    <!-- <link rel="stylesheet" href="lib/css/zenburn.css"> -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/zenburn.min.css">
+    <!-- <link rel="stylesheet" href="index.css"> -->
+  </head>
+
+  <body>
+    <div class="reveal">
+      <div class="slides">
+        <section
+          data-background-size='contain'
+          data-background-color="white"
+          data-background-video="slides_assets/f0d7e661bd32b2ee563190590e64934c65dbd03b896bbe02b1a0e3d956f4d8d8.mp4"
+          data-background-video-muted
+          >
+        </section>
+        <section
+          data-background-size='contain'
+          data-background-color="white"
+          data-background-video="slides_assets/39b5e51eeca0da1b94653c18cc4048dcd58b4789d6d11f146e8567195f48086a.mp4"
+          >
+            <aside class="notes" data-markdown># Contents of the presentation</aside>
+        </section>
+        <section
+          data-background-size='contain'
+          data-background-color="white"
+          data-background-video="slides_assets/f0c84ea550947f3504fb5e4ab5200be949c1d160ca5eb8ebaeb6cf9762edfc13.mp4"
+          >
+            <aside class="notes" data-markdown># What is SINDy</aside>
+        </section>
+        <section
+          data-background-size='contain'
+          data-background-color="white"
+          data-background-video="slides_assets/29abc6b1c691484ffeef5fc357a5730ed7d991da251b4fdaf9d2afd7d21cf701.mp4"
+          >
+            <aside class="notes" data-markdown>What does SINDy stand for ?</aside>
+        </section>
+        <section
+          data-background-size='contain'
+          data-background-color="white"
+          data-background-video="slides_assets/a1a3c8d0a3a784949b0936d9f53423b6dfbc9dca52be1e6c2ce3268e736cffe2.mp4"
+          >
+            <aside class="notes" data-markdown>Now we will focus on Identification of Nonlinear Dynamics</aside>
+        </section>
+        <section
+          data-background-size='contain'
+          data-background-color="white"
+          data-background-video="slides_assets/20568d1185d38117c52740d71784d988153bef72dc5ac720ac659c994ba0fa66.mp4"
+          >
+            <aside class="notes" data-markdown>Let's introduce our pendulum</aside>
+        </section>
+        <section
+          data-background-size='contain'
+          data-background-color="white"
+          data-background-video="slides_assets/a77ed11a38aba01dc0c658f9b555af52d2bfefae680f4031a70a59ce53aa26bd.mp4"
+          >
+            <aside class="notes" data-markdown>Our pendulum is govern by equation following a paradigm</aside>
+        </section>
+        <section
+          data-background-size='contain'
+          data-background-color="white"
+          data-background-video="slides_assets/971f27dc3c7bafa67998adb577b98b8ace953d37e79d412cf73bbb5d6633b3ba.mp4"
+          >
+            <aside class="notes" data-markdown>There is our pendulum equation</aside>
+        </section>
+        <section
+          data-background-size='contain'
+          data-background-color="white"
+          data-background-video="slides_assets/d76452bada920a5857854516f8a6d3c68375e0f9c8bdc7e02e75d7ce2958ddda.mp4"
+          data-background-video-loop
+          >
+            <aside class="notes" data-markdown>Let's give a pinch of energy to the pendulum</aside>
+        </section>
+        <section
+          data-background-size='contain'
+          data-background-color="white"
+          data-background-video="slides_assets/9517eda12ca7d1fd436cf58ab4562762710103e1500911d6a9155da843253204.mp4"
+          >
+            <aside class="notes" data-markdown>Let's analyze the data of our pendulum</aside>
+        </section>
+        <section
+          data-background-size='contain'
+          data-background-color="white"
+          data-background-video="slides_assets/5a0fa79aeb436b423afa3d97cc6e47b1bfd9b21b1ddd93966beefdaee972c7cd.mp4"
+          >
+            <aside class="notes" data-markdown>We also need velocity and acceleration.</aside>
+        </section>
+        <section
+          data-background-size='contain'
+          data-background-color="white"
+          data-background-video="slides_assets/5ffad1fe6c603f57503eb103b4dfe32e36bb9cabfd617c9d88d19dda7e6ce794.mp4"
+          >
+            <aside class="notes" data-markdown>We have now all the data to perform SINDy</aside>
+        </section>
+        <section
+          data-background-size='contain'
+          data-background-color="white"
+          data-background-video="slides_assets/267f7a25b75bf13ed680ba8c7b9c819f6744466737c1e441211f98a55641ba96.mp4"
+          >
+            <aside class="notes" data-markdown>Let's get back to our paradigm newton</aside>
+        </section>
+        <section
+          data-background-size='contain'
+          data-background-color="white"
+          data-background-video="slides_assets/121e9de8edd468097ac2eefe2387fb2f7f5d3139c13a032f9144da83d80dc623.mp4"
+          >
+            <aside class="notes" data-markdown>We want to model a system and not only match our data</aside>
+        </section>
+        <section
+          data-background-size='contain'
+          data-background-color="white"
+          data-background-video="slides_assets/b3781d747c96203e4a962ab54d19a24c3d049d9c2a3bd032a740034d6d1f88d5.mp4"
+          >
+            <aside class="notes" data-markdown>Let's reformulate what is a system</aside>
+        </section>
+        <section
+          data-background-size='contain'
+          data-background-color="white"
+          data-background-video="slides_assets/bca6ded9429e761fe13b9fd50779a45c701c8f1d129640fef9b01b2fa4fafed7.mp4"
+          >
+            <aside class="notes" data-markdown>Let's reformulate what is a system</aside>
+        </section>
+        <section
+          data-background-size='contain'
+          data-background-color="white"
+          data-background-video="slides_assets/73caab97cdeb636290ca277ba08b3cc13611466a6ccb14035eaaed6db9f610a8.mp4"
+          >
+            <aside class="notes" data-markdown>Now we can dive into the sparse argument of SINDy</aside>
+        </section>
+        <section
+          data-background-size='contain'
+          data-background-color="white"
+          data-background-video="slides_assets/ba704d3b19dff51782212e7210c44a35f340e148d4591285a3517333a5d403ea.mp4"
+          >
+            <aside class="notes" data-markdown>We need to take a few of these term to reconstruct our system</aside>
+        </section>
+        <section
+          data-background-size='contain'
+          data-background-color="white"
+          data-background-video="slides_assets/75844f4982e35007203a45cdc8ab90138d6d06d0fe701ccd1572dacc4b9e6164.mp4"
+          >
+            <aside class="notes" data-markdown>We need to select the right terms</aside>
+        </section>
+        <section
+          data-background-size='contain'
+          data-background-color="white"
+          data-background-video="slides_assets/19744d9a2d611bf594aa0a18be48547386cb26788c5d5b6e8206fde047760779.mp4"
+          >
+            <aside class="notes" data-markdown>That s where we can make emerge a linear matrix representation</aside>
+        </section>
+        <section
+          data-background-size='contain'
+          data-background-color="white"
+          data-background-video="slides_assets/5c262489cedeaf4b1e76dd1be280b2f58f6d2f9e708a4f655e031d51a0d1e800.mp4"
+          >
+            <aside class="notes" data-markdown>Now we can use any linear regression algorithm and more precisely a sparse one</aside>
+        </section>
+        <section
+          data-background-size='contain'
+          data-background-color="white"
+          data-background-video="slides_assets/3bb166a9ea34f398f06ac3f5da0b46ef3d5df68e1e6bf217929d9642f0410725.mp4"
+          >
+            <aside class="notes" data-markdown># What are the different type of Sindy ?</aside>
+        </section>
+        <section
+          data-background-size='contain'
+          data-background-color="white"
+          data-background-video="slides_assets/00b462163479f0fd43feb957c7c304a75e0534ca3d6a261cd22978495f896bdc.mp4"
+          >
+            <aside class="notes" data-markdown>SINDy-PI introduces implicit formulations</aside>
+        </section>
+        <section
+          data-background-size='contain'
+          data-background-color="white"
+          data-background-video="slides_assets/4d83b15b6ba0825903313af8f1d1a7348cb755648736040c8409e4dcc241e0c6.mp4"
+          >
+            <aside class="notes" data-markdown>Null space optimization is hard</aside>
+        </section>
+        <section
+          data-background-size='contain'
+          data-background-color="white"
+          data-background-video="slides_assets/0fab7241c43250aedeb9684557ccefe8e74c3de16a4d336e2201f2e4598edf11.mp4"
+          >
+            <aside class="notes" data-markdown>Rearranging catalog line</aside>
+        </section>
+        <section
+          data-background-size='contain'
+          data-background-color="white"
+          data-background-video="slides_assets/34319204fe08c03ee8e9ed6c282a4ac0e872bfa42949315a5af742f6b855f528.mp4"
+          >
+            <aside class="notes" data-markdown>What if this contender is not inside our solution ?</aside>
+        </section>
+        <section
+          data-background-size='contain'
+          data-background-color="white"
+          data-background-video="slides_assets/94d9bb6013477fb86b73208938ac4e3cef26f5ee11b57a902ceac8d645aba9d5.mp4"
+          >
+            <aside class="notes" data-markdown>We can try different combination of terms</aside>
+        </section>
+        <section
+          data-background-size='contain'
+          data-background-color="white"
+          data-background-video="slides_assets/dac58d396ad44d33b052f830e0957e2705962bad159eaa0be538374361e627f6.mp4"
+          >
+            <aside class="notes" data-markdown>This is extremely costly in term of time</aside>
+        </section>
+        <section
+          data-background-size='contain'
+          data-background-color="white"
+          data-background-video="slides_assets/98ca4f4853edf00ddb5c36d95c1662bb5f5ed23a621eac02f60794f6f104682e.mp4"
+          >
+            <aside class="notes" data-markdown>Now let's apply our sparse regression algorithm</aside>
+        </section>
+        <section
+          data-background-size='contain'
+          data-background-color="white"
+          data-background-video="slides_assets/db44013af86a76fb05956b2a554fdcfff15f012ac74a4fbe637bcb24ef94c884.mp4"
+          >
+            <aside class="notes" data-markdown>Not sparse entry are eliminated</aside>
+        </section>
+        <section
+          data-background-size='contain'
+          data-background-color="white"
+          data-background-video="slides_assets/435d542f1e9c9f762e69f27ae96875ff6a13e7c396529047a244653c43b7147f.mp4"
+          >
+            <aside class="notes" data-markdown># The Lab SINDy</aside>
+        </section>
+        <section
+          data-background-size='contain'
+          data-background-color="white"
+          data-background-video="slides_assets/ce16c9c216e55e86b175017cd951aff57b508da46b48102c09e3124abcc85831.mp4"
+          >
+            <aside class="notes" data-markdown>Term per term</aside>
+        </section>
+        <section
+          data-background-size='contain'
+          data-background-color="white"
+          data-background-video="slides_assets/382acb41cc35ec649735a9df2050a12129c0abfa0c0d4eddb254217ae399124e.mp4"
+          >
+            <aside class="notes" data-markdown>All the possible couples for an 8 term catalog and a 2 degree polynome</aside>
+        </section>
+        <section
+          data-background-size='contain'
+          data-background-color="white"
+          data-background-video="slides_assets/df138c76e5859ca4abf925bf6606a3280a38322c785080ede17a38a5e01d6fc4.mp4"
+          >
+            <aside class="notes" data-markdown>And we double again when we put everything in the SINDy matrix</aside>
+        </section>
+        <section
+          data-background-size='contain'
+          data-background-color="white"
+          data-background-video="slides_assets/e44ae39cfbf536965b668616c67158b63967fe8392d91e7260fb4f1b2dfc6690.mp4"
+          >
+            <aside class="notes" data-markdown>Finally we can build the SINDy-Newton matrix</aside>
+        </section>
+        <section
+          data-background-size='contain'
+          data-background-color="white"
+          data-background-video="slides_assets/bde3dd6edb6b15120a8b6ad75a30b3f1c4d3a0fc3c6be5617357152ab27e70b1.mp4"
+          >
+            <aside class="notes" data-markdown># The Lab SINDy</aside>
+        </section>
+        <section
+          data-background-size='contain'
+          data-background-color="white"
+          data-background-video="slides_assets/e071332a2dc70bfb42d7a60ba12b81729bf0cfe91bb8a56808cb9b8d550e91c2.mp4"
+          >
+            <aside class="notes" data-markdown>The lagrangian formula</aside>
+        </section>
+        <section
+          data-background-size='contain'
+          data-background-color="white"
+          data-background-video="slides_assets/656dc81d063aae417f64c336543f44d59ab33dcea6872f8fab792aa89ae20e05.mp4"
+          >
+            <aside class="notes" data-markdown>The Euler-Lagrange equation</aside>
+        </section>
+        <section
+          data-background-size='contain'
+          data-background-color="white"
+          data-background-video="slides_assets/22950c4c3baf3b3c9a1ce89ac199f926ecd61d1fd358206f6a542cd0dc5620ed.mp4"
+          >
+            <aside class="notes" data-markdown>From Lagrange to Newton space</aside>
+        </section>
+        <section
+          data-background-size='contain'
+          data-background-color="white"
+          data-background-video="slides_assets/b91e238788223baf765c8c6053bd9a064884c0a9986482b8592b0ea4f9f4cdb2.mp4"
+          >
+            <aside class="notes" data-markdown># The Lab SINDy</aside>
+        </section>
+        <section
+          data-background-size='contain'
+          data-background-color="white"
+          data-background-video="slides_assets/d3b3b438a1a36f036bdf53dfcbdc35e0fb27d3221b3f3fbe47cbc0036364a688.mp4"
+          >
+            <aside class="notes" data-markdown># The Lab SINDy</aside>
+        </section>
+        <section
+          data-background-size='contain'
+          data-background-color="white"
+          data-background-video="slides_assets/4665d3348badcc773f2d6eb2c75ffea2075d94ad56ac80835ce2f5cfa04843fc.mp4"
+          >
+            <aside class="notes" data-markdown># Addition 1</aside>
+        </section>
+        <section
+          data-background-size='contain'
+          data-background-color="white"
+          data-background-video="slides_assets/875e0a978a29ae64c6931a729386d4e19b779fb6b500a463266f0bed12ffc1b5.mp4"
+          >
+            <aside class="notes" data-markdown>The lagrangian formula</aside>
+        </section>
+        <section
+          data-background-size='contain'
+          data-background-color="white"
+          data-background-video="slides_assets/97496dce6b1348c8e11a7e1d656c66a9503a9f5d2224951ab8128884a73b6ddc.mp4"
+          >
+            <aside class="notes" data-markdown># Addition 2</aside>
+        </section>
+        <section
+          data-background-size='contain'
+          data-background-color="white"
+          data-background-video="slides_assets/34a02f90a163c2756ebedbe972139d3b024247f24a59b4f4a144634951322d3e.mp4"
+          >
+            <aside class="notes" data-markdown>I will explain the algorithm, first we isolate external forces</aside>
+        </section>
+        <section
+          data-background-size='contain'
+          data-background-color="white"
+          data-background-video="slides_assets/baac39e3c7a6cbf3220ba87020ae09474227cda9536bb69e17d05d47f1048a69.mp4"
+          >
+            <aside class="notes" data-markdown>Second we propagate on the left side</aside>
+        </section>
+        <section
+          data-background-size='contain'
+          data-background-color="white"
+          data-background-video="slides_assets/5e5cb519842235fcff6bbe38b02f3bf44dc216942dbe288ecb71f302df9d8208.mp4"
+          >
+            <aside class="notes" data-markdown>Second and half we propagathe the function</aside>
+        </section>
+        <section
+          data-background-size='contain'
+          data-background-color="white"
+          data-background-video="slides_assets/cc23dd911e5bdba4e8783829fc67707d3bb80ec6b647e60861b4d9260c30c872.mp4"
+          >
+            <aside class="notes" data-markdown>Third propagate to the coordinate</aside>
+        </section>
+        <section
+          data-background-size='contain'
+          data-background-color="white"
+          data-background-video="slides_assets/e889d0518f7a4d0ecfc2a26447012c922f8708e7198c3b3ca769e0bfd7482e18.mp4"
+          >
+            <aside class="notes" data-markdown>Fourth loop</aside>
+        </section>
+        <section
+          data-background-size='contain'
+          data-background-color="white"
+          data-background-video="slides_assets/c31795ae4d11b3073a33eb77abdf950e0a5ad3c4b674a977e69d444f5c7bff10.mp4"
+          >
+            <aside class="notes" data-markdown>Fifth execute SINDy</aside>
+        </section>
+        <section
+          data-background-size='contain'
+          data-background-color="white"
+          data-background-video="slides_assets/4edc1b566af423f592333c6ebf59256e51a206886595ada9120f35af2c6619d7.mp4"
+          >
+            <aside class="notes" data-markdown>Sixth execute SINDy-PI on non discovered coordinate</aside>
+        </section>
+        <section
+          data-background-size='contain'
+          data-background-color="white"
+          data-background-video="slides_assets/fb12e4343a04d4353fce9dce764d19d2556f4a08ee53e020ba88ad37b91981c2.mp4"
+          >
+            <aside class="notes" data-markdown>Seventh combine everything</aside>
+        </section>
+        <section
+          data-background-size='contain'
+          data-background-color="white"
+          data-background-video="slides_assets/1db9a6520d47b19979d8cf30469286317bf4fd55be088c316efceccf9dc29ce6.mp4"
+          >
+            <aside class="notes" data-markdown># Result</aside>
+        </section>
+        <section
+          data-background-size='contain'
+          data-background-color="white"
+          data-background-video="slides_assets/a55fc728e95e355d328f63c2909e7e3a936309ebaae55cde026735fd530c1d0e.mp4"
+          >
+            <aside class="notes" data-markdown>let's take example of double cartpole</aside>
+        </section>
+        <section
+          data-background-size='contain'
+          data-background-color="white"
+          data-background-video="slides_assets/31f34df65383010fc18f367c887d4646107bf767bab8118dc8599a3f32fcf36e.mp4"
+          >
+            <aside class="notes" data-markdown>Create a system from the data gathered</aside>
+        </section>
+        <section
+          data-background-size='contain'
+          data-background-color="white"
+          data-background-video="slides_assets/728a1d98939a6e5b3a8ae643092cb9b6306cf06ac0236a2ca9a9fac19eb117e8.mp4"
+          >
+            <aside class="notes" data-markdown>compare real system and discovered system</aside>
+        </section>
+        <section
+          data-background-size='contain'
+          data-background-color="white"
+          data-background-video="slides_assets/c9f6d5830e0acabcc54de9a4534188c49cba40ca80f08092c139910bec4cca19.mp4"
+          >
+            <aside class="notes" data-markdown># Result</aside>
+        </section>
+        <section
+          data-background-size='contain'
+          data-background-color="white"
+          data-background-video="slides_assets/2098b46ebc8c298e81e391b4e733e2c3fa851b62dbd13768d83a3502f2c65cfd.mp4"
+          >
+            <aside class="notes" data-markdown>Table of results</aside>
+        </section>
+        <section
+          data-background-size='contain'
+          data-background-color="white"
+          data-background-video="slides_assets/187c80f42ba2976d815c7d689de06b64bc54406cd351230993ecf9ec8dc62c61.mp4"
+          >
+            <aside class="notes" data-markdown># Conclusion</aside>
+        </section>
+        <section
+          data-background-size='contain'
+          data-background-color="white"
+          data-background-video="slides_assets/af4984064fe1afa262d0a1744ad9dfec274470a78d2b0e63b268c6f1c6bf3a9d.mp4"
+          >
+            <aside class="notes" data-markdown># QA</aside>
+        </section>
+      </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.2.0/reveal.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.2.0/plugin/notes/notes.min.js"></script>
+
+    <!-- To include plugins, see: https://revealjs.com/plugins/ -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.2.0/plugin/markdown/markdown.min.js"></script>
+
+    <!-- <script src="index.js"></script> -->
+    <script>
+      Reveal.initialize({
+        /// The list of RevealJS plugins.
+        plugins: [ RevealMarkdown, RevealNotes ],
+        // The "normal" size of the presentation, aspect ratio will
+        // be preserved when the presentation is scaled to fit different
+        // resolutions. Can be specified using percentage units.
+        width: '100%',
+        height: '100%',
+        // Factor of the display size that should remain empty around
+        // the content
+        margin: 0.04,
+        // Bounds for smallest/largest possible scale to apply to content
+        minScale: 0.2,
+        maxScale: 2.0,
+        // Display presentation control arrows
+        controls: false,
+        // Help the user learn the controls by providing hints, for example by
+        // bouncing the down arrow when they first encounter a vertical slide
+        controlsTutorial: true,
+        // Determines where controls appear, "edges" or "bottom-right"
+        controlsLayout: 'bottom-right',
+        // Visibility rule for backwards navigation arrows; "faded", "hidden"
+        // or "visible"
+        controlsBackArrows: 'faded',
+        // Display a presentation progress bar
+        progress: false,
+        // Display the page number of the current slide
+        // - true:    Show slide number
+        // - false:   Hide slide number
+        //
+        // Can optionally be set as a string that specifies the number formatting:
+        // - "h.v":   Horizontal . vertical slide number (default)
+        // - "h/v":   Horizontal / vertical slide number
+        // - "c":   Flattened slide number
+        // - "c/t":   Flattened slide number / total slides
+        //
+        // Alternatively, you can provide a function that returns the slide
+        // number for the current slide. The function should take in a slide
+        // object and return an array with one string [slideNumber] or
+        // three strings [n1,delimiter,n2]. See #formatSlideNumber().
+        slideNumber: false,
+        // Can be used to limit the contexts in which the slide number appears
+        // - "all":      Always show the slide number
+        // - "print":    Only when printing to PDF
+        // - "speaker":  Only in the speaker view
+        showSlideNumber: 'all',
+        // Use 1 based indexing for # links to match slide number (default is zero
+        // based)
+        hashOneBasedIndex: false,
+        // Add the current slide number to the URL hash so that reloading the
+        // page/copying the URL will return you to the same slide
+        hash: false,
+        // Flags if we should monitor the hash and change slides accordingly
+        respondToHashChanges: false,
+        // Enable support for jump-to-slide navigation shortcuts
+        jumpToSlide: true,
+        // Push each slide change to the browser history.  Implies `hash: true`
+        history: false,
+        // Enable keyboard shortcuts for navigation
+        keyboard: true,
+        // Optional function that blocks keyboard events when retuning false
+        //
+        // If you set this to 'focused', we will only capture keyboard events
+        // for embedded decks when they are in focus
+        keyboardCondition: null,
+        // Disables the default reveal.js slide layout (scaling and centering)
+        // so that you can use custom CSS layout
+        disableLayout: false,
+        // Enable the slide overview mode
+        overview: true,
+        // Vertical centering of slides
+        center: true,
+        // Enables touch navigation on devices with touch input
+        touch: true,
+        // Loop the presentation
+        loop: false,
+        // Change the presentation direction to be RTL
+        rtl: false,
+        // Changes the behavior of our navigation directions.
+        //
+        // "default"
+        // Left/right arrow keys step between horizontal slides, up/down
+        // arrow keys step between vertical slides. Space key steps through
+        // all slides (both horizontal and vertical).
+        //
+        // "linear"
+        // Removes the up/down arrows. Left/right arrows step through all
+        // slides (both horizontal and vertical).
+        //
+        // "grid"
+        // When this is enabled, stepping left/right from a vertical stack
+        // to an adjacent vertical stack will land you at the same vertical
+        // index.
+        //
+        // Consider a deck with six slides ordered in two vertical stacks:
+        // 1.1    2.1
+        // 1.2    2.2
+        // 1.3    2.3
+        //
+        // If you're on slide 1.3 and navigate right, you will normally move
+        // from 1.3 -> 2.1. If "grid" is used, the same navigation takes you
+        // from 1.3 -> 2.3.
+        navigationMode: 'default',
+        // Randomizes the order of slides each time the presentation loads
+        shuffle: false,
+        // Turns fragments on and off globally
+        fragments: true,
+        // Flags whether to include the current fragment in the URL,
+        // so that reloading brings you to the same fragment position
+        fragmentInURL: true,
+        // Flags if the presentation is running in an embedded mode,
+        // i.e. contained within a limited portion of the screen
+        embedded: false,
+        // Flags if we should show a help overlay when the question-mark
+        // key is pressed
+        help: true,
+        // Flags if it should be possible to pause the presentation (blackout)
+        pause: true,
+        // Flags if speaker notes should be visible to all viewers
+        showNotes: false,
+        // Global override for autolaying embedded media (video/audio/iframe)
+        // - null:   Media will only autoplay if data-autoplay is present
+        // - true:   All media will autoplay, regardless of individual setting
+        // - false:  No media will autoplay, regardless of individual setting
+        autoPlayMedia: null,
+        // Global override for preloading lazy-loaded iframes
+        // - null:   Iframes with data-src AND data-preload will be loaded when within
+        //           the viewDistance, iframes with only data-src will be loaded when visible
+        // - true:   All iframes with data-src will be loaded when within the viewDistance
+        // - false:  All iframes with data-src will be loaded only when visible
+        preloadIframes: null,
+        // Can be used to globally disable auto-animation
+        autoAnimate: true,
+        // Optionally provide a custom element matcher that will be
+        // used to dictate which elements we can animate between.
+        autoAnimateMatcher: null,
+        // Default settings for our auto-animate transitions, can be
+        // overridden per-slide or per-element via data arguments
+        autoAnimateEasing: 'ease',
+        autoAnimateDuration: 1.0,
+        autoAnimateUnmatched: true,
+        // CSS properties that can be auto-animated. Position & scale
+        // is matched separately so there's no need to include styles
+        // like top/right/bottom/left, width/height or margin.
+        autoAnimateStyles: ['opacity', 'color', 'background-color', 'padding', 'font-size', 'line-height', 'letter-spacing', 'border-width', 'border-color', 'border-radius', 'outline', 'outline-offset'],
+        // Controls automatic progression to the next slide
+        // - 0:      Auto-sliding only happens if the data-autoslide HTML attribute
+        //           is present on the current slide or fragment
+        // - 1+:     All slides will progress automatically at the given interval
+        // - false:  No auto-sliding, even if data-autoslide is present
+        autoSlide: 0,
+        // Stop auto-sliding after user input
+        autoSlideStoppable: true,
+        // Use this method for navigation when auto-sliding (defaults to navigateNext)
+        autoSlideMethod: null,
+        // Specify the average time in seconds that you think you will spend
+        // presenting each slide. This is used to show a pacing timer in the
+        // speaker view
+        defaultTiming: null,
+        // Enable slide navigation via mouse wheel
+        mouseWheel: false,
+        // Opens links in an iframe preview overlay
+        // Add `data-preview-link` and `data-preview-link="false"` to customize each link
+        // individually
+        previewLinks: false,
+        // Exposes the reveal.js API through window.postMessage
+        postMessage: true,
+        // Dispatches all reveal.js events to the parent window through postMessage
+        postMessageEvents: false,
+        // Focuses body when page changes visibility to ensure keyboard shortcuts work
+        focusBodyOnPageVisibilityChange: true,
+        // Transition style
+        transition: 'none', // none/fade/slide/convex/concave/zoom
+        // Transition speed
+        transitionSpeed: 'default', // default/fast/slow
+        // Transition style for full page slide backgrounds
+        backgroundTransition: 'none', // none/fade/slide/convex/concave/zoom
+        // The maximum number of pages a single slide can expand onto when printing
+        // to PDF, unlimited by default
+        pdfMaxPagesPerSlide: Number.POSITIVE_INFINITY,
+        // Prints each fragment on a separate slide
+        pdfSeparateFragments: true,
+        // Offset used to reduce the height of content within exported PDF pages.
+        // This exists to account for environment differences based on how you
+        // print to PDF. CLI printing options, like phantomjs and wkpdf, can end
+        // on precisely the total height of the document whereas in-browser
+        // printing has to end one pixel before.
+        pdfPageHeightOffset: -1,
+        // Number of slides away from the current that are visible
+        viewDistance: 3,
+        // Number of slides away from the current that are visible on mobile
+        // devices. It is advisable to set this to a lower number than
+        // viewDistance in order to save resources.
+        mobileViewDistance: 2,
+        // The display mode that will be used to show slides
+        display: 'block',
+        // Hide cursor if inactive
+        hideInactiveCursor: true,
+        // Time before the cursor is hidden (in ms)
+        hideCursorTime: 5000
+      });
+      // Override SPACE to play / pause the video
+      Reveal.addKeyBinding(
+        {
+          keyCode: 32,
+          key: 'SPACE',
+          description: 'Play / pause video'
+        },
+        () => {
+          var currentVideos = Reveal.getCurrentSlide().slideBackgroundContentElement.getElementsByTagName("video");
+          if (currentVideos.length > 0) {
+            if (currentVideos[0].paused == true) currentVideos[0].play();
+            else currentVideos[0].pause();
+          } else {
+            Reveal.next();
+          }
+        }
+      );
+    </script>
+  </body>
+</html>
