@@ -86,7 +86,7 @@ const App: React.FC = () => {
   useEffect(() => {
     if (!selectedFile) {
       // Set a default file - you can change this to any default filename
-      setSelectedFile("0a25fa5db7bcb8cafb152f79f36db501.json");
+      setSelectedFile("242eaf2ea764a3a70c8c55098ffabf61.json");
     }
   }, [selectedFile]);
 

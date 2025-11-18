@@ -422,12 +422,12 @@ DecimalNumber.__init__ = default_color(DecimalNumber)
 global_slide_counter = 0
 
 section_name = [
-    "1. What is SINDy",
-    "2. SINDy types",
-    "3. The Lab SINDy",
-    "4. New additions",
-    "5. Results",
-    "6. Questions and answers",
+    "What is SINDy",
+    "SINDy types",
+    "The Lab SINDy",
+    "New additions",
+    "Results",
+    "Questions and answers",
 
 ]
 
@@ -634,6 +634,7 @@ class Main(BaseSlide):
             )
         
         self.play(
+            sindy_text_deployed[0].animate.set_color(DEFAULT_COLOR),
             *[word.animate.set_color(RED_E)  for word in sindy_text_deployed[1:]]
         )
 
@@ -1254,6 +1255,8 @@ class Main(BaseSlide):
 
         equal = MathTex(r"=").scale(1)
 
+        citation = Tex(r"Brunton, S. L., Proctor, J. L. \& Kutz, J. N. Discovering governing equations from data: Sparse identification of nonlinear dynamical systems. (2016).",font_size=self.SOURCE_FONT_SIZE).to_corner(DL)
+
         sindy_equation = VGroup(
             classical_sindy_matrix,
             coefficient_matrix,
@@ -1261,7 +1264,7 @@ class Main(BaseSlide):
             force_vector
         ).arrange(RIGHT,buff=0.5)
 
-        self.new_clean_slide("2.1 Sindy type : classic SINDy",contents=sindy_equation,t2c={"-PI":RED_E})
+        self.new_clean_slide("2.1 Sindy type : classic SINDy",contents=[sindy_equation,citation],t2c={"-PI":RED_E})
 
         self.next_slide(notes="SINDy-PI introduces implicit formulations")
 
@@ -1270,6 +1273,7 @@ class Main(BaseSlide):
         self.play(
             Transform(force_vector.get_contents(),zero),
             self.next_slide_title_animation("2.2 Sindy type : SINDy-PI",t2c={"-PI":RED_E}),
+            Transform(citation,Tex(r"Kaheman, K., Kutz, J. N. \& Brunton, S. L. SINDy-PI: A Robust Algorithm for Parallel Implicit Sparse Identification of Nonlinear Dynamics. (2020).",font_size=self.SOURCE_FONT_SIZE).to_corner(DL)),
             self.next_slide_number_animation()
         )
 
@@ -1691,11 +1695,16 @@ class Main(BaseSlide):
         first_line = sindy_newton_lines[0][:4]
         second_line = sindy_newton_lines[1][4:]
 
+        first_line_zero = sindy_newton_lines[0][4:]
+        second_line_zero = sindy_newton_lines[1][:4]
+
         self.play(
             Create(sindy_newton_matrix.get_brackets()),
             Create(sindy_newton_matrix.get_arrows()),
             ReplacementTransform(function_couples,first_line),
             ReplacementTransform(function_couples_2,second_line),
+            Create(first_line_zero),
+            Create(second_line_zero),
         )
 
     def construct_lagrangian(self):
@@ -1828,8 +1837,9 @@ class Main(BaseSlide):
 
         f_group = VGroup(f_object,f_persistant)
 
+        citation = Tex(r"Purnomo, A. \& Hayashibe, M. Sparse identification of Lagrangian for nonlinear dynamical systems via proximal gradient method. (2023).",font_size=self.SOURCE_FONT_SIZE).to_corner(DL)
 
-        self.new_clean_slide("3.3 The Lab SINDy formulation",contents=[intro_text,f_group])        
+        self.new_clean_slide("3.3 The Lab SINDy formulation",contents=[intro_text,f_group,citation])        
 
         self.next_slide(notes=" # The Lab SINDy")
 
@@ -2121,9 +2131,6 @@ class Main(BaseSlide):
             Group(image_double_cartpole,double_cartpole_text)
         ).arrange(RIGHT,buff=1).scale(0.5)
 
-        
-
-
         self.new_clean_slide("5.1 Result gathering",contents=[intro_text,image_group])
 
         self.next_slide(notes=" let's take example of double cartpole")
@@ -2291,36 +2298,8 @@ sindy x implicit & 24 & 23 & 0 & 0 & 0 & 0 & 0 & 0.00 \\
         self.construct_qa() # 15mn until here
 
 
-
 class WIP(BaseSlide):
 
     def construct(self):
 
         pass
-
-
-
-        
-
-        
-        
-
-
-
-
-
-
-        
-
-
-
-
-
-
-
-
-
-
-
-
-
