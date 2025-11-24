@@ -1,4 +1,3 @@
-results*
 data-archive/
 *.sif
 plots/
@@ -6,3 +5,7 @@ backup/
 graphs_analysis/
 .venv/
 __pycache__/
+*.tar.gz
+*.json
+*.pkl
+*.csv
