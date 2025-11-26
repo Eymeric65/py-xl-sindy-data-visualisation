@@ -18,6 +18,10 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 
+# Filter to only include specific optimizer
+OPTIMIZER_FILTER = "proximal_gradient_descent"
+END_TIME_THRESHOLD= 5 
+
 
 def load_data(csv_path: str) -> tuple:
     """
@@ -45,6 +49,11 @@ def load_data(csv_path: str) -> tuple:
         reader = csv.DictReader(f)
         
         for row in reader:
+            # Filter by optimizer
+            optimizer = row.get('optimizer', '').strip()
+            if optimizer != OPTIMIZER_FILTER:
+                continue
+            
             catalog_type = row['catalog_type']
             solution_type = row['solution_type']
             combo = (catalog_type, solution_type)
@@ -63,7 +72,7 @@ def load_data(csv_path: str) -> tuple:
             end_simulation_time = row.get('end_simulation_time', '')
             try:
                 end_time = float(end_simulation_time)
-                if end_time < 20:
+                if end_time < END_TIME_THRESHOLD:
                     continue
             except (ValueError, TypeError):
                 continue
