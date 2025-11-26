@@ -17,12 +17,14 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-def load_data(csv_path: str) -> dict:
+def load_data(csv_path: str) -> tuple:
     """
     Load validation errors from the database.
     
     Returns:
-        Dictionary: {experiment_type: {noise_level: {combo: [validation_errors]}}}
+        Tuple: (data, success_counts)
+        - data: Dictionary {experiment_type: {noise_level: {combo: [validation_errors]}}}
+        - success_counts: Dictionary {experiment_type: {noise_level: {combo: {experiment_ids}}}}
     """
     # Target combinations
     target_combos = [
@@ -33,6 +35,9 @@ def load_data(csv_path: str) -> dict:
     
     # Structure: {experiment_type: {noise_level: {combo: [validation_errors]}}}
     data = defaultdict(lambda: defaultdict(lambda: defaultdict(list)))
+    # Track experiment IDs with at least one successful method
+    # Structure: {experiment_type: {noise_level: {combo: set(experiment_ids)}}}
+    success_counts = defaultdict(lambda: defaultdict(lambda: defaultdict(set)))
     
     with open(csv_path, 'r') as f:
         reader = csv.DictReader(f)
@@ -41,6 +46,7 @@ def load_data(csv_path: str) -> dict:
             catalog_type = row['catalog_type']
             solution_type = row['solution_type']
             combo = (catalog_type, solution_type)
+            experiment_id = row['experiment_id']
             
             # Only process target combinations
             if combo not in target_combos:
@@ -69,18 +75,21 @@ def load_data(csv_path: str) -> dict:
                 try:
                     val_error = float(validation_error)
                     data[experiment_type][noise_level][combo].append(val_error)
+                    # Track this experiment as successful for this combo
+                    success_counts[experiment_type][noise_level][combo].add(experiment_id)
                 except (ValueError, TypeError):
                     pass
     
-    return data
+    return data, success_counts
 
 
-def create_plots(data: dict, output_dir: str = "."):
+def create_plots(data: dict, success_counts: dict, output_dir: str = "."):
     """
     Create one combined plot with all experiment types as rows.
     
     Args:
         data: Dictionary with structure {experiment_type: {noise_level: {combo: [validation_errors]}}}
+        success_counts: Dictionary with structure {experiment_type: {noise_level: {combo: set(experiment_ids)}}}
         output_dir: Directory to save plots
     """
     # Combo names for display
@@ -104,13 +113,6 @@ def create_plots(data: dict, output_dir: str = "."):
         'cart_pole': 'Cartpole',
         'cart_pole_double': 'Double Pendulum on Cartpole',
         'double_pendulum_pm': 'Double Pendulum'
-    }
-    
-    # n_max values for each system
-    n_max_values = {
-        'cart_pole': 12,
-        'cart_pole_double': 24,
-        'double_pendulum_pm': 12
     }
     
     # Get all experiment types
@@ -214,21 +216,53 @@ def create_plots(data: dict, output_dir: str = "."):
                     )
                 ax.legend(handles=legend_elements, loc='upper left', fontsize=11, frameon=True)
             
+            # Calculate n_max (max success count across all noise levels)
+            n_max = 0
+            for noise_level in all_noise_levels:
+                all_experiment_ids = set()
+                for c in combo_list:
+                    if c in success_counts[exp_type][noise_level]:
+                        all_experiment_ids.update(success_counts[exp_type][noise_level][c])
+                n_max = max(n_max, len(all_experiment_ids))
+            
             # Add n_max annotation in bottom right corner
-            n_max = n_max_values.get(exp_type, 0)
             ax.text(0.98, 0.08, f'$n_{{max}}={n_max}$', 
                    transform=ax.transAxes, fontsize=11, 
                    verticalalignment='bottom', horizontalalignment='right',
                    bbox=dict(boxstyle='round,pad=0.4', facecolor='white', alpha=0.8, edgecolor='gray', linewidth=1))
             
-            # Add sample count annotations
-            for pos, data_points in zip(all_positions, all_plot_data):
-                n = len(data_points)
-                y_max = max(data_points)
-                y_pos = y_max * 1.5
-                ax.text(pos, y_pos, f'n={n}', 
-                       ha='center', va='bottom', fontsize=10, style='italic', fontweight='bold',
-                       bbox=dict(boxstyle='round,pad=0.3', facecolor='white', alpha=0.8, edgecolor='gray', linewidth=1))
+            # Add success rate annotations above each box plot
+            plot_idx = 0
+            for combo_idx, combo in enumerate(combo_list):
+                for noise_idx, noise_level in enumerate(all_noise_levels):
+                    combo_data = noise_data.get(noise_level, {})
+                    
+                    if combo in combo_data and combo_data[combo]:
+                        # Get the number of unique experiments that succeeded for this combo+noise
+                        n_successful = len(success_counts[exp_type][noise_level][combo])
+                        
+                        # Calculate total experiments (union of all experiment IDs at this noise level)
+                        all_experiment_ids = set()
+                        for c in combo_list:
+                            if c in success_counts[exp_type][noise_level]:
+                                all_experiment_ids.update(success_counts[exp_type][noise_level][c])
+                        n_total = len(all_experiment_ids)
+                        
+                        # Calculate success rate
+                        success_rate = (n_successful / n_total * 100) if n_total > 0 else 0
+                        
+                        pos = all_positions[plot_idx]
+                        data_points = all_plot_data[plot_idx]
+                        y_max = max(data_points)
+                        upper_quartile = np.percentile(data_points, 75)
+                        # Use upper_quartile * 2 if max is more than 50x the upper_quartile, otherwise use max * 1.5
+                        y_pos = upper_quartile * 2 if y_max > 50 * upper_quartile else y_max * 1.5
+                        
+                        ax.text(pos, y_pos, f'{success_rate:.0f}%', 
+                               ha='center', va='bottom', fontsize=10, style='italic', fontweight='bold',
+                               bbox=dict(boxstyle='round,pad=0.3', facecolor='white', alpha=0.8, edgecolor='gray', linewidth=1))
+                        
+                        plot_idx += 1
     
     plt.tight_layout(rect=[0, 0, 1, 0.99])
     
@@ -238,6 +272,92 @@ def create_plots(data: dict, output_dir: str = "."):
     print(f"Saved combined plot: {output_file}")
     
     plt.close()
+
+
+def export_latex_table(data: dict, success_counts: dict, output_dir: str = "."):
+    """
+    Export a LaTeX table with average errors and success rates.
+    
+    Args:
+        data: Dictionary with structure {experiment_type: {noise_level: {combo: [validation_errors]}}}
+        success_counts: Dictionary with structure {experiment_type: {noise_level: {combo: set(experiment_ids)}}}
+        output_dir: Directory to save the table
+    """
+    combo_names = {
+        ("mixed", "mixed"): "Mixed",
+        ("xlsindy", "explicit"): "XLSINDy",
+        ("sindy", "explicit"): "SINDy"
+    }
+    
+    pretty_names = {
+        'cart_pole': 'Cartpole',
+        'cart_pole_double': 'Double Pendulum on Cartpole',
+        'double_pendulum_pm': 'Double Pendulum'
+    }
+    
+    combo_list = [("mixed", "mixed"), ("xlsindy", "explicit"), ("sindy", "explicit")]
+    
+    output_path = Path(output_dir)
+    output_path.mkdir(parents=True, exist_ok=True)
+    latex_file = output_path / 'validation_comparison_table.tex'
+    
+    with open(latex_file, 'w') as f:
+        # Write table header
+        f.write("\\begin{table}[htbp]\n")
+        f.write("\\centering\n")
+        f.write("\\caption{Validation Error Comparison by System and Method}\n")
+        f.write("\\label{tab:validation_comparison}\n")
+        f.write("\\begin{tabular}{|l|c|c|c|c|c|c|}\n")
+        f.write("\\hline\n")
+        f.write("\\textbf{System} & \\multicolumn{2}{c|}{\\textbf{Mixed}} & \\multicolumn{2}{c|}{\\textbf{XLSINDy}} & \\multicolumn{2}{c|}{\\textbf{SINDy}} \\\\\n")
+        f.write("\\cline{2-7}\n")
+        f.write(" & Avg Error & Success & Avg Error & Success & Avg Error & Success \\\\\n")
+        f.write("\\hline\n")
+        
+        # Process each experiment type
+        for exp_type in sorted(data.keys()):
+            pretty_name = pretty_names.get(exp_type, exp_type)
+            noise_data = data[exp_type]
+            
+            # Collect all errors and success rates across all noise levels
+            combo_stats = {}
+            for combo in combo_list:
+                all_errors = []
+                total_successful = set()
+                total_experiments = set()
+                
+                for noise_level in sorted(noise_data.keys()):
+                    combo_data = noise_data.get(noise_level, {})
+                    
+                    if combo in combo_data and combo_data[combo]:
+                        all_errors.extend(combo_data[combo])
+                        total_successful.update(success_counts[exp_type][noise_level][combo])
+                    
+                    # Count total experiments at this noise level
+                    for c in combo_list:
+                        if c in success_counts[exp_type][noise_level]:
+                            total_experiments.update(success_counts[exp_type][noise_level][c])
+                
+                avg_error = np.mean(all_errors) if all_errors else 0
+                success_rate = (len(total_successful) / len(total_experiments) * 100) if total_experiments else 0
+                combo_stats[combo] = (avg_error, success_rate)
+            
+            # Write row
+            f.write(f"{pretty_name}")
+            for combo in combo_list:
+                avg_error, success_rate = combo_stats[combo]
+                if avg_error > 0:
+                    f.write(f" & {avg_error:.2e} & {success_rate:.0f}\\%")
+                else:
+                    f.write(" & --- & ---")
+            f.write(" \\\\\n")
+        
+        # Write table footer
+        f.write("\\hline\n")
+        f.write("\\end{tabular}\n")
+        f.write("\\end{table}\n")
+    
+    print(f"Saved LaTeX table: {latex_file}")
 
 
 def print_statistics(data: dict):
@@ -290,7 +410,7 @@ def main():
     print()
     
     # Load data
-    data = load_data(csv_path)
+    data, success_counts = load_data(csv_path)
     
     if not data:
         print("No valid data found!")
@@ -301,7 +421,11 @@ def main():
     
     # Create plots
     print("\nGenerating plots...")
-    create_plots(data, output_dir)
+    create_plots(data, success_counts, output_dir)
+    
+    # Export LaTeX table
+    print("\nGenerating LaTeX table...")
+    export_latex_table(data, success_counts, output_dir)
     
     print("\nDone!")
 

@@ -140,6 +140,7 @@ def generate_mujoco_trajectory(
     extra_info: dict,
     mujoco_transform,
     inverse_mujoco_transform,
+    record_video: bool = False,
 ):
     """
     Generate a MuJoCo trajectory using physics simulation.
@@ -161,6 +162,7 @@ def generate_mujoco_trajectory(
         extra_info (dict): Additional system information including initial conditions.
         mujoco_transform: Function to transform MuJoCo data to desired coordinate system.
         inverse_mujoco_transform: Function to transform desired coordinates to MuJoCo format.
+        record_video (bool): If True, record a video of the simulation and exit. Default is False.
 
     Returns:
         tuple: (simulation_time_g, simulation_qpos_g, simulation_qvel_g, simulation_qacc_g, force_vector_g)
@@ -187,6 +189,89 @@ def generate_mujoco_trajectory(
     # initialize Mujoco environment and controller
     mujoco_model = mujoco.MjModel.from_xml_string(xml_content)
     mujoco_data = mujoco.MjData(mujoco_model)
+
+    # If video recording is requested, set up renderer and record video
+    if record_video:
+        import sys
+        from pathlib import Path
+        
+        # Create result_video directory if it doesn't exist
+        video_dir = Path("result_video")
+        video_dir.mkdir(exist_ok=True)
+        
+        # Set up renderer
+        renderer = mujoco.Renderer(mujoco_model, height=1080, width=1920)
+        
+        # Initialize for first batch only
+        initial_condition = np.array(initial_position).reshape(num_coordinates,2) + extra_info["initial_condition"]
+        rng = np.random.default_rng(random_seed)
+        
+        if len(initial_condition_randomness) == 1:
+            initial_condition += rng.normal(
+                loc=0, scale=initial_condition_randomness, size=initial_condition.shape
+            )
+        else:
+            initial_condition += rng.normal(
+                loc=0, scale=np.reshape(initial_condition_randomness,initial_condition.shape)
+            )
+
+        initial_qpos, initial_qvel = initial_condition[:,0].reshape(1,-1), initial_condition[:,1].reshape(1,-1)
+        initial_qpos, initial_qvel, _ = inverse_mujoco_transform(initial_qpos, initial_qvel, None)
+
+        mujoco_data.qpos = initial_qpos
+        mujoco_data.qvel = initial_qvel
+        mujoco_data.time = 0.0
+        
+        # Generate forces function for first batch
+        forces_function = xlsindy.dynamics_modeling.optimized_force_generator(
+            component_count=num_coordinates,
+            scale_vector=forces_scale_vector,
+            time_end=max_time,
+            period=forces_period,
+            period_shift=forces_period_shift,
+            augmentations=10,
+            random_seed=[random_seed, 0],
+        )
+        
+        # Record video
+        frames = []
+        fps = 60
+        frame_time = 1.0 / fps
+        next_frame_time = 0.0
+        
+        logger.info(f"Recording video at {fps} FPS...")
+        
+        pbar = tqdm(total=max_time, desc="Recording video", unit="s")
+        while mujoco_data.time < max_time:
+            # Apply forces
+            forces = forces_function(mujoco_data.time)
+            mujoco_data.qfrc_applied = forces
+            
+            # Step simulation
+            mujoco.mj_step(mujoco_model, mujoco_data)
+            
+            # Capture frame at desired FPS
+            if mujoco_data.time >= next_frame_time:
+                renderer.update_scene(mujoco_data)
+                pixels = renderer.render()
+                frames.append(pixels.copy())
+                next_frame_time += frame_time
+            
+            pbar.update(mujoco_data.time - pbar.n)
+        pbar.close()
+        
+        # Save video using imageio
+        import imageio
+        video_path = video_dir / f"mujoco_simulation_{random_seed[0]}.mp4"
+        logger.info(f"Saving video to {video_path}...")
+        imageio.mimsave(video_path, frames, fps=fps)
+        logger.info(f"Video saved successfully to {video_path}")
+        
+        # Clean up
+        del renderer, mujoco_model, mujoco_data
+        
+        # Exit the program
+        sys.exit(0)
 
     def random_controller(forces_function):
 

@@ -19,12 +19,14 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-def load_data(csv_path: str) -> dict:
+def load_data(csv_path: str) -> tuple:
     """
     Load validation errors from the database.
     
     Returns:
-        Dictionary: {noise_level: {combo: [validation_errors]}}
+        Tuple: (data, success_counts)
+        - data: Dictionary {noise_level: {combo: [validation_errors]}}
+        - success_counts: Dictionary {noise_level: {combo: {experiment_ids}}}
     """
     # Target combinations
     target_combos = [
@@ -35,6 +37,9 @@ def load_data(csv_path: str) -> dict:
     
     # Structure: {noise_level: {combo: [validation_errors]}}
     data = defaultdict(lambda: defaultdict(list))
+    # Track experiment IDs with at least one successful method
+    # Structure: {noise_level: {combo: set(experiment_ids)}}
+    success_counts = defaultdict(lambda: defaultdict(set))
     
     with open(csv_path, 'r') as f:
         reader = csv.DictReader(f)
@@ -43,6 +48,7 @@ def load_data(csv_path: str) -> dict:
             catalog_type = row['catalog_type']
             solution_type = row['solution_type']
             combo = (catalog_type, solution_type)
+            experiment_id = row['experiment_id']
             
             # Only process target combinations
             if combo not in target_combos:
@@ -70,18 +76,21 @@ def load_data(csv_path: str) -> dict:
                 try:
                     val_error = float(validation_error)
                     data[noise_level][combo].append(val_error)
+                    # Track this experiment as successful for this combo
+                    success_counts[noise_level][combo].add(experiment_id)
                 except (ValueError, TypeError):
                     pass
     
-    return data
+    return data, success_counts
 
 
-def create_plot(data: dict, output_dir: str = "."):
+def create_plot(data: dict, success_counts: dict, output_dir: str = "."):
     """
     Create one plot with all systems combined, showing noise levels on x-axis.
     
     Args:
         data: Dictionary with structure {noise_level: {combo: [validation_errors]}}
+        success_counts: Dictionary with structure {noise_level: {combo: set(experiment_ids)}}
         output_dir: Directory to save plots
     """
     # Combo names for display
@@ -187,20 +196,53 @@ def create_plot(data: dict, output_dir: str = "."):
             )
         ax.legend(handles=legend_elements, loc='upper left', fontsize=11, frameon=True)
         
+        # Calculate n_max (max success count across all noise levels)
+        n_max = 0
+        for noise_level in all_noise_levels:
+            all_experiment_ids = set()
+            for c in combo_list:
+                if c in success_counts[noise_level]:
+                    all_experiment_ids.update(success_counts[noise_level][c])
+            n_max = max(n_max, len(all_experiment_ids))
+        
         # Add n_max annotation in bottom right corner
-        ax.text(0.98, 0.02, r'$n_{max}=48$', 
+        ax.text(0.98, 0.02, f'$n_{{max}}={n_max}$', 
                transform=ax.transAxes, fontsize=11, 
                verticalalignment='bottom', horizontalalignment='right',
                bbox=dict(boxstyle='round,pad=0.4', facecolor='white', alpha=0.8, edgecolor='gray', linewidth=1))
         
-        # Add sample count annotations
-        for pos, data_points in zip(all_positions, all_plot_data):
-            n = len(data_points)
-            y_max = max(data_points)
-            y_pos = y_max * 1.5
-            ax.text(pos, y_pos, f'n={n}', 
-                   ha='center', va='bottom', fontsize=10, style='italic', fontweight='bold',
-                   bbox=dict(boxstyle='round,pad=0.3', facecolor='white', alpha=0.8, edgecolor='gray', linewidth=1))
+        # Add success rate annotations above each box plot
+        plot_idx = 0
+        for combo_idx, combo in enumerate(combo_list):
+            for noise_idx, noise_level in enumerate(all_noise_levels):
+                noise_data = data.get(noise_level, {})
+                
+                if combo in noise_data and noise_data[combo]:
+                    # Get the number of unique experiments that succeeded for this combo+noise
+                    n_successful = len(success_counts[noise_level][combo])
+                    
+                    # Calculate total experiments (union of all experiment IDs at this noise level)
+                    all_experiment_ids = set()
+                    for c in combo_list:
+                        if c in success_counts[noise_level]:
+                            all_experiment_ids.update(success_counts[noise_level][c])
+                    n_total = len(all_experiment_ids)
+                    
+                    # Calculate success rate
+                    success_rate = (n_successful / n_total * 100) if n_total > 0 else 0
+                    
+                    pos = all_positions[plot_idx]
+                    data_points = all_plot_data[plot_idx]
+                    y_max = max(data_points)
+                    upper_quartile = np.percentile(data_points, 75)
+                    # Use upper_quartile * 2 if max is more than 50x the upper_quartile, otherwise use max * 1.5
+                    y_pos = upper_quartile * 2 if y_max > 50 * upper_quartile else y_max * 1.5
+                    
+                    ax.text(pos, y_pos, f'{success_rate:.0f}%', 
+                           ha='center', va='bottom', fontsize=10, style='italic', fontweight='bold',
+                           bbox=dict(boxstyle='round,pad=0.3', facecolor='white', alpha=0.8, edgecolor='gray', linewidth=1))
+                    
+                    plot_idx += 1
     
     plt.tight_layout()
     
@@ -259,7 +301,7 @@ def main():
     print()
     
     # Load data
-    data = load_data(csv_path)
+    data, success_counts = load_data(csv_path)
     
     if not data:
         print("No valid data found!")
@@ -270,7 +312,7 @@ def main():
     
     # Create plot
     print("\nGenerating plot...")
-    create_plot(data, output_dir)
+    create_plot(data, success_counts, output_dir)
     
     print("\nDone!")
 
