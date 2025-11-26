@@ -1,3 +1,7 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "py-xl-sindy-data-generation"
 version = "0.1.0"
@@ -14,3 +18,9 @@ dependencies = [
     "tqdm>=4.67.1",
     "tyro>=0.9.28",
 ]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["data_generation*", "script*", "util*"]
+
+
