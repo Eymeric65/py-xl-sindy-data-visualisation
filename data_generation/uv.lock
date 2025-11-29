@@ -1369,7 +1369,7 @@ wheels = [
 
 [[package]]
 name = "py-xl-sindy"
-version = "2.1.2"
+version = "2.1.3"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "cvxpy" },
@@ -1386,9 +1386,9 @@ dependencies = [
     { name = "sympy" },
     { name = "tqdm" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/3a/94/b3e7b6b783a863c85ab620331ba87187a904137ff0470202dd9225d289d4/py_xl_sindy-2.1.2.tar.gz", hash = "sha256:1b47765715736f219aca23030dd74a421f898b8c8a5f6fd34f3d9490ec638847", size = 593523, upload-time = "2025-11-26T06:08:14.836Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/3e/39/f7203a49b6cbd7433d7ccefa7ef71137e7c37794e1b5fc489a7905c5e96d/py_xl_sindy-2.1.3.tar.gz", hash = "sha256:1fb2f5e6e98320a86f87e19d2dbb6f4872ec199e5ee4a40b0e3e7fc51df742e1", size = 593566, upload-time = "2025-11-26T09:12:48.991Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/4c/4f/1192d100656495c104d9dc36802ad14671014f22fc652acbfc0d3e9a90f6/py_xl_sindy-2.1.2-py3-none-any.whl", hash = "sha256:b6ccfa633cdbbfb0beb1f838e6cfc74efb030a4790b0b6202400652bf703b5be", size = 37985, upload-time = "2025-11-26T06:08:13.307Z" },
+    { url = "https://files.pythonhosted.org/packages/4d/c2/c112810bed2ce448f8e4c9f8ecef8e551909f0c0f2a1167e9882d41d530a/py_xl_sindy-2.1.3-py3-none-any.whl", hash = "sha256:06bb0de2cca671e878701fbea27270359a87fa21bc15dd426063aaacd955890c", size = 38031, upload-time = "2025-11-26T09:12:47.486Z" },
 ]
 
 [[package]]

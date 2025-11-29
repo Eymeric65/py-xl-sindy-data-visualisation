@@ -212,7 +212,7 @@ def run_single_alignment(cmd: List[str], args: Args) -> dict:
             cmd, 
             capture_output=True, 
             text=True, 
-            timeout=3600  # 60 minute timeout per alignment
+            timeout=600  # 10 minute timeout per alignment
         )
         end_time = time.time()
         

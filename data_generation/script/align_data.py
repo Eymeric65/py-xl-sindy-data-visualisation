@@ -186,10 +186,10 @@ if __name__ == "__main__":
 
 
     # add noise
-    imported_qpos += rng.normal(loc=0, scale=args.noise_level, size=imported_qpos.shape)*np.linalg.norm(imported_qpos)/imported_qpos.shape[0]
-    imported_qvel += rng.normal(loc=0, scale=args.noise_level, size=imported_qvel.shape)*np.linalg.norm(imported_qvel)/imported_qvel.shape[0]
-    imported_qacc += rng.normal(loc=0, scale=args.noise_level, size=imported_qacc.shape)*np.linalg.norm(imported_qacc)/imported_qacc.shape[0]
-    imported_force += rng.normal(loc=0, scale=args.noise_level, size=imported_force.shape)*np.linalg.norm(imported_force)/imported_force.shape[0]
+    imported_qpos += rng.normal(loc=0, scale=args.noise_level, size=imported_qpos.shape)#*np.linalg.norm(imported_qpos)/imported_qpos.shape[0]
+    imported_qvel += rng.normal(loc=0, scale=args.noise_level, size=imported_qvel.shape)#*np.linalg.norm(imported_qvel)/imported_qvel.shape[0]
+    imported_qacc += rng.normal(loc=0, scale=args.noise_level, size=imported_qacc.shape)#*np.linalg.norm(imported_qacc)/imported_qacc.shape[0]
+    imported_force += rng.normal(loc=0, scale=args.noise_level, size=imported_force.shape)#*np.linalg.norm(imported_force)/imported_force.shape[0]
 
     # Use a fixed ratio of the data in respect with catalog size
     catalog_size = full_catalog.catalog_length
@@ -256,6 +256,7 @@ if __name__ == "__main__":
             velocity_values=imported_qvel,
             acceleration_values=imported_qacc,
             time_symbol=time_sym,
+            noise_level=args.noise_level*3,
             symbol_matrix=symbols_matrix,
             catalog_repartition=full_catalog,
             external_force=imported_force,
