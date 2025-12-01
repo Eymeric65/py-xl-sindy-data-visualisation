@@ -5,7 +5,9 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "manim>=0.19.0",
+    "manim @ git+ssh://git@github.com/Eymeric65/manim.git@patch-1",
     "manim-slides>=5.5.2",
     "pyqt6>=6.10.0",
 ]
+
+

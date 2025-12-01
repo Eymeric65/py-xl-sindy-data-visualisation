@@ -5,6 +5,8 @@ import numpy as np
 from scipy.integrate import solve_ivp
 import math
 
+from pathlib import Path
+
 from manim import *
 from manim_slides import Slide
 
@@ -13,8 +15,8 @@ import functools
 DEFAULT_COLOR = ManimColor.from_rgb([0.01,0.01,0.01])  # Almost black
 DEFAULT_BACKGROUND_COLOR = WHITE
 
-#DEFAULT_COLOR = WHITE
-#DEFAULT_BACKGROUND_COLOR = ManimColor.from_rgb([0.01,0.01,0.01])  # Almost white
+# DEFAULT_COLOR = WHITE
+# DEFAULT_BACKGROUND_COLOR = ManimColor.from_rgb([0.01,0.01,0.01])  # Almost white
 
 POSITION_COLOR = RED
 VELOCITY_COLOR = GREEN
@@ -411,6 +413,7 @@ MathTex.__init__ = default_color(MathTex)
 MathTex.__init__ = color_mathtext(MathTex)
 
 Line.__init__ = default_color(Line)
+Rectangle.__init__ = default_color(Rectangle)
 Dot.__init__ = default_color(Dot)
 Brace.__init__ = default_color(Brace)
 Arrow.__init__ = default_color(Arrow)
@@ -422,13 +425,15 @@ DecimalNumber.__init__ = default_color(DecimalNumber)
 global_slide_counter = 0
 
 section_name = [
+    "Opening",
     "What is SINDy",
     "SINDy types",
     "The Lab SINDy",
     "New additions",
     "Results",
+    "Discussion",
+    "Conclusion",
     "Questions and answers",
-
 ]
 
 
@@ -532,6 +537,8 @@ class Main(BaseSlide):
 
     def construct_intro(self):
 
+        self.next_slide(notes=" # Title slide")
+
         title = Text(
             "Discovering Nonlinear Dynamics by Simultaneous Lagrangian and Newtonian"
         ).scale(0.5)
@@ -541,6 +548,8 @@ class Main(BaseSlide):
             Text("Eymeric Chauchat C4TM1417 - 18th November 2025")
             .scale(0.3)
         )
+
+        #TODO Add the name of teacher and people who watch the presentation
 
         intro_group = VGroup(title,title_2,lab_title,author_date).arrange(DOWN)
 
@@ -562,6 +571,128 @@ class Main(BaseSlide):
         ).align_to(self.UL, LEFT).shift(RIGHT*1)
 
         self.new_clean_slide("Contents",contents=contents)
+
+    def construct_opening(self):
+        """
+        Opening slide
+        """
+
+        self.next_slide(notes=" # Opening")
+
+        text_1 = Text("White box, Black box system identification",font_size=self.CONTENT_FONT_SIZE).to_corner(UL).shift(DOWN*1)
+
+        self.new_clean_slide("Opening",contents=text_1)
+
+        system_box = Rectangle(fill_opacity=1,height=2,width=3).set_fill(color=WHITE)
+        input_arrow = Arrow(start=system_box.get_left()+LEFT*3,end=system_box.get_left(),buff=0.0)
+        output_arrow = Arrow(start=system_box.get_right(),end=system_box.get_right()+RIGHT*3,buff=0.0)
+        system_label = Text("White box \n System",color=BLACK).scale(0.5).move_to(system_box.get_center())
+
+        input_label = MathTex(r"\qcoordinate,\dots , \dot{\qcoordinate},\dots").next_to(input_arrow,UP)
+        output_label = MathTex(r"\ddot{\qcoordinate},\dots").next_to(output_arrow,UP)
+
+        white_box_system = VGroup(system_box,input_arrow,output_arrow,system_label,input_label,output_label).scale(0.5)
+
+        system_box = Rectangle(fill_opacity=1,height=2,width=3).set_fill(color=BLACK)
+        input_arrow = Arrow(start=system_box.get_left()+LEFT*3,end=system_box.get_left(),buff=0.0)
+        output_arrow = Arrow(start=system_box.get_right(),end=system_box.get_right()+RIGHT*3,buff=0.0)
+        system_label = Text("Black box \n System",color=WHITE).scale(0.5).move_to(system_box.get_center())
+
+        input_label = MathTex(r"\qcoordinate,\dots , \dot{\qcoordinate},\dots").next_to(input_arrow,UP)
+        output_label = MathTex(r"\ddot{\qcoordinate},\dots").next_to(output_arrow,UP)
+
+        black_box_system = VGroup(system_box,input_arrow,output_arrow,system_label,input_label,output_label).scale(0.5)
+
+        systems = VGroup(white_box_system,black_box_system).arrange(RIGHT,buff=2).next_to(text_1,DOWN,buff=1.5).set_x(0)
+
+        self.next_slide(notes=" White box and black box system identification")
+
+        self.play(
+            Create(systems)
+        )
+
+        def color_equation(equation):
+
+            equation.set_color_by_tex(r"x",POSITION_COLOR)
+            equation.set_color_by_tex(r"y",POSITION_COLOR)
+            equation.set_color_by_tex(r"\dot{x}",VELOCITY_COLOR)
+            equation.set_color_by_tex(r"\dot{y}",VELOCITY_COLOR)
+            equation.set_color_by_tex(r"\ddot{x}",ACCELERATION_COLOR)
+            equation.set_color_by_tex(r"\ddot{y}",ACCELERATION_COLOR)
+
+            return equation
+
+        # White box (3 explicit equations)
+        white_box_eqs = VGroup(
+            Text("White box system",font_size=self.CONTENT_FONT_SIZE),
+            color_equation(MathTex(r"{{ \ddot{x} }} = -c_1{{ \dot{x} }} - k_1 {{ y }}")),
+            color_equation(MathTex(r"{{ \ddot{y} }} = -c_2{{ \dot{y} }} - k_2 {{ x }}")),
+        ).arrange(DOWN, buff=0.5).scale(0.5).next_to(text_1,DOWN,buff=0.75).set_x(white_box_system.get_x())
+
+        # Black box (n neural network-like notation)
+        black_box_eqs = VGroup(
+            Text("Black box system",font_size=self.CONTENT_FONT_SIZE),
+            color_equation(MathTex(r"h_1 = \sigma(W^{(1)}_{11} {{ x }} + W^{(1)}_{12} {{ y }} + b^{(1)}_1)")),
+            color_equation(MathTex(r"h_2 = \sigma(W^{(2)}_{21} h_1 + W^{(2)}_{22} {{ \dot{x} }} + b^{(2)}_2)")),
+            color_equation(MathTex(r"h_3 = \sigma(W^{(3)}_{31} h_2 + W^{(3)}_{32} {{ \dot{y} }} + b^{(3)}_3)")),
+            color_equation(MathTex(r"\vdots")),
+            color_equation(MathTex(r"h_n = \sigma(W^{(n)} h_{n-1} + b^{(n)})")),
+            color_equation(MathTex(r"{{ \ddot{x} }} = W^{(out)}_1 h_n + b^{(out)}_1")),
+            color_equation(MathTex(r"{{ \ddot{y} }} = W^{(out)}_2 h_n + b^{(out)}_2")),
+        ).arrange(DOWN, buff=0.25).scale(0.5).next_to(text_1,DOWN,buff=0.75).set_x(black_box_system.get_x())
+
+        self.next_slide(notes=" Example of white box and black box equations")
+
+        self.play(
+            ReplacementTransform(white_box_system,white_box_eqs),
+            ReplacementTransform(black_box_system,black_box_eqs)
+        )
+
+        self.next_slide(notes="Pros and cons")
+
+        white_box_eqs.generate_target()
+        black_box_eqs.generate_target()
+
+        White_box_text= VGroup(
+            Text("Pros:",font_size=self.CONTENT_FONT_SIZE,color=GREEN),
+            Text("- Physically interpretable",font_size=self.CONTENT_FONT_SIZE),
+            Text("- Generalizes well",font_size=self.CONTENT_FONT_SIZE),
+            Text("- Requires less data",font_size=self.CONTENT_FONT_SIZE),
+            Text("Cons:",font_size=self.CONTENT_FONT_SIZE,color=RED),
+            Text("- Scales with expert knowledge",font_size=self.CONTENT_FONT_SIZE),
+            Text("- Difficult to model complex systems",font_size=self.CONTENT_FONT_SIZE),
+        ).arrange(DOWN,buff=0.2,aligned_edge=LEFT).scale(0.5)
+
+        Black_box_text= VGroup(
+            Text("Pros:",font_size=self.CONTENT_FONT_SIZE,color=GREEN),
+            Text("- Scales to complex systems",font_size=self.CONTENT_FONT_SIZE),
+            Text("- No expert knowledge required",font_size=self.CONTENT_FONT_SIZE),
+            Text("Cons:",font_size=self.CONTENT_FONT_SIZE,color=RED),
+            Text("- Not physically interpretable",font_size=self.CONTENT_FONT_SIZE),
+            Text("- Poor generalization",font_size=self.CONTENT_FONT_SIZE),
+            Text("- Requires large amount of data",font_size=self.CONTENT_FONT_SIZE),
+        ).arrange(DOWN,buff=0.2,aligned_edge=LEFT).scale(0.5)
+
+        VGroup(
+            White_box_text,
+            white_box_eqs.target,
+            Black_box_text,
+            black_box_eqs.target
+        ).arrange(RIGHT, buff=0.6, aligned_edge=UP).next_to(text_1,DOWN,buff=0.75).set_x(0)
+
+        self.play(
+            MoveToTarget(white_box_eqs),
+            MoveToTarget(black_box_eqs),
+        )
+
+        self.play(
+            LaggedStart(
+                *[Write(item) for item in White_box_text]
+            ),
+            LaggedStart(
+                *[Write(item) for item in Black_box_text]
+            )
+        )
 
     def construct_introduction(self):
 
@@ -2241,6 +2372,61 @@ sindy x implicit & 24 & 23 & 0 & 0 & 0 & 0 & 0 & 0.00 \\
             Write(table)
         )
 
+    def construct_discussion(self):
+        """
+        Discussion slide
+        """
+
+        self.next_slide(notes=" # Discussion")
+
+        intro_text = Text("Pros and cons, future works",font_size=self.CONTENT_FONT_SIZE).to_corner(UL).shift(DOWN*1)
+
+        self.new_clean_slide("Discussion",contents=intro_text)
+
+        self.next_slide(notes=" pros and cons")
+
+        pros_text = Paragraph(
+            "Pros:",
+            "- Compact catalogs",
+            "- Better discovery rate",
+            "- Handle complex system",
+            "- Unified framework",
+            t2c={"Pros":GREEN_E,"Compact":GREEN_E,"Better":GREEN_E,"complex":GREEN_E,"Unified":GREEN_E},
+            font_size=self.CONTENT_FONT_SIZE
+        )
+
+        cons_text = Paragraph(
+            "Cons:",
+            "- Complex implementation",
+            "- Still limited by catalog functions",
+            "- Ensemble-SINDy not yet implemented",
+            t2c={"Cons":RED_E,"Complex":RED_E,"catalog":RED_E,"implemented":RED_E},
+            font_size=self.CONTENT_FONT_SIZE
+        )
+
+        future_work_text = Paragraph(
+            "Future works:",
+            "- Extend to more complex systems (ENSEMBLE-SINDy, catalog discovery)",
+            "- Improve catalog function selection",
+            "- Real world applications",
+            t2c={"Future":BLUE_E,"complex":BLUE_E,"Real world":BLUE_E},
+            font_size=self.CONTENT_FONT_SIZE
+        )
+
+        pros_cons = VGroup(pros_text,cons_text).arrange(RIGHT,buff=1,aligned_edge=UP).next_to(intro_text,DOWN,buff=0.5).set_x(0)
+        future_work_text.next_to(pros_cons,DOWN,buff=0.5,aligned_edge=LEFT)
+
+        self.play(
+            Write(pros_text),
+            Write(cons_text),
+        )
+
+        self.next_slide(notes=" Future works")
+
+        self.play(
+            Write(future_work_text)
+        )
+
     def construct_conclusion(self):
 
         self.next_slide(notes=" # Conclusion")
@@ -2285,6 +2471,7 @@ sindy x implicit & 24 & 23 & 0 & 0 & 0 & 0 & 0 & 0.00 \\
 
         self.construct_intro()
         #self.construct_introduction()
+        self.construct_opening()
         self.construct_what_is_sindy()
         self.construct_sindy_type()
         self.construct_sindy_limitation()
@@ -2294,12 +2481,21 @@ sindy x implicit & 24 & 23 & 0 & 0 & 0 & 0 & 0 & 0.00 \\
         self.construct_addition_2() # 11mn until here (probable)
         self.construct_result_protocol() # 12mn until here
         self.construct_result() # 13mn until here
-        self.construct_conclusion() # 14mn until here
-        self.construct_qa() # 15mn until here
+        self.construct_discussion() # 14mn until here
+        self.construct_conclusion() # 15mn until here
+        self.construct_qa() # 16mn until here
 
 
 class WIP(BaseSlide):
 
-    def construct(self):
+    def construct_svg(self):
 
-        pass
+        self.next_slide(notes=" # Results V2")
+
+        noise_combined = SVGMobject(file_name=str(Path(__file__).parent / "image" / "noise_combined.svg")).scale_to_fit_height(6)
+        #noise_combined.set_stroke(color=DEFAULT_COLOR,width=1)
+        self.new_clean_slide("Results V2",contents=[noise_combined])
+
+
+
+
