@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """
+[DEPRECATED] Don t use this file
 Generate align commands for failed experiments.
 
 This script analyzes the result JSON files to identify missing algorithm/regression/noise combinations
@@ -64,10 +65,11 @@ def analyze_experiment_file(json_file: str) -> Dict:
         validation_group = data['visualisation']['validation_group']['data']
         present_count = sum(1 for k, v in validation_group.items() 
                           if k != 'validation_data' and isinstance(v, dict) and 'extra_info' in v)
+
         
         # Generate all expected combinations
         algorithms = ["mixed", "xlsindy", "sindy"]
-        noise_levels = [0.0, 0.01, 0.1, 0.001]
+        noise_levels = [0.0, 0.01, 0.1, 0.001,0.2]
         
         expected_combinations = []
         for alg in algorithms:
@@ -75,8 +77,10 @@ def analyze_experiment_file(json_file: str) -> Dict:
                 for noise in noise_levels:
                     expected_combinations.append((alg, reg_type, noise))
         
-        expected_count = len(expected_combinations)
+        expected_count = len(expected_combinations)*2
         missing_count = expected_count - present_count
+
+        print(missing_count)
         
         # If we have missing solutions, assume they are the missing algorithm runs
         # Since we can see that the basic regression_type/noise combinations exist,
