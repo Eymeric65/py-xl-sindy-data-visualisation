@@ -12,7 +12,7 @@ from manim_slides import Slide
 
 import functools
 
-BLACK_BACKGOUND = False
+BLACK_BACKGOUND = True
 
 if not BLACK_BACKGOUND:
 
@@ -505,7 +505,7 @@ class BaseSlide(Slide):
         self.TITLE_FONT_SIZE = 48
         self.CONTENT_FONT_SIZE = 0.5 * self.TITLE_FONT_SIZE
         self.MEDIUM_CONTENT_FONT_SIZE = 0.3 * self.TITLE_FONT_SIZE
-        self.SOURCE_FONT_SIZE = 0.2 * self.TITLE_FONT_SIZE
+        self.SOURCE_FONT_SIZE = 0.3 * self.TITLE_FONT_SIZE
 
         # Mutable variables
         self.slide_number = Integer(global_slide_counter).to_corner(DR)
@@ -557,30 +557,47 @@ class BaseSlide(Slide):
 
 
 
-class Main(BaseSlide):
+class MainBlack(BaseSlide):
 
 
     def construct_intro(self):
+        self.next_slide(notes=" # Title slide")
+
+        self.wait(1)
 
         self.next_slide(notes=" # Title slide")
 
         title = Text(
-            "Discovering Nonlinear Dynamics by Simultaneous Lagrangian and Newtonian"
+            "Discovering Nonlinear Dynamics by Simultaneous Lagrangian and Newtonian",weight=BOLD
         ).scale(0.5)
-        title_2 = Text ("Identification for Implicit and Explicit Sparse Identification").scale(0.5)
+        title_2 = Text ("Identification for Implicit and Explicit Sparse Identification",weight=BOLD).scale(0.5)
+        japanese_title = Text("陰的および陽的スパース同定のためのラグランジアンとニュートン力学の同時同定による非線形力学の発見").scale(0.4)
+
         lab_title = Text("Tohoku University - School of engineering - NeuroRobotics Laboratory").scale(0.3)
         author_date = (
-            Text("Eymeric Chauchat C4TM1417 - 18th November 2025")
+            Text("Eymeric CHAUCHAT C4TM1417 - 18th November 2025")
             .scale(0.3)
         )
 
         #TODO Add the name of teacher and people who watch the presentation
 
-        intro_group = VGroup(title,title_2,lab_title,author_date).arrange(DOWN)
+        teacher_intro = Text("Academic advisor:",weight=BOLD).scale(0.3)
+        teacher = Text("Prof. Mitsuhiro HAYASHIBE").scale(0.3)
+
+        reviewers_intro = Text("Reviewers:",weight=BOLD).scale(0.3)
+        reviewer_1 = Text("Prof. Kanjuro MAKIHARA").scale(0.3)
+        reviewer_2 = Text("Prof. Kimitoshi YAMAZAKI").scale(0.3)
+
+        teacher_group = VGroup(teacher_intro,teacher).arrange(DOWN,buff=0.2,aligned_edge=LEFT)
+        reviewers_group = VGroup(reviewers_intro,reviewer_1,reviewer_2).arrange(DOWN,buff=0.2,aligned_edge=LEFT)
+        credits = VGroup(teacher_group,reviewers_group).arrange(RIGHT,aligned_edge=UP,buff=1).to_corner(DR).shift(UP*0.5+LEFT*1)
+
+        intro_group = VGroup(japanese_title,title,title_2,lab_title,author_date).arrange(DOWN)
 
         self.play(
             self.next_slide_number_animation(),
-            Create(intro_group)
+            Create(intro_group),
+            Create(credits),
             )
 
         self.next_slide(notes=" # Contents of the presentation")
@@ -2357,6 +2374,49 @@ class Main(BaseSlide):
             Write(result_text)
         )
 
+    def construct_result(self):
+
+        self.next_slide(notes=" # Example data 1")
+
+        first_experiment_image = import_svg("0e35cc88d4b1f5a82f5dc0e90725982d_trajectories_UNI-SINDy_noise0.01",scale=7).scale_to_fit_height(6).to_corner(UL).shift(DOWN*1).set_x(0)
+
+        self.new_clean_slide("Example data 1",contents=first_experiment_image)
+
+        self.next_slide(notes=" # Example data 2")
+
+        second_experiment_image = import_svg("396f3105ab61308a891bf8131014e04d_trajectories_UNI-SINDy_SINDy_noise0.0",scale=7).scale_to_fit_width(6).to_corner(UL).shift(DOWN*1).set_x(0)
+
+        self.new_clean_slide("Example data 2",contents=second_experiment_image)
+
+        self.next_slide(notes=" # Results combined")
+
+        noise_comparison_combined = import_svg("noise_comparison_combined",scale=3)
+        success_rate_combined = import_svg("success_rate_combined",scale=3)
+
+        graph_combined = VGroup(
+            noise_comparison_combined,
+            success_rate_combined
+            ).arrange(RIGHT,buff=0.5).set_x(0).scale_to_fit_width(13)
+
+        self.new_clean_slide("Noise analysis combined",contents=[graph_combined])
+
+        self.next_slide(notes=" # Results per system")
+
+        noise_comparison = import_svg("noise_comparison",scale=3)
+        success_rate = import_svg("success_rate",scale=3)
+
+        graph = VGroup(
+            noise_comparison,
+            success_rate
+            ).arrange(RIGHT,buff=0.5).set_x(0).scale_to_fit_width(13)
+        
+        self.play(
+            ReplacementTransform(noise_comparison_combined,noise_comparison),
+            ReplacementTransform(success_rate_combined,success_rate),
+            self.next_slide_number_animation(),
+            self.next_slide_title_animation("Noise analysis per system")
+        )
+
     def construct_annexe_1(self):
 
         self.next_slide(notes=" # Result")
@@ -2369,10 +2429,11 @@ class Main(BaseSlide):
         self.new_clean_slide("5.2 Result table",contents=[  intro_text_1,intro_text_2])
 
         table = Tex(r"""
+\small
 \begin{tabular}{lrrrrrrrr}
-\toprule
-combo_type & not_valid & timeout & not_completed & 1st_rank & 2nd_rank & 2nd> & Wins_WC & win_rate \\
-\midrule
+\hline
+combo type & invalid & timeout & uncomplete & 1st rank & 2nd rank & 2nd> & Wins WC & winrate \\
+\hline
 mixed x explicit & 90 & 5 & 20 & 40 & 6 & 0 & 30 & 0.294872 \\
 mixed x mixed & 96 & 9 & 41 & 39 & 6 & 1 & 29 & 0.251366 \\
 sindy x explicit & 127 & 84 & 9 & 8 & 8 & 0 & 2 & 0.105263 \\
@@ -2382,7 +2443,7 @@ xlsindy x mixed & 110 & 1 & 61 & 4 & 2 & 2 & 3 & 0.044693 \\
 xlsindy x implicit & 8 & 8 & 1 & 3 & 0 & 0 & 1 & 0.250000 \\
 xlsindy x explicit & 103 & 0 & 47 & 2 & 2 & 2 & 2 & 0.038462 \\
 sindy x implicit & 31 & 31 & 0 & 0 & 0 & 0 & 0 & 0.000000 \\
-\bottomrule
+\hline
 \end{tabular}
 """).scale(0.5).next_to(intro_text_2,DOWN,buff=0.5).set_x(0)
 
@@ -2487,6 +2548,14 @@ sindy x implicit & 31 & 31 & 0 & 0 & 0 & 0 & 0 & 0.000000 \\
 
         self.new_clean_slide("7 Questions and answers",contents=content_group)
 
+    def construct_annexe_2_math(self):
+
+        self.next_slide(notes=" # Annexe math")
+
+        math = ImageMobject("image/math.png").scale_to_fit_height(6).to_corner(UL).shift(DOWN*1).set_x(0)
+
+        self.new_clean_slide("Math annexe",contents=math)
+
     def construct(self):
 
         self.construct_intro()
@@ -2500,11 +2569,12 @@ sindy x implicit & 31 & 31 & 0 & 0 & 0 & 0 & 0 & 0.000000 \\
         self.construct_addition_1() # 9mn until here
         self.construct_addition_2() # 11mn until here (probable)
         self.construct_result_protocol() # 12mn until here
-        
+        self.construct_result()
         self.construct_discussion() # 14mn until here
         self.construct_conclusion() # 15mn until here
         self.construct_qa() # 16mn until here
         self.construct_annexe_1() 
+        self.construct_annexe_2_math()
 
 
 class WIP(BaseSlide):
@@ -2513,40 +2583,60 @@ class WIP(BaseSlide):
         """
         WIP slide 
         """
+        self.next_slide(notes=" # Title slide")
 
-        self.next_slide(notes=" # Results combined")
+        self.wait(1)
 
-        noise_comparison_combined = import_svg("noise_comparison_combined",scale=3)
-        success_rate_combined = import_svg("success_rate_combined",scale=3)
+        self.next_slide(notes=" # Title slide")
 
-        graph_combined = VGroup(
-            noise_comparison_combined,
-            success_rate_combined
-            ).arrange(RIGHT,buff=0.5).set_x(0).scale_to_fit_width(13)
+        title = Text(
+            "Discovering Nonlinear Dynamics by Simultaneous Lagrangian and Newtonian",weight=BOLD
+        ).scale(0.5)
+        title_2 = Text ("Identification for Implicit and Explicit Sparse Identification",weight=BOLD).scale(0.5)
+        japanese_title = Text("陰的および陽的スパース同定のためのラグランジアンとニュートン力学の同時同定による非線形力学の発見").scale(0.4)
 
-        self.new_clean_slide("Noise analysis combined",contents=[graph_combined])
-
-        self.next_slide(notes=" # Results per system")
-
-        noise_comparison = import_svg("noise_comparison",scale=3)
-        success_rate = import_svg("success_rate",scale=3)
-
-        graph = VGroup(
-            noise_comparison,
-            success_rate
-            ).arrange(RIGHT,buff=0.5).set_x(0).scale_to_fit_width(13)
-        
-        self.play(
-            ReplacementTransform(noise_comparison_combined,noise_comparison),
-            ReplacementTransform(success_rate_combined,success_rate),
-            self.next_slide_number_animation(),
-            self.next_slide_title_animation("Noise analysis per system")
+        lab_title = Text("Tohoku University - School of engineering - NeuroRobotics Laboratory").scale(0.3)
+        author_date = (
+            Text("Eymeric CHAUCHAT C4TM1417 - 18th November 2025")
+            .scale(0.3)
         )
-        
+
+        #TODO Add the name of teacher and people who watch the presentation
+
+        teacher_intro = Text("Academic advisor:",weight=BOLD).scale(0.3)
+        teacher = Text("Prof. Mitsuhiro HAYASHIBE").scale(0.3)
+
+        reviewers_intro = Text("Reviewers:",weight=BOLD).scale(0.3)
+        reviewer_1 = Text("Prof. Kanjuro MAKIHARA").scale(0.3)
+        reviewer_2 = Text("Prof. Kimitoshi YAMAZAKI").scale(0.3)
+
+        teacher_group = VGroup(teacher_intro,teacher).arrange(DOWN,buff=0.2,aligned_edge=LEFT)
+        reviewers_group = VGroup(reviewers_intro,reviewer_1,reviewer_2).arrange(DOWN,buff=0.2,aligned_edge=LEFT)
+        credits = VGroup(teacher_group,reviewers_group).arrange(RIGHT,aligned_edge=UP,buff=1).to_corner(DR).shift(UP*0.5+LEFT*1)
+
+        intro_group = VGroup(japanese_title,title,title_2,lab_title,author_date).arrange(DOWN)
+
+        self.play(
+            self.next_slide_number_animation(),
+            Create(intro_group),
+            Create(credits),
+            )
+
+        self.next_slide(notes=" # Contents of the presentation")
+
+        i = Item()
+
+        contents = Paragraph(
+            *[
+                f"{i}. {section}"
+                for section in section_name
+            ],
+            font_size=self.CONTENT_FONT_SIZE,
+        ).align_to(self.UL, LEFT).shift(RIGHT*1)
+
+        self.new_clean_slide("Contents",contents=contents)
 
 
-
-    
 
 
 

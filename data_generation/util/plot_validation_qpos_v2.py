@@ -18,7 +18,7 @@ def prettify_system_name(system_name: str) -> str:
 
     name_map = {
         "cart_pole": "Cartpole",
-        "double_cartpole": "Cartpole double",
+        "cart_pole_double": "Cartpole double",
         "double_pendulum_pm": "Double pendulum"
     }
     return name_map.get(system_name.split("/")[-1], system_name)

@@ -10,3 +10,7 @@ python ./data_generation/util/plot_validation_qpos_v2.py \
     -c "mixed,mixed,0.0,lasso_regression,UNI-SINDy" \
     -c "sindy,explicit,0.0,lasso_regression,SINDy" \
     --error
+
+python data_generation/util/plot_validation_qpos_v2.py \
+    results/0e35cc88d4b1f5a82f5dc0e90725982d.json \
+    -c "mixed,explicit,0.01,lasso_regression,UNI-SINDy"
