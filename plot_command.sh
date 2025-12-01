@@ -14,3 +14,6 @@ python data_generation/util/plot_validation_qpos.py \
     --solution mixed \
     --noise 0.1 \
     --regression mixed 
+
+python data_generation/util/plot_validation_gpos_refined.py \
+    results/0e35cc88d4b1f5a82f5dc0e90725982d.json

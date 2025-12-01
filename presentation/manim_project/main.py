@@ -12,18 +12,43 @@ from manim_slides import Slide
 
 import functools
 
-DEFAULT_COLOR = ManimColor.from_rgb([0.01,0.01,0.01])  # Almost black
-DEFAULT_BACKGROUND_COLOR = WHITE
+BLACK_BACKGOUND = False
 
-# DEFAULT_COLOR = WHITE
-# DEFAULT_BACKGROUND_COLOR = ManimColor.from_rgb([0.01,0.01,0.01])  # Almost white
+if not BLACK_BACKGOUND:
+
+    DEFAULT_COLOR = ManimColor.from_rgb([0.01,0.01,0.01])  # Almost black
+    DEFAULT_BACKGROUND_COLOR = WHITE
+
+else:
+
+    DEFAULT_COLOR = WHITE
+    DEFAULT_BACKGROUND_COLOR = ManimColor.from_rgb([0.01,0.01,0.01])  # Almost white
+
+def import_svg(filename: str, scale: float = 6.0) -> SVGMobject:
+    """Imports an SVG file and scales it.
+
+    Args:
+        file_path (str): Path to the SVG file.
+        scale (float): Scaling factor.
+
+    Returns:
+        SVGMobject: The imported and scaled SVG as a Manim object.
+    """
+
+    if BLACK_BACKGOUND:
+        filename = filename + "_dark_background.svg"
+    else:
+        filename = filename + "_white_background.svg"
+
+    svg_mobject = SVGMobject(file_name=str(Path(__file__).parent / "image"/ "results" / filename))
+
+    svg_mobject.scale_to_fit_height(scale)
+
+    return svg_mobject
 
 POSITION_COLOR = RED
 VELOCITY_COLOR = GREEN
 ACCELERATION_COLOR = BLUE
-
-# Skip all the parametric waiting time ( slow down incremental development)
-DEBUG = False
 
 def dep_default_color(func):
     """Sets default color to Default color"""
@@ -803,10 +828,8 @@ class Main(BaseSlide):
         PendulumExtreme.add_updater(update_pendulum)
         PendulumRod.add_updater(update_rod)
 
-        if DEBUG:
-            self.wait(3)
-        else:
-            self.wait(4*PendulumObject.get_period(),stop_condition=lambda: (PendulumObject.get_theta() > math.pi-0.1) and (PendulumObject.get_time()>3) )
+
+        self.wait(4*PendulumObject.get_period(),stop_condition=lambda: (PendulumObject.get_theta() > math.pi-0.1) and (PendulumObject.get_time()>3) )
 
         PendulumObject.deactivate()
         PendulumExtreme.remove_updater(update_pendulum)
@@ -881,10 +904,8 @@ class Main(BaseSlide):
         theta_curve = always_redraw(get_curve)
 
         self.add(theta_curve)
-        if DEBUG:
-            self.wait(simulation_time)
-        else:
-            self.wait(simulation_time,stop_condition=lambda: PendulumObject.get_time()>=simulation_time )
+
+        self.wait(simulation_time,stop_condition=lambda: PendulumObject.get_time()>=simulation_time )
 
         PendulumObject.deactivate()
         PendulumExtreme.remove_updater(update_pendulum)
@@ -2336,7 +2357,7 @@ class Main(BaseSlide):
             Write(result_text)
         )
 
-    def construct_result(self):
+    def construct_annexe_1(self):
 
         self.next_slide(notes=" # Result")
 
@@ -2348,21 +2369,20 @@ class Main(BaseSlide):
         self.new_clean_slide("5.2 Result table",contents=[  intro_text_1,intro_text_2])
 
         table = Tex(r"""
-\small
 \begin{tabular}{lrrrrrrrr}
-\hline
-combo type & invalid & timeout & uncompleted & 1st & 2nd & 2nd$>$ & Wins WC & success rate \\
-\hline
-mixed x mixed (our) & 25 & 0 & 20 & 59 & 12 & 0 & 45 & 0.61 \\
-mixed x explicit (our) & 14 & 0 & 17 & 53 & 8 & 0 & 42 & 0.66 \\
-sindy x mixed & 81 & 43 & 11 & 12 & 8 & 0 & 3 & 0.18 \\
-sindy x explicit & 61 & 16 & 11 & 12 & 8 & 0 & 3 & 0.22 \\
-mixed x implicit (our)& 1 & 0 & 1 & 10 & 2 & 2 & 6 & 0.88 \\
-xlsindy x mixed & 59 & 0 & 43 & 3 & 6 & 4 & 3 & 0.11 \\
-xlsindy x explicit & 38 & 0 & 43 & 3 & 3 & 5 & 3 & 0.12 \\
-xlsindy x implicit & 0 & 0 & 1 & 2 & 1 & 1 & 0 & 0.80 \\
-sindy x implicit & 24 & 23 & 0 & 0 & 0 & 0 & 0 & 0.00 \\
-\hline
+\toprule
+combo_type & not_valid & timeout & not_completed & 1st_rank & 2nd_rank & 2nd> & Wins_WC & win_rate \\
+\midrule
+mixed x explicit & 90 & 5 & 20 & 40 & 6 & 0 & 30 & 0.294872 \\
+mixed x mixed & 96 & 9 & 41 & 39 & 6 & 1 & 29 & 0.251366 \\
+sindy x explicit & 127 & 84 & 9 & 8 & 8 & 0 & 2 & 0.105263 \\
+sindy x mixed & 145 & 105 & 11 & 6 & 7 & 0 & 1 & 0.076923 \\
+mixed x implicit & 14 & 12 & 1 & 5 & 4 & 0 & 4 & 0.375000 \\
+xlsindy x mixed & 110 & 1 & 61 & 4 & 2 & 2 & 3 & 0.044693 \\
+xlsindy x implicit & 8 & 8 & 1 & 3 & 0 & 0 & 1 & 0.250000 \\
+xlsindy x explicit & 103 & 0 & 47 & 2 & 2 & 2 & 2 & 0.038462 \\
+sindy x implicit & 31 & 31 & 0 & 0 & 0 & 0 & 0 & 0.000000 \\
+\bottomrule
 \end{tabular}
 """).scale(0.5).next_to(intro_text_2,DOWN,buff=0.5).set_x(0)
 
@@ -2480,21 +2500,53 @@ sindy x implicit & 24 & 23 & 0 & 0 & 0 & 0 & 0 & 0.00 \\
         self.construct_addition_1() # 9mn until here
         self.construct_addition_2() # 11mn until here (probable)
         self.construct_result_protocol() # 12mn until here
-        self.construct_result() # 13mn until here
+        
         self.construct_discussion() # 14mn until here
         self.construct_conclusion() # 15mn until here
         self.construct_qa() # 16mn until here
+        self.construct_annexe_1() 
 
 
 class WIP(BaseSlide):
 
-    def construct_svg(self):
+    def construct(self):
+        """
+        WIP slide 
+        """
 
-        self.next_slide(notes=" # Results V2")
+        self.next_slide(notes=" # Results combined")
 
-        noise_combined = SVGMobject(file_name=str(Path(__file__).parent / "image" / "noise_combined.svg")).scale_to_fit_height(6)
-        #noise_combined.set_stroke(color=DEFAULT_COLOR,width=1)
-        self.new_clean_slide("Results V2",contents=[noise_combined])
+        noise_comparison_combined = import_svg("noise_comparison_combined",scale=3)
+        success_rate_combined = import_svg("success_rate_combined",scale=3)
+
+        graph_combined = VGroup(
+            noise_comparison_combined,
+            success_rate_combined
+            ).arrange(RIGHT,buff=0.5).set_x(0).scale_to_fit_width(13)
+
+        self.new_clean_slide("Noise analysis combined",contents=[graph_combined])
+
+        self.next_slide(notes=" # Results per system")
+
+        noise_comparison = import_svg("noise_comparison",scale=3)
+        success_rate = import_svg("success_rate",scale=3)
+
+        graph = VGroup(
+            noise_comparison,
+            success_rate
+            ).arrange(RIGHT,buff=0.5).set_x(0).scale_to_fit_width(13)
+        
+        self.play(
+            ReplacementTransform(noise_comparison_combined,noise_comparison),
+            ReplacementTransform(success_rate_combined,success_rate),
+            self.next_slide_number_animation(),
+            self.next_slide_title_animation("Noise analysis per system")
+        )
+        
+
+
+
+    
 
 
 

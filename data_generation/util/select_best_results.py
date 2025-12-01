@@ -40,6 +40,7 @@ def analyze_results(csv_path: str, find_ranking: bool = False):
             catalog_type = row['catalog_type']
             solution_type = row['solution_type']
             valid = row['valid'].lower() == 'true'
+            optimizer = row['optimizer']
             
             # Only include valid results
             if not valid:
@@ -57,7 +58,7 @@ def analyze_results(csv_path: str, find_ranking: bool = False):
             
             # Store the result
             key = (experiment_id, noise_level)
-            results_by_combo[key].append((catalog_type, solution_type, validation_error, end_simulation_time))
+            results_by_combo[key].append((catalog_type, solution_type, validation_error, end_simulation_time,optimizer))
     
     # Sort combinations by experiment_id then noise_level
     sorted_combos = sorted(results_by_combo.keys(), key=lambda x: (x[0], x[1]))
@@ -86,8 +87,10 @@ def analyze_results(csv_path: str, find_ranking: bool = False):
         if find_ranking:
             # Create a dict for easy lookup
             error_by_method = {}
-            for catalog_type, solution_type, validation_error, end_simulation_time in results:
+            end_time_by_method = {}
+            for catalog_type, solution_type, validation_error, end_simulation_time,optimizer in results:
                 error_by_method[catalog_type] = validation_error
+                end_time_by_method[catalog_type] = end_simulation_time
             
             # Check if we have at least mixed and sindy
             if 'mixed' not in error_by_method or 'sindy' not in error_by_method:
@@ -96,6 +99,9 @@ def analyze_results(csv_path: str, find_ranking: bool = False):
             # Check if ranking is correct: mixed < sindy
             if not (error_by_method['mixed'] < error_by_method['sindy']):
                 continue
+
+            if (not end_time_by_method["mixed"] == 20 )or (not end_time_by_method["sindy"] == 20):
+                continue
             
             # This experiment matches!
             found_count += 1
@@ -103,11 +109,11 @@ def analyze_results(csv_path: str, find_ranking: bool = False):
         print(f"Experiment: {experiment_id}")
         print(f"Noise Level: {noise_level}")
         print("-" * 120)
-        print(f"{'Catalog Type':<20} {'Solution Type':<20} {'Validation Error':>20} {'End Sim Time':>20}")
+        print(f"{'Catalog Type':<20} {'Solution Type':<20} {'Validation Error':>20} {'End Sim Time':>20} {'Optimizer':<20}")
         print("-" * 120)
         
-        for catalog_type, solution_type, validation_error, end_simulation_time in results:
-            print(f"{catalog_type:<20} {solution_type:<20} {validation_error:>20.6f} {end_simulation_time:>20.2f}")
+        for catalog_type, solution_type, validation_error, end_simulation_time,optimizer in results:
+            print(f"{catalog_type:<20} {solution_type:<20} {validation_error:>20.6f} {end_simulation_time:>20.2f} {optimizer:<20}")
         
         print()
         print()

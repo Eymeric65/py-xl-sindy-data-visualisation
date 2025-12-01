@@ -51,6 +51,10 @@ def plot_training_validation_qpos(json_data: dict, output_path: str, solution_ty
             for key, data in validation_group_data.items():
                 if key == "validation_data":
                     continue  # Skip reference data
+
+                if key == "optimizer":
+                    if data != "lasso_regression":
+                        continue  # Skip non-lasso_regression optimizers
                 
                 # Check if this entry has extra_info and solution
                 if "extra_info" not in data or "solution" not in data:

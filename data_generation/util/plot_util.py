@@ -347,7 +347,7 @@ def plot_boxplot(filename:str, box_plot_data: list[BPSystemData],output_dir: str
 
     n_rows = len(box_plot_data)
 
-    fig, axes = plt.subplots(n_rows, 1, figsize=(10, 6*n_rows**0.5), squeeze=False)
+    fig, axes = plt.subplots(n_rows, 1, figsize=(12, 6*n_rows**0.5), squeeze=False)
     
     fig.suptitle('Validation Error Comparison (Log Scale)', fontsize=18, fontweight='bold', y=0.995)
 

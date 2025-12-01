@@ -1,10 +1,13 @@
 import pandas as pd
 
 # Load the CSV file into a pandas DataFrame
-df = pd.read_csv('graphs_analysis/results_database.csv')
+df = pd.read_csv('results_database.csv')
 
 # Display the first few rows
 print(df.head())
+
+# Filter algorithms 
+df = df[df["optimizer"]=="lasso_regression"]
 
 df["combo_type"] = df["catalog_type"] + " x " + df["solution_type"]
 
