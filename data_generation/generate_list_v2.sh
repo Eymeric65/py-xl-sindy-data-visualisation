@@ -1,0 +1,12 @@
+python -m data_generation.script.v2.generate_data \
+    --random-seed 1 \
+    --damping-coefficients -1.8 -1.8 \
+    --batch-number 10 \
+    --generation-type "mujoco" \
+    --experiment-folder "data_generation/mujoco_align_data/cart_pole" \
+    --max-time 15 \
+    --forces-scale-vector 0 0.5 \
+    --initial-condition-randomness 3 \
+    --initial-position 0.0 0 0.0 0 \
+    --sample-number 20000 \
+    --max-validation-sample 5000

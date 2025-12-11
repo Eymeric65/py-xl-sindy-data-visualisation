@@ -7,7 +7,7 @@ name = "py-xl-sindy-data-generation"
 version = "0.1.0"
 description = "The data generation utilitary of the py-xl-sindy library"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.12"
 dependencies = [
     "click>=8.1.7",
     "imageio>=2.37.2",
@@ -24,5 +24,8 @@ dependencies = [
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["data_generation*", "script*", "util*"]
+
+[tool.uv.sources]
+py-xl-sindy = { path = "../../py-xl-sindy", editable = true }
 
 
