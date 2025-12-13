@@ -28,10 +28,12 @@ python -m data_generation.script.v2.align_data \
     --regression-parameters.random-seed 1 \
     --regression-parameters.data-ratio 1.5
 
-## The alignement command for the final 
+## The alignement command for the final
 
 python -m data_generation.script.v2.automatic_align \
-    --noise_levels 0.0 0.01 0.1 0.3 \
+    --noise-levels 0.0 0.01 0.1 0.3 \
     --data-ratio 1.5 \
-    --random-seed 0 \
-    --max-workers 4 
+    --random-seeds 0 \
+    --max-workers 4
+
+# Start of the run : 2025-12-10 18:34:20,961

@@ -17,8 +17,14 @@ python -m data_generation.script.v2.generate_data \
 
 """
 
+import subprocess
+import argparse
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from pathlib import Path
+import sys
+
 FIXED_ARGS = {
-    "batch_number": 5,
+    "batch_number": 15,
     "generation_type": "mujoco",
     "max_time": 10.0,
     "initial_condition_randomness": [3.0],
@@ -62,9 +68,9 @@ DAMPING_COEFFICIENTS = {
 FORCE_SCALE_VECTORS = {
     "cart_pole": [
         [0.0, 0.0],
-        [0.0, 0.5],
-        [0.5, 0.0],
-        [0.5, 0.5]
+        [0.0, 1.0],
+        [1.0, 0.0],
+        [1.0, 1.0]
     ],
     "double_pendulum": [
         [0.0, 0.0],
@@ -74,17 +80,17 @@ FORCE_SCALE_VECTORS = {
     ],
     "cart_pole_double": [
         [0.0, 0.0,0.0],
-        [0.0, 0.5,0.0],
-        [0.0, 0.0,0.5],
-        [0.5, 0.0,0.0],
-        [0.5, 0.5,0.0],
-        [0.0, 0.5,0.5],
-        [0.5, 0.0,0.5],
-        [0.5, 0.5,0.5]
+        [0.0, 2.0,0.0],
+        [0.0, 0.0,2.0],
+        [2.0, 0.0,0.0],
+        [2.0, 2.0,0.0],
+        [0.0, 2.0,2.0],
+        [2.0, 0.0,2.0],
+        [2.0, 2.0,2.0]
         ],
 }
 
-RANDOM_SEEDS = [1, 2, 3, 4, 5]
+RANDOM_SEEDS = [1, 2, 3]
 
 EXPERIMENT_FOLDERS = {
     "cart_pole": "data_generation/mujoco_align_data/cart_pole",
@@ -135,8 +141,67 @@ def generate_command(experiment_name, random_seed, damping_coef, initial_pos, fo
     return command
 
 
+def run_command(command_info):
+    """Worker function to execute a command
+    
+    Args:
+        command_info: Tuple of (command_index, total_commands, command_string)
+    
+    Returns:
+        Tuple of (command_index, success, error_message)
+    """
+    idx, total, command = command_info
+    
+    try:
+        print(f"[{idx}/{total}] Starting: {command[:100]}...")
+        
+        result = subprocess.run(
+            command,
+            shell=True,
+            capture_output=True,
+            text=True,
+            check=False
+        )
+        
+        if result.returncode == 0:
+            print(f"[{idx}/{total}] ✓ Completed successfully")
+            return (idx, True, None)
+        else:
+            error_msg = result.stderr[:200] if result.stderr else "Unknown error"
+            print(f"[{idx}/{total}] ✗ Failed: {error_msg}")
+            return (idx, False, error_msg)
+            
+    except Exception as e:
+        error_msg = str(e)
+        print(f"[{idx}/{total}] ✗ Exception: {error_msg}")
+        return (idx, False, error_msg)
+
+
 def main():
-    """Generate all experiment commands and save to file"""
+    """Generate all experiment commands and optionally execute them in parallel"""
+    parser = argparse.ArgumentParser(
+        description="Generate and optionally execute experiment commands in parallel"
+    )
+    parser.add_argument(
+        "--workers",
+        type=int,
+        default=None,
+        help="Number of parallel workers. If not specified, only generates the bash script without executing."
+    )
+    parser.add_argument(
+        "--output",
+        type=str,
+        default="data_generation/generate_all_experiments.sh",
+        help="Output file for the bash script (default: data_generation/generate_all_experiments.sh)"
+    )
+    parser.add_argument(
+        "--execute-only",
+        action="store_true",
+        help="Only execute commands, don't save to file"
+    )
+    
+    args = parser.parse_args()
+    
     commands = []
     
     for experiment_name in EXPERIMENT_FOLDERS.keys():
@@ -159,20 +224,66 @@ def main():
                         )
                         commands.append(command)
     
-    # Save to file
-    output_file = "data_generation/generate_all_experiments.sh"
-    with open(output_file, 'w') as f:
-        f.write("#!/bin/bash\n")
-        f.write("# Auto-generated experiment commands\n")
-        f.write(f"# Total commands: {len(commands)}\n\n")
-        
-        for i, cmd in enumerate(commands, 1):
-            f.write(f"# Command {i}/{len(commands)}\n")
-            f.write(f"{cmd}\n\n")
-    
     print(f"\nGenerated {len(commands)} commands")
-    print(f"Output saved to: {output_file}")
-    print(f"\nTo run all experiments, execute: bash {output_file}")
+    
+    # Save to file unless execute-only mode
+    if not args.execute_only:
+        output_file = args.output
+        Path(output_file).parent.mkdir(parents=True, exist_ok=True)
+        
+        with open(output_file, 'w') as f:
+            f.write("#!/bin/bash\n")
+            f.write("# Auto-generated experiment commands\n")
+            f.write(f"# Total commands: {len(commands)}\n\n")
+            
+            for i, cmd in enumerate(commands, 1):
+                f.write(f"# Command {i}/{len(commands)}\n")
+                f.write(f"{cmd}\n\n")
+        
+        print(f"Output saved to: {output_file}")
+    
+    # Execute in parallel if workers specified
+    if args.workers is not None:
+        if args.workers < 1:
+            print("Error: Number of workers must be at least 1")
+            sys.exit(1)
+        
+        print(f"\nExecuting commands with {args.workers} parallel workers...")
+        print("=" * 80)
+        
+        # Prepare command info tuples
+        command_infos = [(i+1, len(commands), cmd) for i, cmd in enumerate(commands)]
+        
+        # Track results
+        successful = 0
+        failed = 0
+        
+        with ThreadPoolExecutor(max_workers=args.workers) as executor:
+            # Submit all commands
+            future_to_cmd = {
+                executor.submit(run_command, cmd_info): cmd_info 
+                for cmd_info in command_infos
+            }
+            
+            # Process completed commands
+            for future in as_completed(future_to_cmd):
+                idx, success, error = future.result()
+                if success:
+                    successful += 1
+                else:
+                    failed += 1
+        
+        print("=" * 80)
+        print(f"\nExecution complete!")
+        print(f"  Successful: {successful}/{len(commands)}")
+        print(f"  Failed: {failed}/{len(commands)}")
+        
+        if failed > 0:
+            print("\nSome commands failed. Check the output above for details.")
+            sys.exit(1)
+    else:
+        print(f"\nTo run all experiments, execute: bash {args.output}")
+        print(f"Or run with --workers N to execute in parallel with N workers")
 
 
 if __name__ == "__main__":

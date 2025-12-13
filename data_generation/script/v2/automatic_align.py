@@ -21,6 +21,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from pydantic import BaseModel, Field
 from data_generation.script.v2.dataclass import Experiment, RegressionParameter
 
+tqdm.monitor_interval = 2
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -76,7 +77,7 @@ class AutomaticAlignConfig(BaseModel):
     experiment_folders: List[str] = Field(default_factory=list)
     """Filter experiments by folder name. Empty list means all folders"""
     
-    cpu_limit: int = 1000
+    cpu_limit: int = 750
     """CPU limit percentage for cpulimit"""
     
     timeout: int = 3600
@@ -123,33 +124,57 @@ class AlignmentTask(BaseModel):
             print(f"[DRY RUN] {' '.join(cmd)}")
             return {"success": True, "dry_run": True}
         
+        process = None
         try:
-            result = subprocess.run(
+            # Use Popen to have control over the process for proper termination
+            process = subprocess.Popen(
                 cmd,
-                capture_output=True,
-                text=True,
-                timeout=config.timeout
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True
             )
             
+            # Wait with timeout
+            stdout, stderr = process.communicate(timeout=config.timeout)
+            
             return {
-                "success": result.returncode == 0,
-                "returncode": result.returncode,
-                "stdout": result.stdout,
-                "stderr": result.stderr
+                "success": process.returncode == 0,
+                "returncode": process.returncode,
+                "stdout": stdout,
+                "stderr": stderr
             }
             
         except subprocess.TimeoutExpired:
+            # Kill everything matching the experiment file path
+            # This will kill both cpulimit and the python align_data process
+            try:
+                subprocess.run(
+                    ["pkill", "-9", "-f", self.experiment_file],
+                    capture_output=True,
+                    timeout=5
+                )
+            except:
+                pass
+            
             # Signal timeout to align_data
             timeout_cmd = cmd + ["--timeout-signal"]
             try:
                 subprocess.run(timeout_cmd, capture_output=True, text=True, timeout=120)
-            except:
-                pass
+            except Exception as e:
+                logger.error(f"Error signaling timeout for {self.experiment_id}: {e}")
             
             logger.error(f"Timeout for {self.experiment_id}")
             return {"success": False, "error": "timeout"}
             
         except Exception as e:
+            # Clean up process on any other error
+            if process:
+                try:
+                    process.kill()
+                    process.wait(timeout=5)
+                except:
+                    pass
+            
             logger.error(f"Error executing {self.experiment_id}: {e}")
             return {"success": False, "error": str(e)}
 
@@ -198,12 +223,15 @@ def find_experiments(config: AutomaticAlignConfig) -> List[tuple[str, Experiment
             if config.experiment_folders:
                 folder_name = experiment.generation_params.experiment_folder.split('/')[-1]
                 if folder_name not in config.experiment_folders:
+                    logger.info(f"skipped")
                     continue
             
             experiments.append((experiment_id, experiment))
             
         except Exception as e:
             logger.error(f"Failed to load {experiment_id}: {e}")
+
+    return experiments
     
 def generate_tasks(
     experiment_id: str,
@@ -237,11 +265,20 @@ def generate_tasks(
             )
 
 
-def process_experiment(experiment_id: str, tasks: List[AlignmentTask], config: AutomaticAlignConfig) -> List[dict]:
+def process_experiment(experiment_id: str, tasks: List[AlignmentTask], config: AutomaticAlignConfig, position: int = 1) -> List[dict]:
     """Process all tasks for a single experiment sequentially"""
     results = []
-    # Create a progress bar for this experiment's tasks
-    task_pbar = tqdm(tasks, desc=f"Experiment {experiment_id[:8]}", leave=False, position=1)
+    # Create a progress bar - use dynamic_ncols for tmux compatibility
+    task_pbar = tqdm(
+        tasks, 
+        desc=f"Exp {experiment_id[:8]}", 
+        leave=False,  # Don't leave progress bars after completion to reduce clutter
+        position=position, 
+        mininterval=0.1, 
+        maxinterval=10,
+        dynamic_ncols=True,  # Adjust to terminal width dynamically
+        ascii=True  # Use ASCII characters for better tmux compatibility
+    )
     for task in task_pbar:
         # Update progress bar with current task details
         task_pbar.set_postfix({
@@ -322,29 +359,43 @@ def main():
     
     if config.max_workers == 1:
         # Sequential execution - process experiments one by one
-        for experiment_id, tasks in tqdm(tasks_by_experiment.items(), desc="Processing experiments", position=0):
-            experiment_results = process_experiment(experiment_id, tasks, config)
+        for experiment_id, tasks in tasks_by_experiment.items():
+            experiment_results = process_experiment(experiment_id, tasks, config, position=2)
             results.extend(experiment_results)
     else:
         # Parallel execution - each worker processes entire experiments
         logger.info(f"Using {config.max_workers} parallel workers")
         with ThreadPoolExecutor(max_workers=config.max_workers) as executor:
-            # Submit one job per experiment
-            future_to_experiment = {
-                executor.submit(process_experiment, experiment_id, tasks, config): experiment_id
-                for experiment_id, tasks in tasks_by_experiment.items()
-            }
+            # Submit jobs with unique position for each worker (offset by 1 for general progress bar)
+            future_to_data = {}
+            for i, (experiment_id, tasks) in enumerate(tasks_by_experiment.items()):
+                position = (i % config.max_workers) + 2  # Assign positions 2, 3, 4, ... (1 reserved for general)
+                future = executor.submit(process_experiment, experiment_id, tasks, config, position)
+                future_to_data[future] = (experiment_id, tasks)
             
-            # Collect results as experiments complete
-            for future in tqdm(as_completed(future_to_experiment), total=len(tasks_by_experiment), desc="Processing experiments", position=0):
-                experiment_id = future_to_experiment[future]
+            # Collect results as experiments complete with general progress bar
+            completed = 0
+            general_pbar = tqdm(
+                total=len(tasks_by_experiment), 
+                desc="Overall Progress", 
+                position=0, 
+                leave=True, 
+                mininterval=0.1, 
+                maxinterval=10,
+                dynamic_ncols=True,  # Adjust to terminal width
+                ascii=True  # ASCII characters for tmux compatibility
+            )
+            general_pbar.update(0)
+            for future in as_completed(future_to_data):
+                experiment_id, tasks = future_to_data[future]
+                completed += 1
+                general_pbar.update(1)
                 try:
                     experiment_results = future.result()
                     results.extend(experiment_results)
                 except Exception as e:
                     logger.error(f"Experiment {experiment_id} failed: {e}")
                     # Add failed results for all tasks in this experiment
-                    tasks = tasks_by_experiment[experiment_id]
                     for task in tasks:
                         results.append({
                             "success": False,
@@ -354,6 +405,7 @@ def main():
                             "regression_type": task.regression_param.regression_type,
                             "noise_level": task.regression_param.noise_level
                         })
+            general_pbar.close()
     
     # Print summary
     print_summary(results, config)

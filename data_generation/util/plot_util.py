@@ -15,8 +15,8 @@ import numpy as np
 
 class Combo(BaseModel):
     pretty_name:str
-    catalog_type:str
-    solution_type:str
+    paradigm:str
+    regression_type:str
     color:str
 
 class RegressionAlgorithm(BaseModel):
@@ -71,8 +71,8 @@ class BPSystemData(BaseModel):
 class ComboRegistry:
     def __init__(self,combos:list[Combo]):
         self._combos = combos
-        self.catalog_type = [c.catalog_type for c in combos]
-        self.solution_type = [c.solution_type for c in combos]
+        self.paradigm = [c.paradigm for c in combos]
+        self.regression_type = [c.regression_type for c in combos]
 
     def __iter__(self) -> Iterator[Combo]:
         return iter(self._combos)
@@ -80,32 +80,32 @@ class ComboRegistry:
 TARGET_COMBOS = ComboRegistry([
     Combo(
         pretty_name="UNI-SINDy (new)",
-        catalog_type="mixed",
-        solution_type="mixed",
+        paradigm="mixed",
+        regression_type="mixed",
         color="#3498db"
     ),
     Combo(
         pretty_name="XlSINDy",
-        catalog_type="xlsindy",
-        solution_type="explicit",
+        paradigm="xlsindy",
+        regression_type="explicit",
         color="#e74c3c"
     ),
     Combo(
         pretty_name="SINDy",
-        catalog_type="sindy",
-        solution_type="explicit",
+        paradigm="sindy",
+        regression_type="explicit",
         color="#2ecc71"
     ),
     Combo(
         pretty_name="XlSINDy-PI (new)",
-        catalog_type="xlsindy",
-        solution_type="implicit",
+        paradigm="xlsindy",
+        regression_type="implicit",
         color="#602ecc"
     ),
     Combo(
         pretty_name="SINDy-PI",
-        catalog_type="sindy",
-        solution_type="implicit",
+        paradigm="sindy",
+        regression_type="implicit",
         color="#9b59b6"
     ),
 ])
@@ -170,9 +170,9 @@ def import_data(file_path: str) -> pd.DataFrame:
     Import data from a CSV file into a pandas DataFrame.
     Header is this : 
      - experiment_id
-     - solution_id
-     - catalog_type
-     - solution_type
+     - trajectory_name
+     - paradigm
+     - regression_type
      - optimizer
      - noise_level
      - valid
@@ -210,8 +210,8 @@ def filter_data(
 
     if combo_filter is not None:
         data = data[
-            (data['catalog_type'].isin([combo_filter.catalog_type] if isinstance(combo_filter, Combo) else combo_filter.catalog_type)) &
-            (data['solution_type'].isin([combo_filter.solution_type] if isinstance(combo_filter, Combo) else combo_filter.solution_type)) 
+            (data['paradigm'].isin([combo_filter.paradigm] if isinstance(combo_filter, Combo) else combo_filter.paradigm)) &
+            (data['regression_type'].isin([combo_filter.regression_type] if isinstance(combo_filter, Combo) else combo_filter.regression_type)) 
         ]
 
     if algo_filter is not None:
@@ -444,6 +444,10 @@ def plot_boxplot(filename:str, box_plot_data: list[BPSystemData],output_dir: str
 
         ax.set_xlim(1, position -1 )
 
+        print(len(all_plot_data), "boxplots to plot")
+        print(len(all_positions), "positions for boxplots")
+        if (len(all_plot_data) ==0):
+            continue
         # Create boxplot
         box = ax.boxplot(
             all_plot_data, 
@@ -641,7 +645,7 @@ if __name__ == "__main__":
         systems=SYSTEMS.values()
     )
 
-    end_time_threshold = 5
+    end_time_threshold = 18
 
     # Boxplot noise data
 
