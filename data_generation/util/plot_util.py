@@ -6,6 +6,7 @@ import pandas as pd
 
 import matplotlib.pyplot as plt
 from matplotlib.patches import Patch
+import seaborn as sns
 
 from pydantic import BaseModel,ConfigDict
 from typing import Iterator
@@ -77,36 +78,39 @@ class ComboRegistry:
     def __iter__(self) -> Iterator[Combo]:
         return iter(self._combos)
 
+# Use seaborn deep palette colors
+DEEP_PALETTE = sns.color_palette("deep", 10)
+
 TARGET_COMBOS = ComboRegistry([
     Combo(
         pretty_name="UNI-SINDy (new)",
         paradigm="mixed",
         regression_type="mixed",
-        color="#3498db"
+        color="#{:02x}{:02x}{:02x}".format(int(DEEP_PALETTE[0][0]*255), int(DEEP_PALETTE[0][1]*255), int(DEEP_PALETTE[0][2]*255))
     ),
     Combo(
         pretty_name="XlSINDy",
         paradigm="xlsindy",
         regression_type="explicit",
-        color="#e74c3c"
+        color="#{:02x}{:02x}{:02x}".format(int(DEEP_PALETTE[3][0]*255), int(DEEP_PALETTE[3][1]*255), int(DEEP_PALETTE[3][2]*255))
     ),
     Combo(
         pretty_name="SINDy",
         paradigm="sindy",
         regression_type="explicit",
-        color="#2ecc71"
+        color="#{:02x}{:02x}{:02x}".format(int(DEEP_PALETTE[2][0]*255), int(DEEP_PALETTE[2][1]*255), int(DEEP_PALETTE[2][2]*255))
     ),
     Combo(
         pretty_name="XlSINDy-PI (new)",
         paradigm="xlsindy",
         regression_type="implicit",
-        color="#602ecc"
+        color="#{:02x}{:02x}{:02x}".format(int(DEEP_PALETTE[4][0]*255), int(DEEP_PALETTE[4][1]*255), int(DEEP_PALETTE[4][2]*255))
     ),
     Combo(
         pretty_name="SINDy-PI",
         paradigm="sindy",
         regression_type="implicit",
-        color="#9b59b6"
+        color="#{:02x}{:02x}{:02x}".format(int(DEEP_PALETTE[9][0]*255), int(DEEP_PALETTE[9][1]*255), int(DEEP_PALETTE[9][2]*255))
     ),
 ])
 
@@ -123,20 +127,27 @@ WHITE_BACKGROUND_THEME={
             "marker":"D",
             "markerfacecolor":"white",
             "markeredgecolor":"black",
-            "markersize":5,
+            "markersize":6,
         },
         "medianprops":{
-            "color":"black",
-            "linewidth":2
+            "color":"#2c3e50",
+            "linewidth":2.5
+        },
+        "whiskerprops":{
+            "linewidth":1.5,
+            "linestyle":"-"
+        },
+        "capprops":{
+            "linewidth":1.5
         }
     },
     "annotation_bbox":{
         "bbox":{
-            "boxstyle":'round,pad=0.4', 
+            "boxstyle":'round,pad=0.5', 
             "facecolor":'white', 
-            "alpha":0.8, 
-            "edgecolor":'gray', 
-            "linewidth":1
+            "alpha":0.95, 
+            "edgecolor":'#bdc3c7', 
+            "linewidth":1.5
         }
     }
 }
@@ -145,22 +156,29 @@ BLACK_BACKGROUND_THEME={
     "boxplot":{
         "meanprops":{
             "marker":"D",
-            "markerfacecolor":"black",
+            "markerfacecolor":"#2c3e50",
             "markeredgecolor":"white",
-            "markersize":5,
+            "markersize":6,
         },
         "medianprops":{
             "color":"white",
-            "linewidth":2
+            "linewidth":2.5
+        },
+        "whiskerprops":{
+            "linewidth":1.5,
+            "linestyle":"-"
+        },
+        "capprops":{
+            "linewidth":1.5
         }
     },
     "annotation_bbox":{
         "bbox":{
-            "boxstyle":'round,pad=0.4', 
-            "facecolor":'black', 
-            "alpha":0.8, 
-            "edgecolor":'gray', 
-            "linewidth":1
+            "boxstyle":'round,pad=0.5', 
+            "facecolor":'#2c3e50', 
+            "alpha":0.95, 
+            "edgecolor":'#7f8c8d', 
+            "linewidth":1.5
         }
     }
 }
@@ -296,7 +314,7 @@ def generate_boxplot_data(
 
 def apply_style(style_name: str)->dict:
     """
-    Apply a specific style to matplotlib plots.
+    Apply a specific style to matplotlib plots with seaborn enhancements.
 
     Args:
         style_name (str): The name of the style to apply.
@@ -307,10 +325,15 @@ def apply_style(style_name: str)->dict:
     """
 
     if style_name == "white_background":
-        plt.style.use('default')
+        sns.set_style("whitegrid")
+        sns.set_context("notebook", font_scale=1.1, rc={"lines.linewidth": 2.5})
+        sns.set_palette("deep")
         return WHITE_BACKGROUND_THEME
     elif style_name == "dark_background":
         plt.style.use('dark_background')
+        sns.set_style("darkgrid")
+        sns.set_context("notebook", font_scale=1.1, rc={"lines.linewidth": 2.5})
+        sns.set_palette("deep")
         return BLACK_BACKGROUND_THEME
     else:
         raise ValueError(f"Style '{style_name}' is not recognized.")
@@ -347,9 +370,9 @@ def plot_boxplot(filename:str, box_plot_data: list[BPSystemData],output_dir: str
 
     n_rows = len(box_plot_data)
 
-    fig, axes = plt.subplots(n_rows, 1, figsize=(12, 6*n_rows**0.5), squeeze=False)
+    fig, axes = plt.subplots(n_rows, 1, figsize=(14, 6.5*n_rows**0.5), squeeze=False)
     
-    fig.suptitle('Validation Error Comparison (Log Scale)', fontsize=18, fontweight='bold', y=0.995)
+    fig.suptitle('Validation Error Comparison (Log Scale)', fontsize=20, fontweight='bold', y=0.995)
 
     all_noise_levels = set()
 
@@ -373,9 +396,10 @@ def plot_boxplot(filename:str, box_plot_data: list[BPSystemData],output_dir: str
                 factor = 0.3 + (0.7 * noise_idx / (len(all_noise_levels) - 1))
                 gray_val = 1 - factor * 0.6  # Range from light to dark gray
                 legend_elements.append(
-                    Patch(facecolor=(gray_val, gray_val, gray_val), alpha=0.7, label=f'Noise: {noise}')
+                    Patch(facecolor=(gray_val, gray_val, gray_val), alpha=0.8, label=f'Noise: {noise}', edgecolor='black', linewidth=0.5)
                 )
-            ax.legend(handles=legend_elements, loc='upper left', fontsize=11, frameon=True)
+            ax.legend(handles=legend_elements, loc='upper left', fontsize=12, frameon=True, 
+                     fancybox=True, shadow=True, framealpha=0.95)
 
         # Prepare data for each combo across all noise levels
         all_plot_data = []
@@ -452,15 +476,18 @@ def plot_boxplot(filename:str, box_plot_data: list[BPSystemData],output_dir: str
         box = ax.boxplot(
             all_plot_data, 
             positions=all_positions, 
-            widths=0.6,
+            widths=0.65,
             patch_artist=True,
+            showmeans=True,
             **style_dict['boxplot']
         )
 
-        # Color the boxes
+        # Color the boxes with enhanced styling
         for patch, color in zip(box['boxes'], all_colors):
             patch.set_facecolor(color)
-            patch.set_alpha(0.7)
+            patch.set_alpha(0.75)
+            patch.set_edgecolor('#2c3e50')
+            patch.set_linewidth(1.2)
 
         # Set log scale
         ax.set_yscale('log')
@@ -473,11 +500,13 @@ def plot_boxplot(filename:str, box_plot_data: list[BPSystemData],output_dir: str
             ax.set_xlabel('Method (noise levels: 0.0, 0.001, 0.01, 0.1 - only systems converging over full validation period)', fontsize=9)
         
         # Set y-axis
-        ax.set_ylabel(f'{system_data.system_registry.pretty_name}\nValidation Error (log)', fontsize=11, fontweight='bold')
+        ax.set_ylabel(f'{system_data.system_registry.pretty_name}\nValidation Error (log)', fontsize=12, fontweight='bold')
         
-        # Add grid
-        ax.grid(True, alpha=0.3, axis='y', which='both')
-        ax.tick_params(axis='y', labelsize=10)
+        # Add enhanced grid
+        ax.grid(True, alpha=0.4, axis='y', which='major', linestyle='-', linewidth=0.8)
+        ax.grid(True, alpha=0.2, axis='y', which='minor', linestyle=':', linewidth=0.5)
+        ax.tick_params(axis='y', labelsize=11)
+        ax.tick_params(axis='x', labelsize=11)
 
         # Add n_max annotation in bottom right corner
         ax.text(0.98, 0.08, f'$n_{{max}}={system_data.valid_experiment_number}$', 
@@ -506,9 +535,9 @@ def plot_success_rate(filename:str, box_plot_data: list[BPSystemData],output_dir
 
     n_rows = len(box_plot_data)
 
-    fig, axes = plt.subplots(n_rows, 1, figsize=(10, 6*n_rows**0.5), squeeze=False)
+    fig, axes = plt.subplots(n_rows, 1, figsize=(14, 6.5*n_rows**0.5), squeeze=False)
     
-    fig.suptitle('Success rate Comparison', fontsize=18, fontweight='bold', y=0.995)
+    fig.suptitle('Success Rate Comparison', fontsize=20, fontweight='bold', y=0.995)
 
     all_noise_levels = set()
 
@@ -533,9 +562,10 @@ def plot_success_rate(filename:str, box_plot_data: list[BPSystemData],output_dir
                 factor = 0.3 + (0.7 * noise_idx / (len(all_noise_levels) - 1))
                 gray_val = 1 - factor * 0.6  # Range from light to dark gray
                 legend_elements.append(
-                    Patch(facecolor=(gray_val, gray_val, gray_val), alpha=0.7, label=f'Noise: {noise}')
+                    Patch(facecolor=(gray_val, gray_val, gray_val), alpha=0.8, label=f'Noise: {noise}', edgecolor='black', linewidth=0.5)
                 )
-            ax.legend(handles=legend_elements, loc='upper right', fontsize=11, frameon=True)
+            ax.legend(handles=legend_elements, loc='upper right', fontsize=12, frameon=True,
+                     fancybox=True, shadow=True, framealpha=0.95)
 
         # Prepare data for each combo across all noise levels
         all_plot_data = []
@@ -591,19 +621,21 @@ def plot_success_rate(filename:str, box_plot_data: list[BPSystemData],output_dir
 
         ax.set_xlim(1, position -1 )
 
-        # Create boxplot
-        box = ax.bar(
+        # Create enhanced bar chart
+        bars = ax.bar(
             all_positions, 
             height=all_plot_data,
-            width=0.6,
+            width=0.65,
             color=all_colors,
-            # **style_dict['boxplot']
+            alpha=0.85,
+            edgecolor='#2c3e50',
+            linewidth=1.2
         )
-
-        # Color the boxes
-        # for patch, color in zip(box['boxes'], all_colors):
-        #     patch.set_facecolor(color)
-        #     patch.set_alpha(0.7)
+        
+        # Add value labels on top of bars
+        for i, (pos, val) in enumerate(zip(all_positions, all_plot_data)):
+            if val > 0:
+                ax.text(pos, val + 1, f'{val:.0f}%', ha='center', va='bottom', fontsize=9, fontweight='bold')
 
         # Set x-axis ticks and labels (centered on each group of 4 noise levels)
         ax.set_xticks(x_ticks)
@@ -612,12 +644,15 @@ def plot_success_rate(filename:str, box_plot_data: list[BPSystemData],output_dir
         if row_idx == n_rows - 1:
             ax.set_xlabel('Method (noise levels: 0.0, 0.001, 0.01, 0.1 - only systems converging over full validation period)', fontsize=9)
         
-        # Set y-axis
-        ax.set_ylabel(f'{system_data.system_registry.pretty_name}\nSuccess rate (%)', fontsize=11, fontweight='bold')
+        # Set y-axis with enhanced styling
+        ax.set_ylabel(f'{system_data.system_registry.pretty_name}\nSuccess Rate (%)', fontsize=12, fontweight='bold')
+        ax.set_ylim(0, 105)  # Set y-axis from 0 to 105%
         
-        # Add grid
-        ax.grid(True, alpha=0.3, axis='y', which='both')
-        ax.tick_params(axis='y', labelsize=10)
+        # Add enhanced grid
+        ax.grid(True, alpha=0.4, axis='y', which='major', linestyle='-', linewidth=0.8)
+        ax.grid(True, alpha=0.2, axis='y', which='minor', linestyle=':', linewidth=0.5)
+        ax.tick_params(axis='y', labelsize=11)
+        ax.tick_params(axis='x', labelsize=11)
 
         # Add n_max annotation in bottom right corner
         ax.text(0.98, 0.08, f'$n_{{max}}={system_data.valid_experiment_number}$', 
