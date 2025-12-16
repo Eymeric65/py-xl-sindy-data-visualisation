@@ -100,12 +100,12 @@ TARGET_COMBOS = ComboRegistry([
         regression_type="explicit",
         color="#{:02x}{:02x}{:02x}".format(int(DEEP_PALETTE[2][0]*255), int(DEEP_PALETTE[2][1]*255), int(DEEP_PALETTE[2][2]*255))
     ),
-    Combo(
-        pretty_name="XlSINDy-PI (new)",
-        paradigm="xlsindy",
-        regression_type="implicit",
-        color="#{:02x}{:02x}{:02x}".format(int(DEEP_PALETTE[4][0]*255), int(DEEP_PALETTE[4][1]*255), int(DEEP_PALETTE[4][2]*255))
-    ),
+    # Combo(
+    #     pretty_name="XlSINDy-PI (new)",
+    #     paradigm="xlsindy",
+    #     regression_type="implicit",
+    #     color="#{:02x}{:02x}{:02x}".format(int(DEEP_PALETTE[4][0]*255), int(DEEP_PALETTE[4][1]*255), int(DEEP_PALETTE[4][2]*255))
+    # ),
     Combo(
         pretty_name="SINDy-PI",
         paradigm="sindy",
@@ -328,12 +328,14 @@ def apply_style(style_name: str)->dict:
         sns.set_style("whitegrid")
         sns.set_context("notebook", font_scale=1.1, rc={"lines.linewidth": 2.5})
         sns.set_palette("deep")
+        plt.style.use('default')
         return WHITE_BACKGROUND_THEME
     elif style_name == "dark_background":
         plt.style.use('dark_background')
         sns.set_style("darkgrid")
         sns.set_context("notebook", font_scale=1.1, rc={"lines.linewidth": 2.5})
         sns.set_palette("deep")
+        plt.style.use('dark_background')
         return BLACK_BACKGROUND_THEME
     else:
         raise ValueError(f"Style '{style_name}' is not recognized.")
@@ -642,7 +644,7 @@ def plot_success_rate(filename:str, box_plot_data: list[BPSystemData],output_dir
         ax.set_xticklabels(x_labels, fontsize=11)
 
         if row_idx == n_rows - 1:
-            ax.set_xlabel('Method (noise levels: 0.0, 0.001, 0.01, 0.1 - only systems converging over full validation period)', fontsize=9)
+            ax.set_xlabel('Method (noise levels: 0.0, 0.01, 0.1, 0.2 - only systems converging over full validation period)', fontsize=9)
         
         # Set y-axis with enhanced styling
         ax.set_ylabel(f'{system_data.system_registry.pretty_name}\nSuccess Rate (%)', fontsize=12, fontweight='bold')

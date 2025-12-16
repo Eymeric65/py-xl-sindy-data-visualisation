@@ -893,7 +893,7 @@ wheels = [
 
 [[package]]
 name = "py-xl-sindy"
-version = "2.1.6"
+version = "2.1.7"
 source = { editable = "../../py-xl-sindy" }
 dependencies = [
     { name = "cvxpy" },
