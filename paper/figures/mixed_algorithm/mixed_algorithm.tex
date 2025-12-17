@@ -1,0 +1,261 @@
+\documentclass[tikz,border=5mm]{standalone}
+\usepackage{tikz}
+\usepackage{etoolbox}
+\usetikzlibrary{positioning,matrix,backgrounds,calc,fit}
+
+
+\pgfdeclarelayer{background}
+\pgfdeclarelayer{foreground}
+\pgfsetlayers{background,main,foreground}
+
+\definecolor{sindynullgray}{RGB}{200,200,200}
+\definecolor{sindypreknowledge}{RGB}{196,78,82}
+\definecolor{sindystandard}{RGB}{85,168,104}
+\definecolor{sindysolutionexplicit}{RGB}{129,114,179}
+\definecolor{sindysolutionimplicit}{RGB}{204,185,116}
+
+
+\newcommand{\lb}{[}
+\newcommand{\rb}{]}
+
+% Define the sindy component as a node style
+\tikzset{
+    sindy component/.style={
+        rectangle,
+        minimum width=6pt,
+        minimum height=10pt,
+        rounded corners=3pt,
+        fill=sindynullgray,
+        draw=none,
+        inner sep=0pt,
+        outer sep=0pt,
+        align=center,
+        opacity=0.3,
+    },
+    deactivated opacity/.style={opacity=0.3},
+    full opacity/.style={opacity=1.0},
+    sindy solution/.style={
+        rectangle,
+        minimum width=6pt,
+        minimum height=6pt,
+        rounded corners=3pt,
+        fill=sindynullgray,
+        draw=none,
+        inner sep=0pt,
+        outer sep=0pt,
+        align=center,
+        opacity=0.3,
+    },
+}
+
+\begin{document}
+\begin{tikzpicture}
+
+\node (s1)  {1. Find coordinate actived by pre-knowledge};
+\node (s2a) [below=of s1.west,anchor=west] {2.a Find coordinates and function activated};
+\node (s2b) [below=of s2a.west,anchor=west] {2.b Recursively find until no new activations};
+\node (s3) [below=of s2b.west,anchor=west] {3. Execute explicit SINDy};
+\node (s4) [below=of s3.west,anchor=west] {4. Find every function and coordinate not activated by the explicit solution};
+\node (s5) [below=of s4.west,anchor=west] {5. Execute implicit SINDy on the remaining components};
+\node (s6) [below=of s5.west,anchor=west] {6. Finalize the mixed SINDy solution};
+\node (final) [below=of s6.west,anchor=west] {Final solution :\tiny $S =$};
+%
+% \matrix[matrix of nodes,
+%         column sep=3pt, 
+%         row sep=3pt,
+%         nodes={sindy solution},
+%         left delimiter={[},
+%         right delimiter={]},
+%         nodes in empty cells
+%         ] (sm6) [right=0.1cm of final] {
+%         |[fill=sindysolutionimplicit,full opacity]| & |[fill=sindypreknowledge, full opacity]| & |[fill=sindypreknowledge, full opacity]| & |[full opacity]| & |[fill=sindysolutionexplicit,full opacity]| & |[full opacity]| & |[full opacity]| & |[full opacity]| & |[fill=sindysolutionimplicit,full opacity]| \\
+%         };
+
+
+\node[fit=(s1)(s2a)(s2b)(s3)(s4)(s5)(s6)](instructions){};
+
+% Place legend anchored to the bottom-left of the instruction block
+\node(ln) [below=1.3cm of instructions.south west,anchor=west,sindy component,full opacity,fill=sindystandard,label=right:{: \small non-null cordinate/function data}] {};
+\node(lp) [below=0.3cm of ln.south west,anchor=west,sindy component,full opacity,fill=sindypreknowledge,label=right:{: \small pre-knowledge}] {};
+\node(le) [right=2.6cm of lp,sindy component,full opacity,fill=sindysolutionexplicit,label=right:{: \small explicit solution}] {};
+\node(li) [right=2.8cm of le,sindy component,full opacity,fill=sindysolutionimplicit,label=right:{: \small implicit solution}] {};
+
+\matrix[matrix of nodes,
+        column sep=3pt, 
+        row sep=3pt,
+        nodes={sindy component},
+        left delimiter={[},
+        right delimiter={]},
+        nodes in empty cells
+        ] (m2b) [left=1cm of instructions.west, anchor=east] {
+        |[fill=sindystandard,full opacity]| & |[full opacity]| & |[full opacity]| & |[fill=sindystandard,full opacity]| & |[full opacity]| & |[full opacity]| & |[full opacity]| & |[full opacity]| & |[fill=sindystandard,full opacity]| \\
+        |[full opacity]| & |[fill=sindypreknowledge,full opacity]| & |[full opacity]| & |[fill=sindystandard,full opacity]| & |[fill=sindystandard,full opacity]|& |[full opacity]| & |[full opacity]| & |[full opacity]| & |[full opacity]|\\
+        |[full opacity]| & |[full opacity]| & |[fill=sindypreknowledge,full opacity]| & |[full opacity]| & |[fill=sindystandard,full opacity]| & |[full opacity]| & |[full opacity]| & |[full opacity]| & |[full opacity]|\\
+        |[fill=sindystandard,full opacity]| & |[full opacity]| & |[full opacity]| & |[full opacity]| & |[full opacity]| & |[full opacity]| & |[full opacity]| & |[full opacity]| & |[fill=sindystandard,full opacity]| \\
+         & & & & & |[fill=sindystandard,deactivated opacity]| & |[fill=sindystandard,deactivated opacity]| & & \\
+         & & & & & |[fill=sindystandard,deactivated opacity]| &  & |[fill=sindystandard,deactivated opacity]| & \\
+        };
+
+\matrix[matrix of nodes,
+        column sep=3pt, 
+        row sep=3pt,
+        nodes={sindy solution},
+        left delimiter={[},
+        right delimiter={]},
+        nodes in empty cells
+        ] (sm2b) [above=0.01cm of m2b] {
+         & |[fill=sindypreknowledge, full opacity]| & |[fill=sindypreknowledge, full opacity]| & & & & & & \\
+        };
+\node [left=0.1cm of sm2b.west,anchor=east] {\tiny $S =$};
+
+\matrix[matrix of nodes,
+        column sep=3pt, 
+        row sep=3pt,
+        nodes={sindy component},
+        left delimiter={[},
+        right delimiter={]},
+        nodes in empty cells
+        ] (m3) [right=1cm of instructions.east, anchor=west] {
+        |[fill=sindystandard,full opacity]| & |[full opacity]| & |[full opacity]| & |[fill=sindystandard,full opacity]| & |[full opacity]| & |[full opacity]| & |[full opacity]| & |[full opacity]| & |[fill=sindystandard,full opacity]| \\
+        |[full opacity]| & |[fill=sindypreknowledge,full opacity]| & |[full opacity]| & |[fill=sindystandard,full opacity]| & |[fill=sindysolutionexplicit,full opacity]|& |[full opacity]| & |[full opacity]| & |[full opacity]| & |[full opacity]|\\
+        |[full opacity]| & |[full opacity]| & |[fill=sindypreknowledge,full opacity]| & |[full opacity]| & |[fill=sindysolutionexplicit,full opacity]| & |[full opacity]| & |[full opacity]| & |[full opacity]| & |[full opacity]|\\
+        |[fill=sindystandard,full opacity]| & |[full opacity]| & |[full opacity]| & |[full opacity]| & |[full opacity]| & |[full opacity]| & |[full opacity]| & |[full opacity]| & |[fill=sindystandard,full opacity]| \\
+         & & & & & |[fill=sindystandard,deactivated opacity]| & |[fill=sindystandard,deactivated opacity]| & & \\
+         & & & & & |[fill=sindystandard,deactivated opacity]| &  & |[fill=sindystandard,deactivated opacity]| & \\
+        };
+
+\matrix[matrix of nodes,
+        column sep=3pt, 
+        row sep=3pt,
+        nodes={sindy solution},
+        left delimiter={[},
+        right delimiter={]},
+        nodes in empty cells
+        ] (sm3) [above=0.01cm of m3] {
+        |[full opacity]| & |[fill=sindypreknowledge, full opacity]| & |[fill=sindypreknowledge, full opacity]| & |[full opacity]| & |[fill=sindysolutionexplicit,full opacity]| & |[full opacity]| & |[full opacity]| & |[full opacity]| & |[full opacity]| \\
+        };
+\node [left=0.1cm of sm3.west,anchor=east] {\tiny $S =$};
+
+%Create a matrix of nodes with automatic naming (m-row-column)
+\matrix[matrix of nodes,
+        column sep=3pt, 
+        row sep=3pt,
+        nodes={sindy component},
+        left delimiter={[},
+        right delimiter={]},
+        nodes in empty cells
+        ] (m1) [above=0.6cm of m2b] {
+        |[fill=sindystandard,deactivated opacity]| & & & |[fill=sindystandard,deactivated opacity]| & & & & & |[fill=sindystandard,deactivated opacity]| \\
+        |[full opacity]| & |[fill=sindypreknowledge,full opacity]| & |[full opacity]| & |[fill=sindystandard,full opacity]| & |[fill=sindystandard,full opacity]|& |[full opacity]| & |[full opacity]| & |[full opacity]| & |[full opacity]|\\
+        |[full opacity]| & |[full opacity]| & |[fill=sindypreknowledge,full opacity]| & |[full opacity]| & |[fill=sindystandard,full opacity]| & |[full opacity]| & |[full opacity]| & |[full opacity]| & |[full opacity]|\\
+        |[fill=sindystandard,deactivated opacity]| & & & & & & & & |[fill=sindystandard,deactivated opacity]| \\
+         & & & & & |[fill=sindystandard,deactivated opacity]| & |[fill=sindystandard,deactivated opacity]| & & \\
+         & & & & & |[fill=sindystandard,deactivated opacity]| &  & |[fill=sindystandard,deactivated opacity]| & \\
+    };
+
+\matrix[matrix of nodes,
+        column sep=3pt, 
+        row sep=3pt,
+        nodes={sindy solution},
+        left delimiter={[},
+        right delimiter={]},
+        nodes in empty cells
+        ] (sm1) [above=0.01cm of m1] {
+         & |[fill=sindypreknowledge, full opacity]| & |[fill=sindypreknowledge, full opacity]| & & & & & & \\
+        };
+\node [left=0.1cm of sm1.west,anchor=east] {\tiny $S =$};
+
+\matrix[matrix of nodes,
+        column sep=3pt, 
+        row sep=3pt,
+        nodes={sindy component},
+        left delimiter={[},
+        right delimiter={]},
+        nodes in empty cells
+        ] (m2a) [above=0.6cm of m3] {
+        |[fill=sindystandard,full opacity]| & |[full opacity]| & |[full opacity]| & |[fill=sindystandard,full opacity]| & |[full opacity]| & |[full opacity]| & |[full opacity]| & |[full opacity]| & |[fill=sindystandard,full opacity]| \\
+        |[full opacity]| & |[fill=sindypreknowledge,full opacity]| & |[full opacity]| & |[fill=sindystandard,full opacity]| & |[fill=sindystandard,full opacity]|& |[full opacity]| & |[full opacity]| & |[full opacity]| & |[full opacity]|\\
+        |[full opacity]| & |[full opacity]| & |[fill=sindypreknowledge,full opacity]| & |[full opacity]| & |[fill=sindystandard,full opacity]| & |[full opacity]| & |[full opacity]| & |[full opacity]| & |[full opacity]|\\
+        |[fill=sindystandard,deactivated opacity]| & & & & & & & & |[fill=sindystandard,deactivated opacity]| \\
+         & & & & & |[fill=sindystandard,deactivated opacity]| & |[fill=sindystandard,deactivated opacity]| & & \\
+         & & & & & |[fill=sindystandard,deactivated opacity]| &  & |[fill=sindystandard,deactivated opacity]| & \\
+        };
+
+\matrix[matrix of nodes,
+        column sep=3pt, 
+        row sep=3pt,
+        nodes={sindy solution},
+        left delimiter={[},
+        right delimiter={]},
+        nodes in empty cells
+        ] (sm2a) [above=0.01cm of m2a] {
+         & |[fill=sindypreknowledge, full opacity]| & |[fill=sindypreknowledge, full opacity]| & & & & & & \\
+        };
+\node [left=0.1cm of sm2a.west,anchor=east] {\tiny $S =$};
+
+\matrix[matrix of nodes,
+        column sep=3pt, 
+        row sep=3pt,
+        nodes={sindy component},
+        left delimiter={[},
+        right delimiter={]},
+        nodes in empty cells
+        ] (m4) [below=0.6cm of m2b] {
+        |[fill=sindystandard,full opacity]| & &  & |[fill=sindystandard,deactivated opacity]| & & |[full opacity]| & |[full opacity]| & |[full opacity]| & |[fill=sindystandard,full opacity]| \\
+         & |[fill=sindypreknowledge,deactivated opacity]| & & |[fill=sindystandard,deactivated opacity]| & |[fill=sindysolutionexplicit,deactivated opacity]|& & & & \\
+         & & |[fill=sindypreknowledge,deactivated opacity]| & & |[fill=sindysolutionexplicit,deactivated opacity]| & & & & \\
+        |[fill=sindystandard,full opacity]| & & & & & |[full opacity]| & |[full opacity]| & |[full opacity]| & |[fill=sindystandard,full opacity]| \\
+        |[full opacity]| & & & & & |[fill=sindystandard,full opacity]| & |[fill=sindystandard,full opacity]| & |[full opacity]| & |[full opacity]| \\
+        |[full opacity]| & & & & & |[fill=sindystandard,full opacity]| & |[full opacity]| & |[fill=sindystandard,full opacity]| & |[full opacity]| \\
+        };
+
+\matrix[matrix of nodes,
+        column sep=3pt, 
+        row sep=3pt,
+        nodes={sindy solution},
+        left delimiter={[},
+        right delimiter={]},
+        nodes in empty cells
+        ] (sm4) [above=0.01cm of m4] {
+        |[full opacity]| & |[fill=sindypreknowledge, deactivated opacity]| & |[fill=sindypreknowledge, deactivated opacity]| & |[deactivated opacity]| & |[fill=sindysolutionexplicit,deactivated opacity]| & |[full opacity]| & |[full opacity]| & |[full opacity]| & |[full opacity]| \\
+        };
+\node [left=0.1cm of sm4.west,anchor=east] {\tiny $S =$};
+
+\matrix[matrix of nodes,
+        column sep=3pt, 
+        row sep=3pt,
+        nodes={sindy component},
+        left delimiter={[},
+        right delimiter={]},
+        nodes in empty cells
+        ] (m5) [below=0.6cm of m3] {
+        |[fill=sindysolutionimplicit,full opacity]| & &  & |[fill=sindystandard,deactivated opacity]| & & |[full opacity]| & |[full opacity]| & |[full opacity]| & |[fill=sindysolutionimplicit,full opacity]| \\
+         & |[fill=sindypreknowledge,deactivated opacity]| & & |[fill=sindystandard,deactivated opacity]| & |[fill=sindysolutionexplicit,deactivated opacity]|& & & & \\
+         & & |[fill=sindypreknowledge,deactivated opacity]| & & |[fill=sindysolutionexplicit,deactivated opacity]| & & & & \\
+        |[fill=sindysolutionimplicit,full opacity]| & & & & & |[full opacity]| & |[full opacity]| & |[full opacity]| & |[fill=sindysolutionimplicit,full opacity]| \\
+        |[full opacity]| & & & & & |[fill=sindystandard,full opacity]| & |[fill=sindystandard,full opacity]| & |[full opacity]| & |[full opacity]| \\
+        |[full opacity]| & & & & & |[fill=sindystandard,full opacity]| & |[full opacity]| & |[fill=sindystandard,full opacity]| & |[full opacity]| \\
+        };
+
+\matrix[matrix of nodes,
+        column sep=3pt, 
+        row sep=3pt,
+        nodes={sindy solution},
+        left delimiter={[},
+        right delimiter={]},
+        nodes in empty cells
+        ] (sm5) [above=0.01cm of m5] {
+        |[fill=sindysolutionimplicit,full opacity]| & |[fill=sindypreknowledge, deactivated opacity]| & |[fill=sindypreknowledge, deactivated opacity]| & |[deactivated opacity]| & |[fill=sindysolutionexplicit,deactivated opacity]| & |[full opacity]| & |[full opacity]| & |[full opacity]| & |[fill=sindysolutionimplicit,full opacity]| \\
+        };
+\node [left=0.1cm of sm5.west,anchor=east] {\tiny $S =$};
+
+
+\draw (s1.west) -- ($(m1.east) + (0.4cm,0)$);
+\draw (s2a.east) -- ($(m2a.west) - (0.4cm,0)$);
+\draw (s2b.west) -- ($(m2b.east) + (0.4cm,0)$);
+\draw (s3.east) -- ($(m3.west) - (0.4cm,0)$);
+\draw (s4.west) -- ($(m4.east) + (0.4cm,0)$);
+\draw (s5.east) -- ($(m5.west) - (0.4cm,0)$);
+
+\end{tikzpicture}
+\end{document}
