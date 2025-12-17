@@ -1,4 +1,4 @@
-\documentclass[tikz,border=5mm]{standalone}
+\documentclass[tikz,border=1mm]{standalone}
 \usepackage{tikz}
 \usepackage{etoolbox}
 \usetikzlibrary{positioning,matrix,backgrounds,calc,fit}
@@ -51,13 +51,13 @@
 \begin{document}
 \begin{tikzpicture}
 
-\node (s1)  {1. Find coordinate actived by pre-knowledge};
-\node (s2a) [below=of s1.west,anchor=west] {2.a Find coordinates and function activated};
-\node (s2b) [below=of s2a.west,anchor=west] {2.b Recursively find until no new activations};
-\node (s3) [below=of s2b.west,anchor=west] {3. Execute explicit SINDy};
-\node (s4) [below=of s3.west,anchor=west] {4. Find every function and coordinate not activated by the explicit solution};
-\node (s5) [below=of s4.west,anchor=west] {5. Execute implicit SINDy on the remaining components};
-\node (s6) [below=of s5.west,anchor=west] {6. Combine the mixed SINDy solution};
+\node (s1) [text width=6.5cm] {1. Find coordinate actived by pre-knowledge};
+\node (s2a) [below=1.3cm of s1.west,anchor=west,text width=6.5cm] {2.a Find coordinates and function activated};
+\node (s2b) [below=1.3cm of s2a.west,anchor=west,text width=6.5cm] {2.b Recursively find until no new activations};
+\node (s3) [below=1.3cm of s2b.west,anchor=west,text width=6.5cm] {3. Execute explicit SINDy};
+\node (s4) [below=1.3cm of s3.west,anchor=west,text width=6.5cm] {4. Find every function and coordinate not activated by the explicit solution};
+\node (s5) [below=1.3cm of s4.west,anchor=west,text width=6.5cm] {5. Execute implicit SINDy on the remaining components};
+\node (s6) [below=1.3cm of s5.west,anchor=west,text width=6.5cm] {6. Combine the mixed SINDy solution};
 \node (final) [below=0.5cm of s6.west,anchor=west] {\ Final solution : \ \tiny $S =$};
 
 \matrix[matrix of nodes,
@@ -75,10 +75,10 @@
 \node[fit=(s1)(s2a)(s2b)(s3)(s4)(s5)(s6)](instructions){};
 
 % Place legend anchored to the bottom-left of the instruction block
-\node(ln) [below=1.5cm of instructions.south west,anchor=west,sindy component,full opacity,fill=sindystandard,label=right:{: \small non-null cordinate/function data}] {};
+\node(ln) [below=1.3cm of instructions.south west,anchor=west,sindy component,full opacity,fill=sindystandard,label=right:{: \small non-null cordinate/function data}] {};
 \node(lp) [below=0.3cm of ln.south west,anchor=west,sindy component,full opacity,fill=sindypreknowledge,label=right:{: \small pre-knowledge}] {};
 \node(le) [right=2.6cm of lp,sindy component,full opacity,fill=sindysolutionexplicit,label=right:{: \small explicit solution}] {};
-\node(li) [right=2.8cm of le,sindy component,full opacity,fill=sindysolutionimplicit,label=right:{: \small implicit solution}] {};
+\node(li) [below=0.3cm of lp.south west,anchor=west,sindy component,full opacity,fill=sindysolutionimplicit,label=right:{: \small implicit solution}] {};
 
 
 \matrix[matrix of nodes,
@@ -88,7 +88,7 @@
         left delimiter={[},
         right delimiter={]},
         nodes in empty cells
-        ] (m3) [left=1cm of instructions.west, anchor=east,yshift=-0.8cm] {
+        ] (m3) [left=1cm of instructions.west, anchor=east,yshift=-1.5cm] {
         |[fill=sindystandard,full opacity]| & |[full opacity]| & |[full opacity]| & |[fill=sindystandard,full opacity]| & |[full opacity]| & |[full opacity]| & |[full opacity]| & |[full opacity]| & |[fill=sindystandard,full opacity]| \\
         |[full opacity]| & |[fill=sindypreknowledge,full opacity]| & |[full opacity]| & |[fill=sindystandard,full opacity]| & |[fill=sindysolutionexplicit,full opacity]|& |[full opacity]| & |[full opacity]| & |[full opacity]| & |[full opacity]|\\
         |[full opacity]| & |[full opacity]| & |[fill=sindypreknowledge,full opacity]| & |[full opacity]| & |[fill=sindysolutionexplicit,full opacity]| & |[full opacity]| & |[full opacity]| & |[full opacity]| & |[full opacity]|\\
