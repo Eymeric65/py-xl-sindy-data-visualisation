@@ -150,6 +150,7 @@ def extract_trajectory_data(experiment: Experiment,
         'sample_number': experiment.generation_params.sample_number,
         'generation_type': experiment.generation_params.generation_type,
         'batch_number': experiment.generation_params.batch_number,
+        'damping_coefficients': experiment.generation_params.damping_coefficients,
     })
     
     # Extract regression result fields if available

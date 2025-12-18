@@ -213,7 +213,8 @@ def filter_data(
     combo_filter:ComboRegistry|Combo|None=None,
     system_filter:SystemRegistry|System|None=None,
     end_time_treshold:float|None=None,
-    algo_filter: RegressionAlgorithmRegistry|RegressionAlgorithm|None=None
+    algo_filter: RegressionAlgorithmRegistry|RegressionAlgorithm|None=None,
+    no_damping:bool=True
     ) -> pd.DataFrame:
     """
     Filter data for a specific experiment type.
@@ -225,6 +226,23 @@ def filter_data(
     Returns:
         pd.DataFrame: The filtered data.
     """
+
+    if no_damping:
+        # Parse damping_coefficients string and filter for all zeros
+        import ast
+        # print(data['damping_coefficients'].apply(
+        #     lambda x: all(coef == 0.0 for coef in x)
+        # ))
+        # print(data['damping_coefficients'].apply(
+        #     lambda x: all([ coef == 0.0 for coef in ast.literal_eval(x)])
+        # ))
+        
+        data = data[data['damping_coefficients'].apply(
+            lambda x: all([ coef == 0.0 for coef in ast.literal_eval(x)])
+        )]
+
+    if len(data) == 0:
+        return data
 
     if combo_filter is not None:
         data = data[
@@ -281,6 +299,13 @@ def generate_boxplot_data(
         )
 
     print(len(filtered_data), "experiments after filtering")
+    
+    if len(filtered_data) == 0:
+        return BPSystemData(
+            valid_experiment_number=0,
+            system_registry=system_registry,
+            combo_data=[]
+        )
 
     combo_data_list:list[BPComboData] = []
 
@@ -351,6 +376,10 @@ def plot_to_file(output_path:Path,filename:str):
     output_file_svg = output_path / (filename + ".svg")
     plt.savefig(output_file_svg, dpi=300, bbox_inches='tight',transparent=True)
     print(f"Saved combined plot: {output_file_svg}")
+
+    output_file_eps = output_path / (filename + ".eps")
+    plt.savefig(output_file_eps, dpi=300, bbox_inches='tight',transparent=True)
+    print(f"Saved combined plot: {output_file_eps}")
     
     plt.close()
 
@@ -739,7 +768,8 @@ if __name__ == "__main__":
             box_plot_data=[
                 bp_data_combined
                 ],
-            style=style
+            style=style,
+            output_dir="plots_no_damping"
         )
 
         plot_boxplot(
@@ -749,7 +779,8 @@ if __name__ == "__main__":
                 bp_data_cartpole_double,
                 bp_data_double_pendulum_pm
                 ],
-            style=style
+            style=style,
+            output_dir="plots_no_damping"
         )
 
 
@@ -760,7 +791,8 @@ if __name__ == "__main__":
                 bp_data_cartpole_double,
                 bp_data_double_pendulum_pm
                 ],
-            style=style
+            style=style,
+            output_dir="plots_no_damping"
         )
 
         plot_success_rate(
@@ -768,6 +800,7 @@ if __name__ == "__main__":
             box_plot_data=[
                 bp_data_combined
                 ],
-            style=style
+            style=style,
+            output_dir="plots_no_damping"
         )
 

@@ -1,6 +1,6 @@
 data-archive/
 *.sif
-plots/
+plots*/
 backup/
 graphs_analysis/
 .venv/
