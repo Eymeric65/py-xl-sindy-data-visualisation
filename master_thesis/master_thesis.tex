@@ -1,0 +1,195 @@
+% master_thesis.tex
+% -------------------------------------------------------------------------
+%   Modern Minimalist Master Thesis Template - Robotics (SINDy)
+% -------------------------------------------------------------------------
+\documentclass[
+    11pt,               % Standard font size
+    a4paper,            % Paper size
+    oneside,            % Print on one side (change to 'twoside' for binding)
+    numbers=noenddot,   % Removes end dots in numbering (e.g. 1.1 not 1.1.)
+    parskip=half,       % Adds space between paragraphs (modern look)
+    listof=totoc,       % Adds Lists of Figures/Tables to TOC
+    bibliography=totoc  % Adds Bibliography to TOC
+]{scrreprt}
+
+% --- Essential Packages ---
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[english]{babel}
+\usepackage{microtype}      % Improves character kerning (essential for 'classy' look)
+\usepackage[margin=2.5cm, bindingoffset=1cm]{geometry} % Clean margins
+
+\usepackage{scrhack} % listing issue
+\usepackage{csquotes} % babel quote
+
+% --- Fonts (Palatino for text, Euler for math - very readable) ---
+\usepackage{newpxtext}      % Palatino-like font
+\usepackage{newpxmath}      % Matching math font
+\usepackage[scaled=0.9]{helvet} % Helvetica for sans-serif (headers)
+
+% --- Mathematics & Robotics Specifics ---
+\usepackage{amsmath}
+\usepackage{mathtools}
+\usepackage{bm}             % Bold math symbols (\bm{x})
+\usepackage{siunitx}        % Correct unit formatting (e.g. \SI{5}{\meter\per\second})
+
+% --- Graphics & Tables ---
+\usepackage{graphicx}       % For including images
+\usepackage{booktabs}       % Professional tables (no vertical lines)
+\usepackage{float}          % Better float placement
+\usepackage{subcaption}     % For sub-figures (a) (b)
+
+% --- Algorithms & Code ---
+\usepackage[ruled,vlined]{algorithm2e} % For pseudocode
+\usepackage{listings}       % For Python/Matlab code
+\usepackage{xcolor}
+
+% --- Header & Footer Styling (Clean/Minimalist) ---
+\usepackage[automark,headsepline]{scrlayer-scrpage}
+\clearpairofpagestyles
+\ihead{\headmark}
+\ohead{\pagemark}
+\pagestyle{scrheadings}
+
+% --- Hyperlinks (Must be loaded last) ---
+\usepackage[colorlinks=true, linkcolor=black, citecolor=blue, urlcolor=blue]{hyperref}
+
+% --- Bibliography ---
+\usepackage[style=ieee, backend=biber]{biblatex}
+\addbibresource{references.bib}
+
+% --- Custom Commands for SINDy ---
+\newcommand{\TODO}[1]{\textcolor{red}{\textbf{TODO: #1}}}
+
+% -------------------------------------------------------------------------
+%   DOCUMENT BEGINS
+% -------------------------------------------------------------------------
+\begin{document}
+
+% --- Title Page ---
+\begin{titlepage}
+    \centering
+    \vspace*{2cm}
+    
+    {\scshape\LARGE University Name \par}
+    \vspace{1.5cm}
+    
+    {\huge\bfseries Data-Driven Identification of Nonlinear Dynamics in Robotic Systems\par}
+    \vspace{0.5cm}
+    {\Large\itshape Application of the SINDy Algorithm\par}
+    
+    \vspace{2cm}
+    
+    {\Large \textbf{Your Name}\par}
+    \vspace{1cm}
+    {\large A thesis submitted in partial fulfillment of the requirements\\ for the degree of Master of Science in Robotics\par}
+    
+    \vspace{3cm}
+    
+    \begin{tabular}{rl}
+        \textbf{Supervisor:} & Prof. Dr. Jane Doe \\
+        \textbf{Co-Supervisor:} & Dr. John Smith
+    \end{tabular}
+    
+    \vfill
+    {\large \today \par}
+\end{titlepage}
+
+% --- Front Matter ---
+\pagenumbering{roman} 
+
+\chapter*{Abstract}
+\addcontentsline{toc}{chapter}{Abstract}
+Here you write the summary of your work. Since you are studying SINDy, you should mention the challenge of modeling complex robotic dynamics, the data collection process, and how sparse regression helped identify the governing equations.
+
+\chapter*{Acknowledgements}
+Thanks to the lab, the supervisor, and coffee.
+
+\tableofcontents
+\listoffigures
+\listoftables
+
+\clearpage
+\pagenumbering{arabic} 
+
+% -------------------------------------------------------------------------
+%   MAIN CONTENT
+% -------------------------------------------------------------------------
+
+%Start with \chapter{} after it is normal \section \subsection stuff
+\chapter{Methods}
+
+This chapter details the working principles of the Sparse Identification of Nonlinear Dynamics (SINDy) algorithm and outlines our specific contributions to the method. 
+
+SINDy is a data-driven framework designed to \textbf{identify} governing equations from data. It applies to nonlinear ordinary differential equations (ODEs), defined generally as in Eq.~\eqref{eq:ode} and \eqref{eq:ode:ex}, and can be extended to partial differential equations (PDEs) as shown in Eq.~\eqref{eq:pde} and \eqref{eq:pde:ex}:
+
+\begin{equation}
+    \left( u^{(k)}(t) = f_k(t, u) \right)_{k \in \mathbb{N}}
+    \label{eq:ode}
+\end{equation}
+
+\begin{equation}
+    \left( \partial^\alpha u(x) = f_\alpha(x, u) \right)_{\alpha \in \mathbb{N}^n}
+    \label{eq:pde}
+\end{equation}
+
+\noindent where $\alpha = (\alpha_1, \dots, \alpha_n)$ is a multi-index, and $\partial^\alpha = \frac{\partial^{|\alpha|}}{\partial x_1^{\alpha_1} \dots \partial x_n^{\alpha_n}}$.
+
+\noindent This formalism encompasses systems subjected to external forces:
+\begin{equation}
+    \left( u^{(k)}(t) = \mathcal{A}_k(u) + F_k(t) \right)_{k \in \mathbb{N}}
+    \label{eq:ode:ex}
+\end{equation}
+
+\begin{equation}
+    \left( \partial^\alpha u = \underbrace{\mathcal{A}_\alpha(u)}_{\text{Internal Dynamics}} + \underbrace{S_\alpha(x)}_{\text{External Forces}} \right)_{\alpha \in \mathbb{N}^n}
+    \label{eq:pde:ex}
+\end{equation}
+
+\noindent To facilitate the understanding of the following sections, we will focus primarily on ODEs. We adopt the state-space formulation:
+\begin{equation}
+    \dot{\mathcal{X}}(t) = f(\mathcal{X}(t)) + F(t)
+\end{equation}
+Note that while this resembles a matrix formulation, $f$ represents a general non-linear vector function, not necessarily a linear transformation. Although the generalization to PDEs is conceptually similar, we restrict our analysis to ODEs for clarity.
+
+\section{Core SINDy Principle}
+
+SINDy, as developed by Brunton et al.\cite{brunton2016sindy}, relies on the decomposition of dynamics into linearly dependent components. In order to achieve this we assume that the dynamics will lies inside a set of predetermined non-linear and linear function (eg. $(cos,sin,\cdot^2,\sqrt{\cdot},\dots)$). This function catalog $\boldsymbol{\Theta} = (f_1(\mathcal{X}),f_2(\mathcal{X}),\dots,f_k(\mathcal{X}))$will bridge the gap between linear ODEs and non-linear ones. A particuliar attention should be made during the selection of the catalog. \TODO{link this with concerned chapter}
+
+It can be noted that in the next subsection we make the distinction between the different coordinate when applying a catalog function for ease of comprehension we introduce the following subscript notation $cos_2(\mathcal{X}(t))=cos(x_2(t))$.
+
+Since SINDy is a data-driven method instead of relying on theoretical formulation, we manipulate discrete state-space matrices $\boldsymbol{X}$. In order to streamline comprehension in the next chapters, we introduce right now the concept of \textsc{symbol matrix} $\boldsymbol{X}_t$:
+\begin{equation}
+    \boldsymbol{X}_t = \begin{bmatrix}
+        x_1(t) & x_2(t) & \cdots & x_n(t) \\
+        \dot{x}_1(t) & \dot{x}_2(t) & \cdots & \dot{x}_n(t) \\
+        \ddot{x}_1(t) & \ddot{x}_2(t) & \cdots & \ddot{x}_n(t)
+    \end{bmatrix}
+\end{equation}
+\noindent We don't need to go past the second derivative (acceleration) in all our next study.
+
+
+
+
+
+
+% -------------------------------------------------------------------------
+%   BACK MATTER
+% -------------------------------------------------------------------------
+
+\printbibliography
+
+\appendix
+\chapter{Python Implementation}
+\begin{lstlisting}[language=Python, caption=STLSQ Implementation]
+import numpy as np
+
+def stlsq(Theta, dXdt, threshold=0.1):
+    Xi = np.linalg.lstsq(Theta, dXdt, rcond=None)[0]
+    # Simple thresholding
+    small_inds = np.abs(Xi) < threshold
+    Xi[small_inds] = 0
+    return Xi
+\end{lstlisting}
+
+\end{document}

@@ -4,6 +4,9 @@
   \providecommand{\doi}[1]{doi:\discretionary{}{}{}#1}\else
   \providecommand{\doi}{doi:\discretionary{}{}{}\begingroup \urlstyle{rm}\Url}\fi
 
+\bibitem{methods}
+Supplementary Materials, see Materials and Methods section.
+
 \bibitem{bruntonDiscoveringGoverningEquations2016}
 S.~L. Brunton, J.~L. Proctor, J.~N. Kutz, Discovering Governing Equations from Data: {{Sparse}} Identification of Nonlinear Dynamical Systems. \emph{Proceedings of the National Academy of Sciences} \textbf{113}~(15), 3932--3937 (2016), \doi{10.1073/pnas.1517384113}.
 
