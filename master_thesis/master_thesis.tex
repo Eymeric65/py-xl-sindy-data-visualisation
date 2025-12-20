@@ -149,25 +149,126 @@ SINDy is a data-driven framework designed to \textbf{identify} governing equatio
 \noindent To facilitate the understanding of the following sections, we will focus primarily on ODEs. We adopt the state-space formulation:
 \begin{equation}
     \dot{\mathcal{X}}(t) = f(\mathcal{X}(t)) + F(t)
+    \label{eq:system-dynamics}
 \end{equation}
 Note that while this resembles a matrix formulation, $f$ represents a general non-linear vector function, not necessarily a linear transformation. Although the generalization to PDEs is conceptually similar, we restrict our analysis to ODEs for clarity.
 
 \section{Core SINDy Principle}
 
-SINDy, as developed by Brunton et al.\cite{brunton2016sindy}, relies on the decomposition of dynamics into linearly dependent components. In order to achieve this we assume that the dynamics will lies inside a set of predetermined non-linear and linear function (eg. $(cos,sin,\cdot^2,\sqrt{\cdot},\dots)$). This function catalog $\boldsymbol{\Theta} = (f_1(\mathcal{X}),f_2(\mathcal{X}),\dots,f_k(\mathcal{X}))$will bridge the gap between linear ODEs and non-linear ones. A particuliar attention should be made during the selection of the catalog. \TODO{link this with concerned chapter}
+SINDy, as developed by Brunton et al.\cite{bruntonDiscoveringGoverningEquations2016}, relies on the decomposition of dynamics into linearly dependent components. In order to achieve this we assume that the dynamics will lies inside a set of predetermined non-linear and linear function (eg. $(cos,sin,\cdot^2,\sqrt{\cdot},\dots)$). This function catalog $\boldsymbol{\Theta} = (f_1(\mathcal{X}),f_2(\mathcal{X}),\dots,f_k(\mathcal{X}))$will bridge the gap between linear ODEs and non-linear ones. A particuliar attention should be made during the selection of the catalog. \TODO{link this with concerned chapter}
 
 It can be noted that in the next subsection we make the distinction between the different coordinate when applying a catalog function for ease of comprehension we introduce the following subscript notation $cos_2(\mathcal{X}(t))=cos(x_2(t))$.
 
 Since SINDy is a data-driven method instead of relying on theoretical formulation, we manipulate discrete state-space matrices $\boldsymbol{X}$. In order to streamline comprehension in the next chapters, we introduce right now the concept of \textsc{symbol matrix} $\boldsymbol{X}_t$:
 \begin{equation}
-    \boldsymbol{X}_t = \begin{bmatrix}
+    \boldsymbol{X}_{t} = \begin{bmatrix}
         x_1(t) & x_2(t) & \cdots & x_n(t) \\
         \dot{x}_1(t) & \dot{x}_2(t) & \cdots & \dot{x}_n(t) \\
         \ddot{x}_1(t) & \ddot{x}_2(t) & \cdots & \ddot{x}_n(t)
     \end{bmatrix}
 \end{equation}
-\noindent We don't need to go past the second derivative (acceleration) in all our next study.
+\noindent We don't need to go past the second derivative (acceleration) in all our next study. The set of sample $\boldsymbol{X}=(\boldsymbol{X}_{t_k})_{k\in [1,\dots,m]}$, will be considered as our input in all next study.
 
+The next step is now to populate the experiment matrix $\boldsymbol{\Theta}(\boldsymbol{X})$ with our set of sample :
+
+\begin{equation}
+    \boldsymbol{\Theta}(\boldsymbol{X}) = \begin{bmatrix}
+        f_1(\boldsymbol{X}_1) & f_2(\boldsymbol{X}_1) & \cdots & f_k(\boldsymbol{X}_1) \\
+        f_1(\boldsymbol{X}_2) & f_2(\boldsymbol{X}_2) & \cdots & f_k(\boldsymbol{X}_2) \\
+         \vdots & \vdots & & \vdots \\
+        f_1(\boldsymbol{X}_m) & f_2(\boldsymbol{X}_m) & \cdots & f_k(\boldsymbol{X}_m) \\
+    \end{bmatrix}
+    \label{eq:one-coordinate-expmat}
+\end{equation}
+
+\noindent The SINDy regression system is thus defined as the following :
+
+\begin{equation}
+    \boldsymbol{\Theta}(\boldsymbol{X}) \boldsymbol{\Xi} = F
+\end{equation}
+
+\noindent Where F is our external forces vector $F = (\boldsymbol{F}_{t_k})_{k\in [1,\dots,m]}$. In the original SINDy paper \cite{bruntonDiscoveringGoverningEquations2016}, this has been extended to multiple coordinate by allowing $F$ to be a matrix :
+
+\begin{equation}
+    F = \begin{bmatrix}
+        F_{1_1} & F_{2_1} & \cdots & F_{n_1} \\
+        F_{1_2} & F_{2_2} & \cdots & F_{n_2} \\
+        \vdots & \vdots & & \vdots \\
+        F_{1_m} & F_{2_m} & \cdots & F_{n_m} \\
+    \end{bmatrix}
+\end{equation}
+
+\noindent In result the coefficient vector $\boldsymbol{\Xi}$ will also be a matrix. This constraint will be studied in detail and partly relaxed in Sec.~\ref{sec:unified-catalog}.
+
+From the moment we have the linear system correctly setup, we can use a sparse linear regression algorithm to retrieve our set of parse coefficient  $\boldsymbol{\Xi}$. Detail on different algorithm can be read in Sec.~\ref{sec:sparse-linear-algorithm}. If the regression has been successful we can retrieve the dynamics equation on each coordinate by computing the following:
+\begin{equation}
+    f = \boldsymbol{\Theta} \boldsymbol{\Xi}
+    \label{eq:sindy-equation}
+\end{equation}
+\noindent where $f$ is the dynamics of our system in Eq.~\ref{eq:system-dynamics}
+
+\section{SINDy parallel implicit}
+
+The first addition of SINDy that we will study is the case where no-external forces are provided to our system (eg. $(F_k(t)=0)_{k\in\mathbb{N}}$). This will lead to the following modified SINDy equation (original Eq.~\ref{eq:sindy-equation}) :
+\begin{equation}
+    \boldsymbol{\Theta}(\boldsymbol{X}) \boldsymbol{\Xi} = 0
+    \label{eq:sindypi-equation}
+\end{equation}
+
+\noindent As we may notice we are in a case of null-space determination, which have a clear trivial solution : $\boldsymbol{\Xi} = 0$. This makes the use of any classical (sparse) linear regression algorithm impossible (since they will converge to 0 inevitably).
+
+This condition as lead Kaheman et al.\cite{kahemanSINDyPIRobustAlgorithm2020} to develop a new algorithm to tackle this case. Their observation 
+has been the following : if we know at least one catalog function that is in our system dynamics we can take this as a reference. To demonstrate this sentence let's consider that from our catalog of function $\boldsymbol{\Theta}$ we know a term $f_j$ that appears in our system dynamics $f$. We could define the catalog of function $\boldsymbol{\Theta}_j$ where $f_j$ has been removed and define the following SINDy linear system:
+\begin{equation}
+    \boldsymbol{\Theta}_j(\boldsymbol{X}) \boldsymbol{\Xi} = f_j(\boldsymbol{X})
+    \label{eq:sindypi-equation-j}
+\end{equation}
+
+After successful regression we would obtain the dynamics of our system in the following equation :
+\begin{equation}
+    f = \boldsymbol{\Theta}_j \boldsymbol{\Xi} - f_j
+\end{equation}
+
+\noindent Now in the case that we don't know any of the term in our base dynamic we can use the following strategy: let's call Eq.~\ref{eq:sindypi-equation-j} as our j-SINDy system (with accordingly the $\boldsymbol{\Xi}_j$ solution vector). By executing all the j-SINDy system, we could identify the true dynamics by analysing the solution between each other. If the j-solution has been successful (alogorithm converged to a \textbf{sparse} solution) it likely means that this is the dynamics solution (a new more performant decision algorithm will be defined in \ref{sec:mixed-sindy}).
+
+This idea was in theory the solution of implicit SINDy but lead to high computationnal burden. SINDy sparse regression being already resources intensive the fact of running hundreds sequentially made it impossible to implement in practice. This has been solved by introducing the SINDy parallel implicit formulation for the j-SINDy system : 
+
+\begin{equation}
+    \boldsymbol{\Theta} \begin{bmatrix}
+    0 & \boldsymbol{\Xi}_{1_1} & \boldsymbol{\Xi}_{1_2} & \cdots & \boldsymbol{\Xi}_{1_{k-3}} & \boldsymbol{\Xi}_{1_{k-2}} & \boldsymbol{\Xi}_{1_{k-1}} \\
+    \boldsymbol{\Xi}_{2_1} & 0 & \boldsymbol{\Xi}_{2_2} & \cdots & \boldsymbol{\Xi}_{2_{k-3}} & \boldsymbol{\Xi}_{2_{k-2}} & \boldsymbol{\Xi}_{2_{k-1}} \\
+    \vdots & \ddots & \ddots & \ddots & &  & \vdots \\
+    \boldsymbol{\Xi}_{l_1} & \cdots & \boldsymbol{\Xi}_{l_{l-1}} & 0 & \boldsymbol{\Xi}_{l_{l+1}} & \cdots & \boldsymbol{\Xi}_{l_{k-1}}\\
+    \vdots & & & \ddots & \ddots & \ddots & \vdots \\
+    \boldsymbol{\Xi}_{{k-1}_1} & \boldsymbol{\Xi}_{{k-1}_2} & \boldsymbol{\Xi}_{{k-1}_3}  & \cdots & \boldsymbol{\Xi}_{{k-1}_{k-2}} &  0 & \boldsymbol{\Xi}_{{k-1}_{k-1}} \\
+    \boldsymbol{\Xi}_{k_1} & \boldsymbol{\Xi}_{k_1} & \boldsymbol{\Xi}_{k_2}  & \cdots & \boldsymbol{\Xi}_{k_{k-2}} &  \boldsymbol{\Xi}_{k_{k-1}}& 0 \\
+    \end{bmatrix} = \boldsymbol{\Theta}
+\end{equation}
+
+\noindent By enforcing the diagonal of zero in our linear system we can effectively execute all the j-SINDy system all at once. The diagonal constraint restrain however the scope of the algorithm that we can use for this linear system. This constraint force the use of more complex solver and still increase the overall computationnal burden of SINDy. 
+
+\section{Xl SINDy}
+
+The first goal of the lab (precedent work before this thesis) has been to leverage the Lagrangian formulation in robotics in order to increase the performance of SINDy algorithms in the domain of robotics. Before diving into detail in the method developped we will study the base of the lagrangian formalism.
+
+\subsection{Lagrangian formalism}
+
+The lagrangian is an alternate formulation of classical mechanics founded on the d'Alembert principle of virtual work \TODO{cite something here}. In a totally abstract manner Lagrangian can be seen as a "projection" of Newton Law in a space with more constraint rule. Lagrangian mechanics uses the energies in the system. The central quantity in Lagrangian mechanics is the Lagrangian a function that will summarize the dynamics of our system. In our case we are going to focus in the non-relativistic Lagrangian which is defined by :
+\begin{equation}
+    L = T - V 
+    \label{eq:lagrangian}
+\end{equation}
+\noindent where $T$ is the total kinetic energy of the system and $V$ is the potential energy of the system. A more mathematical definition of the Lagrangian can be given but the goal of our study is more about the application rather than how to compute lagrangian in different system. In the new addition Sec.~\ref{sec:unified-catalog} lagrangian and newton will be generalised as "talking paradigm", which totally shift the scope from Lagrangian/Newton to any paradigm from any area of physics or math.
+
+
+\section{Unified SINDy catalog}
+\label{sec:unified-catalog}
+
+\section{Mixed SINDy regression algorithm}
+\label{sec:mixed-sindy}
+
+\section{Sparse linear regression algorithm}
+\label{sec:sparse-linear-algorithm}
 
 
 
