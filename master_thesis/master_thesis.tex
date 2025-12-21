@@ -58,6 +58,41 @@
 \usepackage[style=ieee, backend=biber]{biblatex}
 \addbibresource{references.bib}
 
+% --- Tikz ---
+\usepackage{tikz}
+\usepackage{etoolbox}
+\usetikzlibrary{positioning,matrix,backgrounds,calc}
+
+
+\pgfdeclarelayer{background}
+\pgfdeclarelayer{foreground}
+\pgfsetlayers{background,main,foreground}
+
+\definecolor{sindynullgray}{RGB}{200,200,200}
+\definecolor{sindyforces}{RGB}{196,78,82}
+\definecolor{sindynewton}{RGB}{85,168,104}
+\definecolor{sindylagrange}{RGB}{129,114,179}
+
+\newcommand{\lb}{[}
+\newcommand{\rb}{]}
+
+% Define the sindy component as a node style
+\tikzset{
+    sindy label/.style={font=\tiny, text=black,minimum height=0pt},
+    sindy component/.style={
+        rectangle,
+        minimum width=10pt,
+        minimum height=1.5cm,
+        rounded corners=5pt,
+        fill=none,
+        draw=none,
+        inner sep=0pt,
+        outer sep=1pt,
+        align=center,
+    },
+    with label/.style={label={[sindy label]above:#1}}
+}
+
 % --- Custom Commands for SINDy ---
 \newcommand{\TODO}[1]{\textcolor{red}{\textbf{TODO: #1}}}
 
@@ -184,18 +219,18 @@ The next step is now to populate the experiment matrix $\boldsymbol{\Theta}(\bol
 \noindent The SINDy regression system is thus defined as the following :
 
 \begin{equation}
-    \boldsymbol{\Theta}(\boldsymbol{X}) \boldsymbol{\Xi} = F
+    \boldsymbol{\Theta}(\boldsymbol{X}) \boldsymbol{\Xi} = F_{ext}
 \end{equation}
 
-\noindent Where F is our external forces vector $F = (\boldsymbol{F}_{t_k})_{k\in [1,\dots,m]}$. In the original SINDy paper \cite{bruntonDiscoveringGoverningEquations2016}, this has been extended to multiple coordinate by allowing $F$ to be a matrix :
+\noindent Where F is our external forces vector $F_{ext}$. In the original SINDy paper \cite{bruntonDiscoveringGoverningEquations2016}, this has been extended to multiple coordinate by allowing $F$ to be a matrix :
 
 \begin{equation}
-    F = \begin{bmatrix}
-        F_{1_1} & F_{2_1} & \cdots & F_{n_1} \\
-        F_{1_2} & F_{2_2} & \cdots & F_{n_2} \\
-        \vdots & \vdots & & \vdots \\
-        F_{1_m} & F_{2_m} & \cdots & F_{n_m} \\
+    F_{ext} = \begin{bmatrix}
+        F_{ext_{1}}(t_1) & \cdots & F_{ext_{n}}(t_1) \\
+        \vdots &  & \vdots \\
+        F_{ext_{1}}(t_m) &  \cdots & F_{ext_{n}}(t_m) \\
     \end{bmatrix}
+    \label{eq:f-ext-1}
 \end{equation}
 
 \noindent In result the coefficient vector $\boldsymbol{\Xi}$ will also be a matrix. This constraint will be studied in detail and partly relaxed in Sec.~\ref{sec:unified-catalog}.
@@ -260,9 +295,149 @@ The lagrangian is an alternate formulation of classical mechanics founded on the
 \end{equation}
 \noindent where $T$ is the total kinetic energy of the system and $V$ is the potential energy of the system. A more mathematical definition of the Lagrangian can be given but the goal of our study is more about the application rather than how to compute lagrangian in different system. In the new addition Sec.~\ref{sec:unified-catalog} lagrangian and newton will be generalised as "talking paradigm", which totally shift the scope from Lagrangian/Newton to any paradigm from any area of physics or math.
 
+The main point that is interesting for our study is the ability to translate the lagrangian back to newton formalism $F=ma$ using the Euler-Lagrange equation:
+\begin{equation}
+    \frac{d}{dt}\left( \frac{\partial L}{\partial \dot{q}_i} \right) - \frac{\partial L}{\partial q_i} = 0
+    \label{eq:euler-lagrange}
+\end{equation}
+\noindent where $q_i$ is the generalised coordinate in our system. Generalized coordinate can be directly translated to degree of freedom in mechanics system study. The result of the Euler-Lagrage equation \ref{eq:euler-lagrange} is a set of equation (one for each coordinate) that constraint our system dynamics in the real world.
+
+The general version of Euler-Lagrange when dealing with external forces :
+
+\begin{equation}
+    \frac{d}{dt}\left( \frac{\partial L}{\partial \dot{q}_i} \right) - \frac{\partial L}{\partial q_i} = F_{ext}
+\end{equation}
+
+\subsection{Lagrangian SINDy}
+
+Purmono in the second lab paper about SINDy \cite{purnomoSparseIdentificationLagrangian2023} used the lagrangian to transform the catalog function using Euler-Lagrange. Instead of searching $\boldsymbol{\Xi}$ thanks to $F_{ext}$ such as :
+\begin{align}
+    f &:= F - ma \\
+    f &= \boldsymbol{\Theta} \boldsymbol{\Xi}
+\end{align}
+
+\noindent where $F$ is the internal forces in our system, in the classical $F=ma$ in Newton dynamics (as opposed with $F_{ext}$ in $F -ma = F_{ext}$ used as our pre-knowledge in the regression step)
+
+Purmono searched to solve the dynamics shifted in Lagrangian world, and thus determining the lagrangian $L$ with SINDy :
+\begin{align}
+    f &:= \frac{d}{dt}\left( \frac{\partial L}{\partial \dot{q}_i} \right) - \frac{\partial L}{\partial q_i} \\
+    f &= \mathcal{L}[\boldsymbol{\Theta} \boldsymbol{\Xi}]
+\end{align}
+\noindent where $\mathcal{L}$ is the euler-lagrange operator :
+\begin{equation}
+    \mathcal{L}[f] = \begin{bmatrix}
+        \frac{d}{dt}\left( \frac{\partial f}{\partial \dot{q}_1} \right) - \frac{\partial f}{\partial q_1} \\
+        \vdots \\
+        \frac{d}{dt}\left( \frac{\partial f}{\partial \dot{q}_n} \right) - \frac{\partial f}{\partial q_n} \\
+    \end{bmatrix} 
+\end{equation}
+\noindent This operator is linearly stable (addition, scalar multiplication).
+
+Thanks to the stability of the euler-lagrange operator the regression system remained linear :
+\begin{align}
+    \frac{d}{dt}\left( \frac{\partial L}{\partial \dot{q}_i} \right) - \frac{\partial L}{\partial q_i} &= F_{ext} \\
+    \mathcal{L}[\boldsymbol{\Theta} \boldsymbol{\Xi}] &= F_{ext} \\
+    \mathcal{L}[\boldsymbol{\Theta}] \boldsymbol{\Xi} &= F_{ext}
+\end{align}
+\noindent It can be noted that the shape of $F_{ext}$ changed from the first definition Eq.~\ref{eq:f-ext-1} :
+\begin{equation}
+    F_{ext} = \begin{bmatrix}
+        F_{ext_{1}}(t_1)  \\
+        \vdots  \\
+        F_{ext_{1}}(t_m)  \\
+        \vdots \\
+        F_{ext_{n}}(t_1)  \\
+        \vdots  \\
+        F_{ext_{n}}(t_m)  \\
+    \end{bmatrix}
+\end{equation}
+
+This will be interpreted in Sec.~\ref{sec:unified-catalog} as a transformation applied to the function catalog.
+
+Thanks to this transformation, we can use a restricted catalog function and only solve for one equation which futher reduce the size of the variable we need to determine with the sparse regression algorithm.
+
 
 \section{Unified SINDy catalog}
 \label{sec:unified-catalog}
+
+This section constitute the first major addition of our work.
+
+As stated earlier, XL-SINDy can be summarized as a post-transformation on a catalog. We have come to the conclusion that any transformation can be imagined as far as it is linearly stable. We have immagined more complex transformation to fit more specifically with different system. Since we wanted to tackle friction forces at the same time as having lagrangian term, we have imagined multiple catalog composing the same experiment matrix. The main condition to follow is that every catalog should output their transformation in the same "world". In the case of the Lagrangian this condition is respected because the result of Euler-Lagrange equation Eq.~\ref{eq:euler-lagrange} lies into the same "world" as classical Newtonian term.
+
+When talking about "world" we specifically aim at the compatibility of our resulting system dynamics. The compability can be summarized by this question : Does this following system makes sense ?
+\begin{equation}
+    f=\mathcal{F}_1[\boldsymbol{\Theta_1}]\boldsymbol{\Xi_1} + \dots + \mathcal{F}_j[\boldsymbol{\Theta_j}]\boldsymbol{\Xi_j}
+\end{equation}
+\noindent where $\mathcal{F}_k$ is the transformation function of the $\boldsymbol{\Theta_k}$ catalog and $\boldsymbol{\Xi_k}$ the k-solution.
+
+Following this principle we have come with the unified experiment matrix for robotics system Figure.~\ref{fig:unified-sindy}.
+
+\begin{figure}
+    \centering
+    \begin{tikzpicture}
+    %Create a matrix of nodes with automatic naming (m-row-column)
+    \matrix[matrix of nodes,
+            column sep=10pt, 
+            row sep=0.2cm,
+            nodes={sindy component},
+            left delimiter={[},
+            right delimiter={]},
+            nodes in empty cells
+            ] (m) {
+        |[fill=sindyforces,with label=$F_1$]| & |[fill=sindynullgray]| &  & |[fill=sindynullgray]| & |[fill=sindynewton,with label=$\phi_1$]| & |[fill=sindynullgray]| & |[fill=sindynullgray]| & |[fill=sindynewton,with label=$\phi_2$]| & |[fill=sindynullgray]| & |[fill=sindynullgray]| & & |[fill=sindynewton,with label=$\phi_k$]| & |[fill=sindynullgray]| & |[fill=sindynullgray]| & |[fill=sindylagrange,with label=$\mathcal{L}_1 \lb \xi_1 \rb$]| & |[fill=sindylagrange,with label=$\mathcal{L}_1 \lb \xi_2 \rb$]| & & |[fill=sindylagrange,with label=$\mathcal{L}_1 \lb \xi_p \rb$]| \\
+        |[fill=sindynullgray]| & |[fill=sindyforces,with label=$F_2$]| & |[fill=none]|\dots  & |[fill=sindynullgray]| & |[fill=sindynullgray]| & |[fill=sindynewton,with label=$\phi_1$]| & |[fill=sindynullgray]| & |[fill=sindynullgray]| & |[fill=sindynewton,with label=$\phi_2$]| & |[fill=sindynullgray]| & |[fill=none]|\dots & |[fill=sindynullgray]| & |[fill=sindynewton,with label=$\phi_k$]| & |[fill=sindynullgray]| & |[fill=sindylagrange,with label=$\mathcal{L}_2 \lb \xi_1 \rb$]| & |[fill=sindylagrange,with label=$\mathcal{L}_2 \lb \xi_2 \rb$]| & |[fill=none]|\dots & |[fill=sindylagrange,with label=$\mathcal{L}_2 \lb \xi_p \rb$]| \\
+        |[fill=sindynullgray]| & |[fill=sindynullgray]| &   & |[fill=sindyforces,with label=$F_n$]| & |[fill=sindynullgray]| & |[fill=sindynullgray]| & |[fill=sindynewton,with label=$\phi_1$]| & |[fill=sindynullgray]| & |[fill=sindynullgray]| & |[fill=sindynewton,with label=$\phi_2$]| &  & |[fill=sindynullgray]| & |[fill=sindynullgray]| & |[fill=sindynewton,with label=$\phi_k$]| & |[fill=sindylagrange,with label=$\mathcal{L}_3 \lb \xi_1 \rb$]| & |[fill=sindylagrange,with label=$\mathcal{L}_3 \lb \xi_2 \rb$]| &  & |[fill=sindylagrange,with label=$\mathcal{L}_3 \lb \xi_p \rb$]| \\
+        };
+
+    \draw[dashed] ($(m-3-4.south east)!0.5!(m-3-5.south west)$) -- ($(m-1-4.north east)!0.5!(m-1-5.north west)$) -- ++(0,1.2cm);
+
+    \draw[dashed] ($(m-3-14.south east)!0.5!(m-3-15.south west)$) -- ($(m-1-14.north east)!0.5!(m-1-15.north west)$) -- ++(0,1.2cm);
+
+    \node at ($(m-1-1.north)!0.5!(m-1-4.north) + (0,1.6cm)$) {\small \textbf{Forces catalog}};
+    \node at ($(m-1-5.north)!0.5!(m-1-14.north) + (0,1.6cm)$) {\small \textbf{Newton catalog}};
+    \node at ($(m-1-15.north)!0.5!(m-1-18.north) + (0,1.6cm)$) {\small \textbf{Lagrange catalog}};
+
+    \node at ($(m-1-1.north) + (0,1cm)$) {\small $F_1$};
+    \node at ($(m-1-2.north) + (0,1cm)$) {\small $F_2$};
+    \node at ($(m-1-3.north) + (0,1cm)$) {\small \dots};
+    \node at ($(m-1-4.north) + (0,1cm)$) {\small $F_n$};
+
+    \node (phi1-label) at ($(m-1-6.north) + (0,1cm)$) {\small $\phi_1$};
+    \node (phi2-label)at ($(m-1-9.north) + (0,1cm)$) {\small $\phi_2$};
+    \node at ($(m-1-11.north) + (0,1cm)$) {\small \dots};
+    \node (phi3-label)at ($(m-1-13.north) + (0,1cm)$) {\small $\phi_k$};
+
+    \draw (phi1-label) -- ($(m-1-5.north) + (0,0.25cm)$);
+    \draw (phi1-label) -- (m-1-6.north);
+    \draw (phi1-label) -- (m-1-7.north);
+
+    \draw (phi2-label) -- ($(m-1-8.north) + (0,0.25cm)$);
+    \draw (phi2-label) -- (m-1-9.north);
+    \draw (phi2-label) -- (m-1-10.north);
+
+    \draw (phi3-label) -- ($(m-1-12.north) + (0,0.25cm)$);
+    \draw (phi3-label) -- (m-1-13.north);
+    \draw (phi3-label) -- (m-1-14.north);
+
+    \node at ($(m-1-15.north) + (0,1cm)$) {\small $\xi_1$};
+    \node at ($(m-1-16.north) + (0,1cm)$) {\small $\xi_2$};
+    \node at ($(m-1-17.north) + (0,1cm)$) {\small \dots};
+    \node at ($(m-1-18.north) + (0,1cm)$) {\small $\xi_p$};
+
+    \node[anchor=south] at ($(m-1-1.north west) + (-0.5cm,-0.15cm)$) {\tiny $t_1$};
+    \draw[->,line width=1.25pt] ($(m-1-1.north west) + (-0.5cm,-0.15cm)$) -- ($(m-1-1.south west) + (-0.5cm,0.2cm)$);
+
+    \node[anchor=south] at ($(m-2-1.north west) + (-0.5cm,-0.15cm)$) {\tiny $t_2$};
+    \draw[->,line width=1.25pt] ($(m-2-1.north west) + (-0.5cm,-0.15cm)$) -- ($(m-2-1.south west) + (-0.5cm,0.2cm)$);
+
+    \node[anchor=south] at ($(m-3-1.north west) + (-0.5cm,-0.15cm)$) {\tiny $t_3$};
+    \draw[->,line width=1.25pt] ($(m-3-1.north west) + (-0.5cm,-0.15cm)$) -- ($(m-3-1.south west) + (-0.5cm,0.2cm)$);
+    \end{tikzpicture}
+    \caption{\textbf{Unified SINDy experiment matrix :} The following experiment matrix regroup the external forces (pre-knowledge), a newton catalog in order to grasp friction forces and the lagrangian catalog that determines all the other internal dynamics}
+    \label{fig:unified-sindy}
+\end{figure}
+
+This experiment matrix represent everything we need in order to execute a SINDy regression. In addition the external forces has been incorporated in the column of the matrix mainly to streamline the work in Sec.~\ref{sec:mixed-sindy}. Using this experiment matrix we can determine the right hand side and left hand side of our regression before executing it (if we for example have only input forces in a subset of the forces catalog, in a system composed of active and passive joint).
 
 \section{Mixed SINDy regression algorithm}
 \label{sec:mixed-sindy}
