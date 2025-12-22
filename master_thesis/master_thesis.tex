@@ -61,7 +61,7 @@
 % --- Tikz ---
 \usepackage{tikz}
 \usepackage{etoolbox}
-\usetikzlibrary{positioning,matrix,backgrounds,calc}
+\usetikzlibrary{positioning,matrix,backgrounds,calc,fit}
 
 
 \pgfdeclarelayer{background}
@@ -79,7 +79,7 @@
 % Define the sindy component as a node style
 \tikzset{
     sindy label/.style={font=\tiny, text=black,minimum height=0pt},
-    sindy component/.style={
+    sindy component text/.style={
         rectangle,
         minimum width=10pt,
         minimum height=1.5cm,
@@ -90,8 +90,40 @@
         outer sep=1pt,
         align=center,
     },
-    with label/.style={label={[sindy label]above:#1}}
+    with label/.style={label={[sindy label]above:#1}},
+    deactivated opacity/.style={opacity=0.3},
+    full opacity/.style={opacity=1.0},
+    sindy solution/.style={
+        rectangle,
+        minimum width=6pt,
+        minimum height=6pt,
+        rounded corners=3pt,
+        fill=sindynullgray,
+        draw=none,
+        inner sep=0pt,
+        outer sep=0pt,
+        align=center,
+        opacity=0.3,
+    },
+    sindy component/.style={
+        rectangle,
+        minimum width=6pt,
+        minimum height=10pt,
+        rounded corners=3pt,
+        fill=sindynullgray,
+        draw=none,
+        inner sep=0pt,
+        outer sep=1pt,
+        align=center,
+        opacity=0.3,
+    },
 }
+
+\definecolor{sindypreknowledge}{RGB}{196,78,82}
+\definecolor{sindystandard}{RGB}{85,168,104}
+\definecolor{sindysolutionexplicit}{RGB}{129,114,179}
+\definecolor{sindysolutionimplicit}{RGB}{204,185,116}
+
 
 % --- Custom Commands for SINDy ---
 \newcommand{\TODO}[1]{\textcolor{red}{\textbf{TODO: #1}}}
@@ -153,6 +185,7 @@ Thanks to the lab, the supervisor, and coffee.
 
 %Start with \chapter{} after it is normal \section \subsection stuff
 \chapter{Methods}
+\label{ch:methods}
 
 This chapter details the working principles of the Sparse Identification of Nonlinear Dynamics (SINDy) algorithm and outlines our specific contributions to the method. 
 
@@ -189,6 +222,7 @@ SINDy is a data-driven framework designed to \textbf{identify} governing equatio
 Note that while this resembles a matrix formulation, $f$ represents a general non-linear vector function, not necessarily a linear transformation. Although the generalization to PDEs is conceptually similar, we restrict our analysis to ODEs for clarity.
 
 \section{Core SINDy Principle}
+\textit{\textcolor{gray}{[Background - State of the Art]}}
 
 SINDy, as developed by Brunton et al.\cite{bruntonDiscoveringGoverningEquations2016}, relies on the decomposition of dynamics into linearly dependent components. In order to achieve this we assume that the dynamics will lies inside a set of predetermined non-linear and linear function (eg. $(cos,sin,\cdot^2,\sqrt{\cdot},\dots)$). This function catalog $\boldsymbol{\Theta} = (f_1(\mathcal{X}),f_2(\mathcal{X}),\dots,f_k(\mathcal{X}))$will bridge the gap between linear ODEs and non-linear ones. A particuliar attention should be made during the selection of the catalog. \TODO{link this with concerned chapter}
 
@@ -243,6 +277,8 @@ From the moment we have the linear system correctly setup, we can use a sparse l
 \noindent where $f$ is the dynamics of our system in Eq.~\ref{eq:system-dynamics}
 
 \section{SINDy parallel implicit}
+\label{sec:sindy-pi}
+\textit{\textcolor{gray}{[Background - State of the Art]}}
 
 The first addition of SINDy that we will study is the case where no-external forces are provided to our system (eg. $(F_k(t)=0)_{k\in\mathbb{N}}$). This will lead to the following modified SINDy equation (original Eq.~\ref{eq:sindy-equation}) :
 \begin{equation}
@@ -283,10 +319,12 @@ This idea was in theory the solution of implicit SINDy but lead to high computat
 \noindent By enforcing the diagonal of zero in our linear system we can effectively execute all the j-SINDy system all at once. The diagonal constraint restrain however the scope of the algorithm that we can use for this linear system. This constraint force the use of more complex solver and still increase the overall computationnal burden of SINDy. 
 
 \section{Xl SINDy}
+\textit{\textcolor{gray}{[Background - Prior Lab Work]}}
 
 The first goal of the lab (precedent work before this thesis) has been to leverage the Lagrangian formulation in robotics in order to increase the performance of SINDy algorithms in the domain of robotics. Before diving into detail in the method developped we will study the base of the lagrangian formalism.
 
 \subsection{Lagrangian formalism}
+\textit{\textcolor{gray}{[Background - Classical Mechanics]}}
 
 The lagrangian is an alternate formulation of classical mechanics founded on the d'Alembert principle of virtual work \TODO{cite something here}. In a totally abstract manner Lagrangian can be seen as a "projection" of Newton Law in a space with more constraint rule. Lagrangian mechanics uses the energies in the system. The central quantity in Lagrangian mechanics is the Lagrangian a function that will summarize the dynamics of our system. In our case we are going to focus in the non-relativistic Lagrangian which is defined by :
 \begin{equation}
@@ -309,6 +347,7 @@ The general version of Euler-Lagrange when dealing with external forces :
 \end{equation}
 
 \subsection{Lagrangian SINDy}
+\textit{\textcolor{gray}{[Background - Prior Lab Work]}}
 
 Purmono in the second lab paper about SINDy \cite{purnomoSparseIdentificationLagrangian2023} used the lagrangian to transform the catalog function using Euler-Lagrange. Instead of searching $\boldsymbol{\Xi}$ thanks to $F_{ext}$ such as :
 \begin{align}
@@ -359,6 +398,7 @@ Thanks to this transformation, we can use a restricted catalog function and only
 
 \section{Unified SINDy catalog}
 \label{sec:unified-catalog}
+\textbf{\textcolor{blue}{[Novel Contribution - Major]}}
 
 This section constitute the first major addition of our work.
 
@@ -379,7 +419,7 @@ Following this principle we have come with the unified experiment matrix for rob
     \matrix[matrix of nodes,
             column sep=10pt, 
             row sep=0.2cm,
-            nodes={sindy component},
+            nodes={sindy component text},
             left delimiter={[},
             right delimiter={]},
             nodes in empty cells
@@ -439,15 +479,329 @@ Following this principle we have come with the unified experiment matrix for rob
 
 This experiment matrix represent everything we need in order to execute a SINDy regression. In addition the external forces has been incorporated in the column of the matrix mainly to streamline the work in Sec.~\ref{sec:mixed-sindy}. Using this experiment matrix we can determine the right hand side and left hand side of our regression before executing it (if we for example have only input forces in a subset of the forces catalog, in a system composed of active and passive joint).
 
+We can directly see the compactness of the lagrangian catalog in opposition with the Newton catalog. Newton catalog is longer in two aspect : catalog function need to be larger, each function have one variable per coordinate.
+
+\subsection{Implicit and explicit regression with unified experiment matrix}
+
+The different SINdy classical algorithm can be used on the unified experiment matrix. When doing explicit regression on the the unified experiment matrix we can choose what component will be part of our left hand side and what component will be part of our right hand side or so called pre-knowledge. This is a generalization of two case present in Purmono paper \cite{purnomoSparseIdentificationLagrangian2023}, the explicit case and the "implicit" with pre-knowledge. Implicit with pre-knowledge means that instead of putting the external forces in the rihgt hand side, we put a part of the catalog that belongs to the systems as the right hand side (in a way to cope with harder implicit regression). This two characteristic are an inherant part of the new unified experiement matrix since we can choose any column to be part of the right hand side.
+
 \section{Mixed SINDy regression algorithm}
 \label{sec:mixed-sindy}
+\textbf{\textcolor{blue}{[Novel Contribution - Major]}}
+
+The second major addition of our work is the creation of a new algorithm able to differentiate between the explicit part of a system with the implicit part of it. This is a totally new addition in SINDy because beforehand no work where concerned about system that got a mix of passive and active joint.
+
+As a theoritical digression, if we consider a system with $n$ coordinates, it is impossible before the experiment to guess which coordinate are linked when forces are input to a certain coordinates. This lead to the creation of an algorithm able to analyse the structure of the experiment matrix at each step of this mixed regression. 
+
+The proposed algorithm is a first shot at handling these mixed implicit explicit system and other variant with the same spirit could be imagined.
+
+\begin{figure}
+    \centering
+    \begin{tikzpicture}
+    %Create a matrix of nodes with automatic naming (m-row-column)
+    \matrix[matrix of nodes,
+            column sep=3pt, 
+            row sep=3pt,
+            nodes={sindy component},
+            left delimiter={[},
+            right delimiter={]},
+            nodes in empty cells
+            ] (m1) {
+            |[fill=sindystandard,deactivated opacity]| & & & |[fill=sindystandard,deactivated opacity]| & & & & & |[fill=sindystandard,deactivated opacity]| \\
+            |[deactivated opacity]| & |[fill=sindypreknowledge,full opacity]| & |[full opacity]| & |[fill=sindystandard,full opacity]| & |[fill=sindystandard,full opacity]|& |[deactivated opacity]| & |[deactivated opacity]| & |[deactivated opacity]| & |[deactivated opacity]|\\
+            |[deactivated opacity]| & |[full opacity]| & |[fill=sindypreknowledge,full opacity]| & |[full opacity]| & |[fill=sindystandard,full opacity]| & |[deactivated opacity]| & |[deactivated opacity]| & |[deactivated opacity]| & |[deactivated opacity]|\\
+            |[fill=sindystandard,deactivated opacity]| & & & & & & & & |[fill=sindystandard,deactivated opacity]| \\
+            & & & & & |[fill=sindystandard,deactivated opacity]| & |[fill=sindystandard,deactivated opacity]| & & \\
+            & & & & & |[fill=sindystandard,deactivated opacity]| &  & |[fill=sindystandard,deactivated opacity]| & \\
+        };
+
+    \matrix[matrix of nodes,
+            column sep=3pt, 
+            row sep=3pt,
+            nodes={sindy component},
+            left delimiter={[},
+            right delimiter={]},
+            nodes in empty cells
+            ] (m2a) [right=1.2cm of m1] {
+            |[fill=sindystandard,full opacity]| & |[full opacity]| & |[full opacity]| & |[fill=sindystandard,full opacity]| & |[full opacity]| & |[deactivated opacity]| & |[deactivated opacity]| & |[deactivated opacity]| & |[fill=sindystandard,full opacity]| \\
+            |[full opacity]| & |[fill=sindypreknowledge,full opacity]| & |[full opacity]| & |[fill=sindystandard,full opacity]| & |[fill=sindystandard,full opacity]|& |[deactivated opacity]| & |[deactivated opacity]| & |[deactivated opacity]| & |[full opacity]|\\
+            |[full opacity]| & |[full opacity]| & |[fill=sindypreknowledge,full opacity]| & |[full opacity]| & |[fill=sindystandard,full opacity]| & |[deactivated opacity]| & |[deactivated opacity]| & |[deactivated opacity]| & |[full opacity]|\\
+            |[fill=sindystandard,deactivated opacity]| & & & & & & & & |[fill=sindystandard,deactivated opacity]| \\
+            & & & & & |[fill=sindystandard,deactivated opacity]| & |[fill=sindystandard,deactivated opacity]| & & \\
+            & & & & & |[fill=sindystandard,deactivated opacity]| &  & |[fill=sindystandard,deactivated opacity]| & \\
+            };
+
+    \matrix[matrix of nodes,
+            column sep=3pt, 
+            row sep=3pt,
+            nodes={sindy component},
+            left delimiter={[},
+            right delimiter={]},
+            nodes in empty cells
+            ] (m2b) [right=1.2cm of m2a] {
+            |[fill=sindystandard,full opacity]| & |[full opacity]| & |[full opacity]| & |[fill=sindystandard,full opacity]| & |[full opacity]| & |[deactivated opacity]| & |[deactivated opacity]| & |[deactivated opacity]| & |[fill=sindystandard,full opacity]| \\
+            |[full opacity]| & |[fill=sindypreknowledge,full opacity]| & |[full opacity]| & |[fill=sindystandard,full opacity]| & |[fill=sindystandard,full opacity]|& |[deactivated opacity]| & |[deactivated opacity]| & |[deactivated opacity]| & |[full opacity]|\\
+            |[full opacity]| & |[full opacity]| & |[fill=sindypreknowledge,full opacity]| & |[full opacity]| & |[fill=sindystandard,full opacity]| & |[deactivated opacity]| & |[deactivated opacity]| & |[deactivated opacity]| & |[full opacity]|\\
+            |[fill=sindystandard,full opacity]| & |[full opacity]| & |[full opacity]| & |[full opacity]| & |[full opacity]| & |[deactivated opacity]| & |[deactivated opacity]| & |[deactivated opacity]| & |[fill=sindystandard,full opacity]| \\
+            & & & & & |[fill=sindystandard,deactivated opacity]| & |[fill=sindystandard,deactivated opacity]| & & \\
+            & & & & & |[fill=sindystandard,deactivated opacity]| &  & |[fill=sindystandard,deactivated opacity]| & \\
+            };
+
+    \matrix[matrix of nodes,
+            column sep=3pt, 
+            row sep=3pt,
+            nodes={sindy component},
+            left delimiter={[},
+            right delimiter={]},
+            nodes in empty cells
+            ] (m3) [below=0.7cm of m1] {
+            |[fill=sindystandard,full opacity]| & |[full opacity]| & |[full opacity]| & |[fill=sindystandard,full opacity]| & |[full opacity]| & |[deactivated opacity]| & |[deactivated opacity]| & |[deactivated opacity]| & |[fill=sindystandard,full opacity]| \\
+            |[full opacity]| & |[fill=sindypreknowledge,full opacity]| & |[full opacity]| & |[fill=sindystandard,full opacity]| & |[fill=sindysolutionexplicit,full opacity]|& |[deactivated opacity]| & |[deactivated opacity]| & |[deactivated opacity]| & |[full opacity]|\\
+            |[full opacity]| & |[full opacity]| & |[fill=sindypreknowledge,full opacity]| & |[full opacity]| & |[fill=sindysolutionexplicit,full opacity]| & |[deactivated opacity]| & |[deactivated opacity]| & |[deactivated opacity]| & |[full opacity]|\\
+            |[fill=sindystandard,full opacity]| & |[full opacity]| & |[full opacity]| & |[full opacity]| & |[full opacity]| & |[deactivated opacity]| & |[deactivated opacity]| & |[deactivated opacity]| & |[fill=sindystandard,full opacity]| \\
+            & & & & & |[fill=sindystandard,deactivated opacity]| & |[fill=sindystandard,deactivated opacity]| & & \\
+            & & & & & |[fill=sindystandard,deactivated opacity]| &  & |[fill=sindystandard,deactivated opacity]| & \\
+            };
+
+    \matrix[matrix of nodes,
+            column sep=3pt, 
+            row sep=3pt,
+            nodes={sindy component},
+            left delimiter={[},
+            right delimiter={]},
+            nodes in empty cells
+            ] (m4) [right=1.2cm of m3] {
+            |[fill=sindystandard,full opacity]| & &  & |[fill=sindystandard,deactivated opacity]| & & |[full opacity]| & |[full opacity]| & |[full opacity]| & |[fill=sindystandard,full opacity]| \\
+            & |[fill=sindypreknowledge,deactivated opacity]| & & |[fill=sindystandard,deactivated opacity]| & |[fill=sindysolutionexplicit,deactivated opacity]|& & & & \\
+            & & |[fill=sindypreknowledge,deactivated opacity]| & & |[fill=sindysolutionexplicit,deactivated opacity]| & & & & \\
+            |[fill=sindystandard,full opacity]| & & & & & |[full opacity]| & |[full opacity]| & |[full opacity]| & |[fill=sindystandard,full opacity]| \\
+            |[full opacity]| & & & & & |[fill=sindystandard,full opacity]| & |[fill=sindystandard,full opacity]| & |[full opacity]| & |[full opacity]| \\
+            |[full opacity]| & & & & & |[fill=sindystandard,full opacity]| & |[full opacity]| & |[fill=sindystandard,full opacity]| & |[full opacity]| \\
+            };
+
+    \matrix[matrix of nodes,
+            column sep=3pt, 
+            row sep=3pt,
+            nodes={sindy component},
+            left delimiter={[},
+            right delimiter={]},
+            nodes in empty cells
+            ] (m5) [right=1.2cm of m4] {
+            |[fill=sindysolutionimplicit,full opacity]| & &  & |[fill=sindystandard,deactivated opacity]| & & |[full opacity]| & |[full opacity]| & |[full opacity]| & |[fill=sindysolutionimplicit,full opacity]| \\
+            & |[fill=sindypreknowledge,deactivated opacity]| & & |[fill=sindystandard,deactivated opacity]| & |[fill=sindysolutionexplicit,deactivated opacity]|& & & & \\
+            & & |[fill=sindypreknowledge,deactivated opacity]| & & |[fill=sindysolutionexplicit,deactivated opacity]| & & & & \\
+            |[fill=sindysolutionimplicit,full opacity]| & & & & & |[full opacity]| & |[full opacity]| & |[full opacity]| & |[fill=sindysolutionimplicit,full opacity]| \\
+            |[full opacity]| & & & & & |[fill=sindystandard,full opacity]| & |[fill=sindystandard,full opacity]| & |[full opacity]| & |[full opacity]| \\
+            |[full opacity]| & & & & & |[fill=sindystandard,full opacity]| & |[full opacity]| & |[fill=sindystandard,full opacity]| & |[full opacity]| \\
+            };
+
+
+    \matrix[matrix of nodes,
+            column sep=3pt, 
+            row sep=3pt,
+            nodes={sindy solution},
+            left delimiter={[},
+            right delimiter={]},
+            nodes in empty cells
+            ] (sm3) [above=0.01cm of m3] {
+            |[full opacity]| & |[fill=sindypreknowledge, full opacity]| & |[fill=sindypreknowledge, full opacity]| & |[full opacity]| & |[fill=sindysolutionexplicit,full opacity]| & |[deactivated opacity]| & |[deactivated opacity]| & |[deactivated opacity]| & |[full opacity]| \\
+            };
+    \node [left=0.1cm of sm3.west,anchor=east] {\tiny $S =$};
+
+    \matrix[matrix of nodes,
+            column sep=3pt, 
+            row sep=3pt,
+            nodes={sindy solution},
+            left delimiter={[},
+            right delimiter={]},
+            nodes in empty cells
+            ] (sm2b) [above=0.01cm of m2b] {
+            & |[fill=sindypreknowledge, full opacity]| & |[fill=sindypreknowledge, full opacity]| & & & & & & \\
+            };
+    \node [left=0.1cm of sm2b.west,anchor=east] {\tiny $S =$};
+
+    \matrix[matrix of nodes,
+            column sep=3pt, 
+            row sep=3pt,
+            nodes={sindy solution},
+            left delimiter={[},
+            right delimiter={]},
+            nodes in empty cells
+            ] (sm1) [above=0.01cm of m1] {
+            & |[fill=sindypreknowledge, full opacity]| & |[fill=sindypreknowledge, full opacity]| & & & & & & \\
+            };
+    \node [left=0.1cm of sm1.west,anchor=east] {\tiny $S =$};
+
+    \matrix[matrix of nodes,
+            column sep=3pt, 
+            row sep=3pt,
+            nodes={sindy solution},
+            left delimiter={[},
+            right delimiter={]},
+            nodes in empty cells
+            ] (sm2a) [above=0.01cm of m2a] {
+            & |[fill=sindypreknowledge, full opacity]| & |[fill=sindypreknowledge, full opacity]| & & & & & & \\
+            };
+    \node [left=0.1cm of sm2a.west,anchor=east] {\tiny $S =$};
+
+    \matrix[matrix of nodes,
+            column sep=3pt, 
+            row sep=3pt,
+            nodes={sindy solution},
+            left delimiter={[},
+            right delimiter={]},
+            nodes in empty cells
+            ] (sm4) [above=0.01cm of m4] {
+            |[full opacity]| & |[fill=sindypreknowledge, deactivated opacity]| & |[fill=sindypreknowledge, deactivated opacity]| & |[deactivated opacity]| & |[fill=sindysolutionexplicit,deactivated opacity]| & |[full opacity]| & |[full opacity]| & |[full opacity]| & |[full opacity]| \\
+            };
+    \node [left=0.1cm of sm4.west,anchor=east] {\tiny $S =$};
+
+    \matrix[matrix of nodes,
+            column sep=3pt, 
+            row sep=3pt,
+            nodes={sindy solution},
+            left delimiter={[},
+            right delimiter={]},
+            nodes in empty cells
+            ] (sm5) [above=0.01cm of m5] {
+            |[fill=sindysolutionimplicit,full opacity]| & |[fill=sindypreknowledge, deactivated opacity]| & |[fill=sindypreknowledge, deactivated opacity]| & |[deactivated opacity]| & |[fill=sindysolutionexplicit,deactivated opacity]| & |[full opacity]| & |[full opacity]| & |[full opacity]| & |[fill=sindysolutionimplicit,full opacity]| \\
+            };
+    \node [left=0.1cm of sm5.west,anchor=east] {\tiny $S =$};
+
+    \node at ($(m1.west) - (0.2cm,0)$) [anchor=east] {1.};
+    \node at ($(m2a.west) - (0.2cm,0)$) [anchor=east] {2.a};
+    \node at ($(m2b.west) - (0.2cm,0)$) [anchor=east] {2.b};
+    \node at ($(m3.west) - (0.2cm,0)$) [anchor=east] {3.};
+    \node at ($(m4.west) - (0.2cm,0)$) [anchor=east] {4.};
+    \node at ($(m5.west) - (0.2cm,0)$) [anchor=east] {5.};
+
+    % Place legend anchored to the bottom-left of the instruction block
+    \node(ln) [below=0.3cm of m3.south west,anchor=west,sindy component,full opacity,fill=sindystandard,label=right:{: \small non-null cordinate/function data}] {};
+    \node(lp) [below=0.3cm of ln.south west,anchor=west,sindy component,full opacity,fill=sindypreknowledge,label=right:{: \small pre-knowledge}] {};
+    \node(le) [right=2.8cm of lp,sindy component,full opacity,fill=sindysolutionexplicit,label=right:{: \small explicit solution}] {};
+    \node(li) [right=3.0cm of le,sindy component,full opacity,fill=sindysolutionimplicit,label=right:{: \small implicit solution}] {};
+
+
+    \node (final) [below=1.2cm of m4,xshift=-1.4cm] {\normalsize Final solution : \ \tiny $S =$};
+
+    \matrix[matrix of nodes,
+            column sep=3pt, 
+            row sep=3pt,
+            nodes={sindy solution},
+            left delimiter={[},
+            right delimiter={]},
+            nodes in empty cells
+            ] (sm6) [right=0.1cm of final] {
+            |[fill=sindysolutionimplicit,full opacity]| & |[fill=sindypreknowledge, full opacity]| & |[fill=sindypreknowledge, full opacity]| & |[full opacity]| & |[fill=sindysolutionexplicit,full opacity]| & |[full opacity]| & |[full opacity]| & |[full opacity]| & |[fill=sindysolutionimplicit,full opacity]| \\
+            };
+
+    \draw [->] (m1-2-2.north) to [bend left] (m1-2-4.north);
+    \draw [->] (m1-2-2.north) to [bend left] (m1-2-5.north);
+    \draw [->] (m1-3-3.south) to [bend right] (m1-3-5.south);
+
+    \draw [->] (m2a-2-4.west) to [bend left] (m2a-1-4.west);
+    \draw [->] (m2a-1-4.north) to [bend left] (m2a-1-9.north);
+    \draw [->] (m2a-1-4.north) to [bend right] (m2a-1-1.north);
+
+    \draw [->] (m2b-1-1.west) to [bend right] (m2b-4-1.west);
+    \draw [->] (m2b-1-9.east) to [bend left] (m2b-4-9.east);
+
+    \end{tikzpicture}
+    \caption{\textbf{Mixed regression master algorithm :} The algorithm is detailed in Sec.~\ref{sec:mixed-sindy}. Arrow are illustration of the coordinate propagation mechanisms}
+    \label{fig:mixed-algorithm}
+\end{figure}
+
+The algorithm is the following : 
+\begin{itemize}
+    \item [1] Find coordinate actived by pre-knowledge
+    \item [2.a] Find coordinates and function activated
+    \item [2.b] Recursively find until no new activations
+    \item [3] Execute explicit SINDy
+    \item [4] Find every function and coordinate not activated by the explicit solution
+    \item [5] Execute implicit SINDy on the remaining components
+    \item [6] Combine the mixed SINDy solution
+\end{itemize}
+
+\noindent  The algorithm is illustrated Fig.~\ref{fig:mixed-algorithm}. This new algorithm enables the correct discovery of dynamics in a system that have partial input on some of its coordinate.
+
+\section{Enhanced implicit solution clustering}
+\textbf{\textcolor{blue}{[Novel Contribution]}}
+
+As explained in Sec.~\ref{sec:sindy-pi} about SINDy-PI, the true solution in Kaheman paper \cite{kahemanSINDyPIRobustAlgorithm2020} was isolated between all the false one thanks to the sparsity. the solutions that were more sparse than the other were deamed correct. This approach is correct when dealing with one coordinate or one equation but lead to wrong result when dealing with higher dimensional system or generally multiple equation.
+
+Theoriticaly that's come from the fact that we can have disjoint sub-space in our catalog (and thus substantely in our experiment matrix). These disjoint space emerge in our catalog because for example in the SINDy case no function from our catalog will activate two coordinate, this phenomenum leads to actively solve $n$ independant equation at the same time. If we use the SINDy-PI solution choosing algorithm we will by default select the most sparse solution that belong to only one of the subspace, thus missing all the other subspace solution. 
+
+In order to tackle this issue with have developped an algorithm that correctly cluster the different part of the whole solution. This algorithm correctly agreggate all the part of the solution.
+
+In the algorithm we consider each of the $\boldsymbol{\Xi}_j$ solution as a space vector (it can be noted that in this section $\boldsymbol{\Xi}_j$ have the complete lenght of our catalog and has been completed by -1 at the $j$ solution to cover the right hand side function at the $j$ position). 
+The algorithm is the following :
+\begin{enumerate}
+    \item Clusterize the different normalised $\boldsymbol{\Xi}_j$ by their direction using a max cone angle. 
+    \item Compute the weak sparsity score for each of the group (summed), Listing.~\ref{lst:weak-sparsity} (weighted averate of descending sorted list with indice )
+    \item Keep only the group with high sparsity index (more than 80\% in practice)
+    \item Compute the SVD of the group and store the result as solution
+\end{enumerate}
+It can be noted that the SVD step was developped in order to keep the true "average" solution in the group (the major solution direction of the group).
+
+Using this algorithm we have been able to retrieve all the solution of every catalog subspace in majority of case. 
 
 \section{Sparse linear regression algorithm}
 \label{sec:sparse-linear-algorithm}
+\textit{\textcolor{gray}{[Background - Implementation Details]}}
 
+\section{Input knowledge and catalog creation}
+\textbf{\textcolor{blue}{[Novel Contribution]}}
 
+One of the most important point in SINDy method is how to choose a catalog, what training data to gather and predict how this two first points will impact our result. By nature this question are hard to solve theoriticaly, and during this section we will present empirical observation that takes their root from information theory. 
 
+\section{Implementation detail}
+\textbf{\textcolor{blue}{[Novel Contribution]}}
 
+Even if we are willing to keep this section as tiny as possible, we are going to detail some of the most important implementation detail. Since the main goal of this work was to bring to everyone a way to use our new addition to SINDy framework, it has been decided to create a modular python library covering past and new addition (for algorithm comparison purpose). The following library has been made \textsc{py-xl-sindy} : \url{https://github.com/Eymeric65/py-xl-sindy}. This library contains the implementation for the \textbf{unified catalog} and the \textbf{mixed implicit explicit algorithm}. In addition, \textbf{lasso}, \textbf{proximal gradient}, \textbf{Clarabel solver} have been reimplemented / linked in this library for a direct use with the experiment matrix. Concerning the different catalog type the base three have been implemented :
+\begin{itemize}
+    \item \textbf{External forces :} Used as a placeholder for external input to the system
+    \item \textbf{Newton :} Used mainly for friction forces and behavior not deriving from potential
+    \item \textbf{Lagrange :} The main part of the catalog for the internal dynamics. Storing the term of the lagrangian
+\end{itemize}
+
+In addition with this the library contains utilitaries for generating data with Mujoco and some example script for getting started. Everything is available on \textsc{PyPi} and the library can be installed like any other one. At the stage of this master thesis the library is at the version \textsc{v2.2.0} (and thus any data from the thesis can be generated identically using this version of the library)
+
+\subsection{ Data generation repository}
+
+In addition with the library another repository has been made concerning the result analysis and the other resources concerning the research. This repository found there : 
+
+\url{https://github.com/Eymeric65/py-xl-sindy-data-visualisation} contains the following ressources :
+\begin{itemize}
+    \item First poster about unified catalog and SINDy for Robotic system
+    \item Presentation slide source (\textsc{manim}) for this master
+    \item Paper source : \textit{Unified SINDy catalog for mixed implicit explicit system\footnote{proposed title}}
+    \item Batch generation code
+    \item Data visualisation website
+    \item The master thesis source
+\end{itemize}
+
+\noindent The visualisation website is available here :
+
+\url{https://eymeric65.github.io/py-xl-sindy-data-visualisation/}. The concerned data is the one used for this master thesis, the paper and the presentation. Every script that lead to this data can be found in the repository and used again to check the reproducibility of the generation step. Data as itself can be found the \textsc{Releases} of the repository.
+
+\section{Data sampling and experiment matrix building}
+\textbf{\textcolor{blue}{[Novel Contribution]}}
+
+Before ending this chapter and diving into the result of the thesis, it is nice to develop more our view on data gathered and how do we used it in the regression. Concerning the regression, we have choosen to apply a fixed data ratio between the size of the catalog (the columns our experiment matrix) and the number of sample we use (the rows of our experiment). 
+
+This lead in practice to takes thousands of sample during our different system training batch ( see more information in Results Chapter.~\ref{ch:results}), while having a subsample of a few hundreds (1 to 2 times the size of our catalog). This decision is part of our will to take advantage of our compact \textit{unified catalog}.
+
+Concerning the way to sample even if we are not going to present some quantitative result in this thesis, a pre-study part of the poster made last year \cite{echauchatSparseIdentificationNonlinear2024} has shown that uniform sampling in time was leading to better result than any other of the following method :
+\begin{itemize}
+    \item Random sampling
+    \item Entropy base sampling (takes the distribution of point that maximise the entropy in the phase portrait)
+    \item Random sampling with replacement (probability to takes the same sample two times)
+    \item uniform sampling in the phase portrait.
+\end{itemize}
+\noindent This shouldn't be mistaken with training data lenght and batch size. Longer experiment with an high number of batch lead inevitably to better result (even if the same number of end sample were taken from the training data)
+
+\chapter{Results}
+\label{ch:results}
 
 % -------------------------------------------------------------------------
 %   BACK MATTER
@@ -457,15 +811,23 @@ This experiment matrix represent everything we need in order to execute a SINDy 
 
 \appendix
 \chapter{Python Implementation}
-\begin{lstlisting}[language=Python, caption=STLSQ Implementation]
-import numpy as np
 
-def stlsq(Theta, dXdt, threshold=0.1):
-    Xi = np.linalg.lstsq(Theta, dXdt, rcond=None)[0]
-    # Simple thresholding
-    small_inds = np.abs(Xi) < threshold
-    Xi[small_inds] = 0
-    return Xi
+\begin{lstlisting}[language=Python, caption={\textbf{Weak sparsity function}}, label=lst:weak-sparsity]
+def _weak_sparsity_rank_weighted(x):
+
+    x = np.abs(x)
+    s = np.sort(x)[::-1] # descending order
+    ranks = np.arange(1, len(s) + 1)
+
+    weights = 1.0 / ranks
+    weighted_sum = np.sum(s * weights)
+    weight_total = np.sum(s)
+
+    if weight_total == 0:
+        return 0
+    else:
+        return weighted_sum / weight_total
+
 \end{lstlisting}
 
 \end{document}
