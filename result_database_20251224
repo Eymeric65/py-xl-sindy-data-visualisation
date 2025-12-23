@@ -1,0 +1,40 @@
+==========================================================================================
+EXPERIMENT RESULTS ANALYSIS - BY SYSTEM
+==========================================================================================
+
+>>> CART_POLE
+  mixed      / mixed      | Valid:   67 | Failed:   79 | Timeout:    0 | Total:  146 | Median RMSE: 1.749179
+  sindy      / explicit   | Valid:   33 | Failed:  101 | Timeout:    0 | Total:  134 | Median RMSE: 1.231870
+  sindy      / implicit   | Valid:    0 | Failed:   48 | Timeout:   48 | Total:   48 | Median RMSE: nan
+  xlsindy    / explicit   | Valid:   28 | Failed:   59 | Timeout:    0 | Total:   87 | Median RMSE: 20.416102
+
+>>> CART_POLE_DOUBLE
+  mixed      / mixed      | Valid:   41 | Failed:  166 | Timeout:   48 | Total:  207 | Median RMSE: 1.937164
+  sindy      / explicit   | Valid:    0 | Failed:  336 | Timeout:  301 | Total:  336 | Median RMSE: nan
+  xlsindy    / explicit   | Valid:    0 | Failed:  201 | Timeout:    0 | Total:  201 | Median RMSE: nan
+
+>>> DOUBLE_PENDULUM_PM
+  mixed      / mixed      | Valid:   27 | Failed:  110 | Timeout:    0 | Total:  137 | Median RMSE: 9.864293
+  sindy      / explicit   | Valid:   11 | Failed:  133 | Timeout:    0 | Total:  144 | Median RMSE: 2.281174
+  sindy      / implicit   | Valid:    0 | Failed:   48 | Timeout:   48 | Total:   48 | Median RMSE: nan
+  xlsindy    / explicit   | Valid:    6 | Failed:  138 | Timeout:    0 | Total:  144 | Median RMSE: 33.991603
+
+==========================================================================================
+OVERALL STATISTICS
+==========================================================================================
+
+mixed      / mixed      | Valid:  135 | Failed:  355 | Timeout:   48 | Total:  490 | Median RMSE: 2.102901
+sindy      / explicit   | Valid:   44 | Failed:  570 | Timeout:  301 | Total:  614 | Median RMSE: 2.078001
+sindy      / implicit   | Valid:    0 | Failed:   96 | Timeout:   96 | Total:   96 | Median RMSE: nan
+xlsindy    / explicit   | Valid:   34 | Failed:  398 | Timeout:    0 | Total:  432 | Median RMSE: 23.498434
+
+==========================================================================================
+OVERALL STATISTICS (NO FRICTION SYSTEMS ONLY)
+==========================================================================================
+
+mixed      / mixed      | Valid:   34 | Failed:   88 | Timeout:   12 | Total:  122 | Median RMSE: 9.229096
+sindy      / explicit   | Valid:    4 | Failed:  149 | Timeout:   53 | Total:  153 | Median RMSE: 12.795298
+sindy      / implicit   | Valid:    0 | Failed:   24 | Timeout:   24 | Total:   24 | Median RMSE: nan
+xlsindy    / explicit   | Valid:   23 | Failed:  108 | Timeout:    0 | Total:  131 | Median RMSE: 9.018050
+
+==========================================================================================

@@ -29,6 +29,7 @@ def analyze_results(results_dir: str = "results", only_valid_experiments: bool =
     stats = defaultdict(lambda: {"valid": 0, "failed": 0, "timeout": 0, "rmse_values": []})
     overall_stats = defaultdict(lambda: {"valid": 0, "failed": 0, "timeout": 0, "rmse_values": []})
     no_friction_stats = defaultdict(lambda: {"valid": 0, "failed": 0, "timeout": 0, "rmse_values": []})
+    implicit_stats = defaultdict(lambda: {"valid": 0, "failed": 0, "timeout": 0, "rmse_values": []})
     
     # Load all experiments
     json_files = list(Path(results_dir).glob("*.json"))
@@ -42,6 +43,7 @@ def analyze_results(results_dir: str = "results", only_valid_experiments: bool =
             
             # Check if system has no friction (empty damping coefficients)
             has_no_friction = sum(experiment.generation_params.damping_coefficients) == 0
+            is_implicit = sum(experiment.generation_params.forces_scale_vector) == 0
             
             # First pass: check if any trajectory is valid in this experiment
             has_any_valid = False
@@ -65,11 +67,15 @@ def analyze_results(results_dir: str = "results", only_valid_experiments: bool =
                         overall_stats[overall_key]["valid"] += 1
                         if has_no_friction:
                             no_friction_stats[overall_key]["valid"] += 1
+                        if is_implicit:
+                            implicit_stats[overall_key]["valid"] += 1
                         if traj.regression_result.RMSE_validation_position is not None:
                             stats[key]["rmse_values"].append(traj.regression_result.RMSE_validation_position)
                             overall_stats[overall_key]["rmse_values"].append(traj.regression_result.RMSE_validation_position)
                             if has_no_friction:
                                 no_friction_stats[overall_key]["rmse_values"].append(traj.regression_result.RMSE_validation_position)
+                            if is_implicit:
+                                implicit_stats[overall_key]["rmse_values"].append(traj.regression_result.RMSE_validation_position)
                     else:
                         # Count timeouts
                         if traj.regression_result.timeout:
@@ -77,12 +83,16 @@ def analyze_results(results_dir: str = "results", only_valid_experiments: bool =
                             overall_stats[overall_key]["timeout"] += 1
                             if has_no_friction:
                                 no_friction_stats[overall_key]["timeout"] += 1
+                            if is_implicit:
+                                implicit_stats[overall_key]["timeout"] += 1
                         # Only count failures if at least one other solution was valid (when flag is enabled)
                         if not only_valid_experiments or has_any_valid:
                             stats[key]["failed"] += 1
                             overall_stats[overall_key]["failed"] += 1
                             if has_no_friction:
                                 no_friction_stats[overall_key]["failed"] += 1
+                            if is_implicit:
+                                implicit_stats[overall_key]["failed"] += 1
         except Exception as e:
             print("Error processing file:", json_path,e)
             continue
@@ -127,6 +137,21 @@ def analyze_results(results_dir: str = "results", only_valid_experiments: bool =
     print(f"{'='*90}\n")
     
     for (paradigm, reg_type), data in sorted(no_friction_stats.items()):
+        valid = data["valid"]
+        failed = data["failed"]
+        timeout = data["timeout"]
+        total = valid + failed
+        median_rmse = statistics.median(data["rmse_values"]) if data["rmse_values"] else float('nan')
+        
+        print(f"{paradigm:10s} / {reg_type:10s} | Valid: {valid:4d} | Failed: {failed:4d} | Timeout: {timeout:4d} | Total: {total:4d} | Median RMSE: {median_rmse:.6f}")
+    
+    print(f"\n{'='*90}\n")
+
+    print(f"\n{'='*90}")
+    print(f"OVERALL STATISTICS (IMPLICIT SYSTEMS ONLY)")
+    print(f"{'='*90}\n")
+    
+    for (paradigm, reg_type), data in sorted(implicit_stats.items()):
         valid = data["valid"]
         failed = data["failed"]
         timeout = data["timeout"]
