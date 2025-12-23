@@ -14,7 +14,7 @@ dependencies = [
     "matplotlib>=3.10.6",
     "mujoco>=3.3.5",
     "pandas>=2.3.2",
-    "py-xl-sindy",
+    "py-xl-sindy==2.2.1",
     "pydantic>=2.12.5",
     "seaborn>=0.13.2",
     "tqdm>=4.67.1",
@@ -24,8 +24,5 @@ dependencies = [
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["data_generation*", "script*", "util*"]
-
-[tool.uv.sources]
-py-xl-sindy = { path = "../../py-xl-sindy", editable = true }
 
 

@@ -29,3 +29,5 @@ results*/
 *.out
 *.run.xml
 *.toc
+
+automatic_align*
