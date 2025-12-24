@@ -341,7 +341,7 @@ if __name__ == "__main__":
                             qacc=simulation_qacc_g,
                             forces=force_vector_g,
                             reference_time=experiment_data.data.validation_group.get_trajectory_by_name("validation_data").series.time.time,
-                            mode_solution="mixed",
+                            mode_solution=args.regression_parameters.paradigm,
                             solution_vector=solution,
                             solution_label=full_catalog.label(),
                             reference=False,

@@ -13,6 +13,7 @@ from typing import Iterator
 from pathlib import Path
 
 import numpy as np
+import ast
 
 class Combo(BaseModel):
     pretty_name:str
@@ -214,7 +215,8 @@ def filter_data(
     system_filter:SystemRegistry|System|None=None,
     end_time_treshold:float|None=None,
     algo_filter: RegressionAlgorithmRegistry|RegressionAlgorithm|None=None,
-    no_damping:bool=True
+    no_damping:bool=True,
+    force_mode:str|None=None
     ) -> pd.DataFrame:
     """
     Filter data for a specific experiment type.
@@ -227,16 +229,18 @@ def filter_data(
         pd.DataFrame: The filtered data.
     """
 
+    if force_mode is not None:
+        if force_mode == "explicit":
+            data = data[data['force_scale_vector'].apply(
+                lambda x: all([ coef != 0.0 for coef in ast.literal_eval(x)])
+            )]
+        elif force_mode == "implicit":
+            data = data[data['force_scale_vector'].apply(
+                lambda x: all([ coef == 0.0 for coef in ast.literal_eval(x)])
+            )]
+
     if no_damping:
-        # Parse damping_coefficients string and filter for all zeros
-        import ast
-        # print(data['damping_coefficients'].apply(
-        #     lambda x: all(coef == 0.0 for coef in x)
-        # ))
-        # print(data['damping_coefficients'].apply(
-        #     lambda x: all([ coef == 0.0 for coef in ast.literal_eval(x)])
-        # ))
-        
+        # Parse damping_coefficients string and filter for all zeros        
         data = data[data['damping_coefficients'].apply(
             lambda x: all([ coef == 0.0 for coef in ast.literal_eval(x)])
         )]
@@ -273,46 +277,38 @@ def filter_data(
 
 
 def generate_boxplot_data(
-        data: pd.DataFrame,
-        system_registry:SystemRegistry|System|None = None, 
-        algo_filter: RegressionAlgorithmRegistry|RegressionAlgorithm|None = None, 
-        combo_filter: ComboRegistry|Combo|None = None,
-        end_time_treshold:float|None = None
+        filtered_data: pd.DataFrame,
+        combo_registry: ComboRegistry,
+        system_name: str = "System"
         ) -> BPSystemData:
     """
-    Generate box plot data for a specific experiment type and combo.
+    Generate box plot data structure from pre-filtered data.
 
     Args:
-        data (pd.DataFrame): The input data.
-        experiment_type (str): The type of experiment to filter.
-        combo (dict): The combo dictionary with 'catalog_type' and 'solution_type'.
+        filtered_data (pd.DataFrame): Pre-filtered data ready for processing.
+        combo_registry (ComboRegistry): Registry of combos to process.
+        system_name (str): Name of the system for display purposes.
     Returns:
-        BoxPlotData: The generated box plot data.
+        BPSystemData: The generated box plot data structure.
     """
-
-    filtered_data = filter_data(
-        data, 
-        combo_filter=combo_filter, 
-        system_filter=system_registry, 
-        end_time_treshold=end_time_treshold,
-        algo_filter=algo_filter
-        )
-
-    print(len(filtered_data), "experiments after filtering")
     
     if len(filtered_data) == 0:
         return BPSystemData(
             valid_experiment_number=0,
-            system_registry=system_registry,
+            system_registry=System(pretty_name=system_name, name=system_name),
             combo_data=[]
         )
 
     combo_data_list:list[BPComboData] = []
 
-    for combo in combo_filter:
+    for combo in combo_registry:
         noise_data_list:list[BPNoiseData] = []
 
-        combo_data = filter_data(filtered_data,combo_filter=combo)
+        # Filter for this specific combo
+        combo_data = filtered_data[
+            (filtered_data['paradigm'] == combo.paradigm) &
+            (filtered_data['regression_type'] == combo.regression_type)
+        ]
 
         grouped_by_noise = combo_data.groupby('noise_level')
 
@@ -332,7 +328,7 @@ def generate_boxplot_data(
 
     bp_system_data = BPSystemData(
         valid_experiment_number=len(filtered_data['experiment_id'].unique()),
-        system_registry=system_registry,
+        system_registry=System(pretty_name=system_name, name=system_name),
         combo_data=combo_data_list
     )
     return bp_system_data
@@ -697,110 +693,4 @@ def plot_success_rate(filename:str, box_plot_data: list[BPSystemData],output_dir
     plot_to_file(output_path=output_path, filename=filename+"_"+style)
 
 
-if __name__ == "__main__":
-
-    # Example usage
-    data_file = 'results_database.csv'
-    data = import_data(data_file)
-
-    algo_name = "lasso_regression"
-    algo_pretty_name = "Lasso"
-
-    all_system_registry = SystemRegistry(
-        pretty_name="All systems",
-        systems=SYSTEMS.values()
-    )
-
-    end_time_threshold = 18
-
-    # Boxplot noise data
-
-    bp_data_combined = generate_boxplot_data(
-        data,
-        system_registry= all_system_registry, 
-        algo_filter = RegressionAlgorithm(
-            pretty_name=algo_pretty_name,
-            name=algo_name
-        ), 
-        combo_filter = TARGET_COMBOS,
-        end_time_treshold= end_time_threshold
-        )
-    
-    bp_data_cartpole = generate_boxplot_data(
-        data,
-        system_registry= SYSTEMS["cartpole"], 
-        algo_filter = RegressionAlgorithm(
-            pretty_name=algo_pretty_name,
-            name=algo_name
-        ), 
-        combo_filter = TARGET_COMBOS,
-        end_time_treshold= end_time_threshold
-        )
-    
-    bp_data_cartpole_double = generate_boxplot_data(
-        data,
-        system_registry= SYSTEMS["cartpole_double"], 
-        algo_filter = RegressionAlgorithm(
-            pretty_name=algo_pretty_name,
-            name=algo_name
-        ), 
-        combo_filter = TARGET_COMBOS,
-        end_time_treshold= end_time_threshold
-        )
-
-    bp_data_double_pendulum_pm = generate_boxplot_data(
-        data,
-        system_registry= SYSTEMS["double_pendulum_pm"], 
-        algo_filter = RegressionAlgorithm(
-            pretty_name=algo_pretty_name,
-            name=algo_name
-        ), 
-        combo_filter = TARGET_COMBOS,
-        end_time_treshold= end_time_threshold
-        )
-    
-    ## Plot 
-
-    for style in ['dark_background', 'white_background']:
-
-        plot_boxplot(
-            filename="noise_comparison_combined",
-            box_plot_data=[
-                bp_data_combined
-                ],
-            style=style,
-            output_dir="plots_no_damping"
-        )
-
-        plot_boxplot(
-            filename="noise_comparison",
-            box_plot_data=[
-                bp_data_cartpole,
-                bp_data_cartpole_double,
-                bp_data_double_pendulum_pm
-                ],
-            style=style,
-            output_dir="plots_no_damping"
-        )
-
-
-        plot_success_rate(
-            filename="success_rate",
-            box_plot_data=[
-                bp_data_cartpole,
-                bp_data_cartpole_double,
-                bp_data_double_pendulum_pm
-                ],
-            style=style,
-            output_dir="plots_no_damping"
-        )
-
-        plot_success_rate(
-            filename="success_rate_combined",
-            box_plot_data=[
-                bp_data_combined
-                ],
-            style=style,
-            output_dir="plots_no_damping"
-        )
 

@@ -15,9 +15,10 @@ import os
 import glob
 from pathlib import Path
 from typing import Dict, List, Any, Optional
-import argparse
+from dataclasses import dataclass
 import logging
 from tqdm import tqdm
+import tyro
 
 from data_generation.script.dataclass import Experiment, TrajectoryData, Series
 
@@ -80,50 +81,15 @@ def compute_end_simulation_time(trajectory: TrajectoryData) -> Optional[float]:
         return None
 
 
-def compute_validation_error(trajectory: TrajectoryData, 
-                           validation_reference: TrajectoryData) -> Optional[float]:
+def compute_validation_error(trajectory: TrajectoryData) -> Optional[float]:
     """
-    Compute the relative validation error between trajectory and validation reference.
+    Extract the validation error from the trajectory's regression result.
     
-    Returns the mean relative error: mean(|solution - validation| / |validation|)
-    for all coordinate components (qpos, qvel, qacc, forces).
+    Returns the RMSE_validation_position if available, otherwise None.
     """
-    try:
-        if not trajectory.series or not validation_reference.series:
-            return None
-            
-        total_errors = []
-        
-        # Process each component (qpos, qvel, qacc, forces)
-        for component_name in ['qpos', 'qvel', 'qacc', 'forces']:
-            sol_component = getattr(trajectory.series, component_name)
-            val_component = getattr(validation_reference.series, component_name)
-            
-            # Get numpy arrays for both
-            sol_data = sol_component.get_numpy_series()
-            val_data = val_component.get_numpy_series()
-            
-            # Ensure arrays have the same shape
-            min_len = min(sol_data.shape[0], val_data.shape[0])
-            min_coords = min(sol_data.shape[1], val_data.shape[1])
-            
-            if min_len == 0 or min_coords == 0:
-                continue
-                
-            sol_data = sol_data[:min_len, :min_coords]
-            val_data = val_data[:min_len, :min_coords]
-            
-            # Avoid division by zero
-            mask = np.abs(val_data) > 1e-12
-            if np.any(mask):
-                rel_error = np.abs(sol_data[mask] - val_data[mask]) / np.abs(val_data[mask])
-                total_errors.extend(rel_error.flatten())
-        
-        return np.mean(total_errors) if total_errors else None
-        
-    except Exception as e:
-        logging.warning(f"Error computing validation error: {e}")
-        return None
+    if trajectory.regression_result and trajectory.regression_result.RMSE_validation_position is not None:
+        return trajectory.regression_result.RMSE_validation_position
+    return None
 
 
 def extract_trajectory_data(experiment: Experiment, 
@@ -151,6 +117,7 @@ def extract_trajectory_data(experiment: Experiment,
         'generation_type': experiment.generation_params.generation_type,
         'batch_number': experiment.generation_params.batch_number,
         'damping_coefficients': experiment.generation_params.damping_coefficients,
+        'force_scale_vector': experiment.generation_params.forces_scale_vector,
     })
     
     # Extract regression result fields if available
@@ -185,11 +152,8 @@ def extract_trajectory_data(experiment: Experiment,
             'RMSE_validation_position': None,
         })
     
-    # Compute validation error if valid and validation reference available
-    validation_error = None
-    if (row_data['valid'] and validation_reference):
-        validation_error = compute_validation_error(trajectory, validation_reference)
-    
+    # Extract validation error from regression result
+    validation_error = compute_validation_error(trajectory) if row_data['valid'] else None
     row_data['validation_error'] = validation_error
     
     # Compute end simulation time from the trajectory data
@@ -343,42 +307,20 @@ def compile_results_database(results_dir: str,
 
 def main():
     """Main entry point for the script."""
-    parser = argparse.ArgumentParser(
-        description="Compile result JSON files (v2 format) into a unified pandas DataFrame",
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter
-    )
+    @dataclass
+    class Args:
+        results_dir: str = "results"
+        """Directory containing result JSON files"""
+        output: str = "results_database.csv"
+        """Output CSV file path"""
+        pattern: str = "*.json"
+        """File pattern to match in results directory"""
+        max_files: Optional[int] = None
+        """Maximum number of files to process (for testing)"""
+        verbose: bool = False
+        """Enable verbose logging"""
     
-    parser.add_argument(
-        '--results-dir',
-        default='results',
-        help='Directory containing result JSON files'
-    )
-    
-    parser.add_argument(
-        '--output',
-        default='results_database.csv',
-        help='Output CSV file path'
-    )
-    
-    parser.add_argument(
-        '--pattern',
-        default='*.json',
-        help='File pattern to match in results directory'
-    )
-    
-    parser.add_argument(
-        '--max-files',
-        type=int,
-        help='Maximum number of files to process (for testing)'
-    )
-    
-    parser.add_argument(
-        '--verbose', '-v',
-        action='store_true',
-        help='Enable verbose logging'
-    )
-    
-    args = parser.parse_args()
+    args = tyro.cli(Args)
     
     # Setup logging
     setup_logging(args.verbose)

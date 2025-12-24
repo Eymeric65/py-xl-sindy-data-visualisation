@@ -2,6 +2,8 @@
 # Auto-generated experiment commands
 # Total commands: 192
 
+## Command list for data generation experiments for paper and thesis.
+
 # Command 1/192
 python -m data_generation.script.generate_data --params.random-seed 1 --params.damping-coefficients 0.0 0.0 --params.batch-number 15 --params.generation-type "mujoco" --params.max-time 10.0 --params.sample-number 10000 --params.max-validation-sample 5000 --params.experiment-folder "data_generation/mujoco_align_data/cart_pole" --params.initial-condition-randomness 3.0 --params.initial-position 0.0 0.0 0.0 0.0 --params.forces-scale-vector 0.0 0.0
 

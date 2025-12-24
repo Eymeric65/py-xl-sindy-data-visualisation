@@ -1,7 +1,7 @@
-## The alignement command for the final
+## The alignement command for the final paper and thesis.
 
 python -m data_generation.script.automatic_align \
-    --noise-levels 0.0 0.01 0.1 0.3 \
+    --noise-levels 0.0 0.01 0.1 0.2 \
     --data-ratio 1.5 \
     --random-seeds 0 \
     --max-workers 4

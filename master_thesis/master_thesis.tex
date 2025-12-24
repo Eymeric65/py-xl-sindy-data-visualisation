@@ -119,6 +119,24 @@
     },
 }
 
+\tikzset{
+    % Le style pour la "patate" : notre système physique réel
+    system/.style={
+        fill=gray!30, 
+        draw=black, 
+        thick,
+        opacity=0.8
+    },
+    % Le style pour les fonctions candidates du catalogue
+    catalog_function/.style={
+        draw=blue!80, 
+        fill=blue!20, 
+        circle, 
+        opacity=0.6,
+        line width=1pt
+    }
+}
+
 \definecolor{sindypreknowledge}{RGB}{196,78,82}
 \definecolor{sindystandard}{RGB}{85,168,104}
 \definecolor{sindysolutionexplicit}{RGB}{129,114,179}
@@ -752,7 +770,115 @@ Using this algorithm we have been able to retrieve all the solution of every cat
 \section{Input knowledge and catalog creation}
 \textbf{\textcolor{blue}{[Novel Contribution]}}
 
-One of the most important point in SINDy method is how to choose a catalog, what training data to gather and predict how this two first points will impact our result. By nature this question are hard to solve theoriticaly, and during this section we will present empirical observation that takes their root from information theory. 
+One of the most important point in SINDy method is how to choose a catalog, what training data to gather and predict how this two first points will impact our result. By nature these questions are hard to solve theoriticaly, and during this section we will present empirical observation that takes their root from information theory. 
+
+\subsection{Training data information}
+\textbf{\textcolor{blue}{[Novel Contribution]}}
+
+In this first subsection we are going to study the performance of the SINDy in regards with the input "information".
+
+First of all we need to introduce some mathematical ground. Mathematicaly we can measure information from a signal using the shannon entropy :
+\begin{equation}
+    H(\mathit{X}) = \int_{-\infty}^{+\infty} p(x) \log_2 \left( \frac{1}{p(x)} \right) dx
+\end{equation}
+\noindent where $\mathit{X}$ is a random variable (can be discrete) and $\int_a^b p(x) \vcentcolon = P(a\le X < b) $. This entropy definition with a log in base 2 is rooted in the definition in binary information theory, one can choose any base we are only going to take the entropy $H$ as a relative quantity. 
+
+Now in our case our source of information is the set of \textsc{symbol matrix} $\boldsymbol{X}_t$. As you may notice now for the first time, SINDy regression are not dependent about time, the different \textsc{symbol matrix} can be shuffled, subsampled before fed into our catalog without having any impact on the regression. 
+
+Rooted in mechanics study it has been decided to take as random variable $\mathit{X} = (\mathit{\Theta},\dot{\mathit{\Theta}})$, the phase portrait. We exclude acceleration for two reasons: first, to stick to the standard definition of a state in a phase portrait; second, because acceleration is the dependent variable we aim to predict and does not provide additional independent information about the system's exploration of its state space.
+
+In practice we compute $H(\mathit{X})$ by doing a discrete approximation :
+\begin{enumerate}
+    \item Normalise the data between $[-1,1]$
+    \item Scinding the space in a grid 
+    \item Compute the discrete probability on every case
+    \item Compute discrete entropy
+\end{enumerate}
+
+One of the main way in order that the user change the amount of information before executing an experiment leveraging two mechanisms :
+\begin{itemize}
+    \item crafting a force function that explore all the system phase portrait
+    \item run multiple batch of experiment by varying the initial condition of the system
+\end{itemize}
+
+As we are going to develop in Sec.~\ref{sec:data-gathering-strategy} about how did we generate data for different experiment, we have generally used some kind of random input forces to explore as much as possible the phase portrait in a minimum amount of time. We will detail in this section our observation between the input entropy of the forces and the entropy of the phase portrait, and ultimately link this with the performance of the different SINDy algorithm.
+
+\subsection{Concept of same input knowledge between different catalog type }
+\textbf{\textcolor{blue}{[Novel Contribution]}}
+
+One of the most challenging aspects of comparing SINDy libraries across different physical paradigms is quantifying the intrinsic knowledge embedded within a catalog. When a user constructs a library of candidate functions, they are essentially injecting "structural priors"—expert knowledge about the system's underlying physics—into the regression process.
+
+In practice, a user will populate a catalog with functions likely to govern the dynamics. For instance, in the case of a pendulum, it is intuitive to include trigonometric functions. However, the "informational weight" of these functions is not equivalent across different paradigms. This discrepancy creates an uneven playing ground when comparing, for example, Newtonian and Lagrangian formulations.
+
+A fundamental distinction lies in how a candidate function propagates through the system's equations:
+\begin{itemize}
+\item \textbf{Newtonian Paradigm:} A function placed in a Newtonian catalog directly influences a specific coordinate. Its impact is local and explicit.
+\item \textbf{Lagrangian Paradigm:} A function added to the Lagrangian carries significantly more weight. Through the Euler-Lagrange operator, a single scalar term is automatically distributed across all degrees of freedom. In this sense, the Lagrangian formalism acts as a \textbf{physical filter}: it constrains the evolution of the system to remain consistent with the principle of least action.
+\end{itemize}
+
+As a result, even if two catalogs are of identical size (number of candidate functions), they may possess a different inductive bias. A catalog that covers a narrower "knowledge space" (as illustrated in Figure~\ref{fig:catalog-knowledge}) implies that the user has provided more specific information about the system's structure.
+
+Paradoxically, "covering less knowledge" means the search space is more constrained, effectively simplifying the optimization task for the SINDy algorithm. Therefore, any performance comparison must account for this bias: a paradigm may appear superior not because the algorithm is more efficient, but because the structural priors injected by the user have already solved a significant portion of the dynamical complexity.
+
+\begin{figure}
+    \centering
+    \begin{tikzpicture}
+        % --- 1. Dessin du système physique (la patate) ---
+        % On le dessine une fois à gauche, et on le réutilise à droite en le décalant
+        % Les coordonnées sont choisies pour créer une forme organique et fermée.
+        \def\systemshape{
+            (0,0) ..controls ++(-45:0.5) and ++(-101.3:0.51) ..  (1.5, 0)
+                ..controls ++(78.7:0.51) and ++(-153.4:0.447) .. (2.5, 0.5)
+                ..controls ++(26.6:0.447) and ++(-45:0.566) ..  (2.8, 1.8)
+                ..controls ++(135:0.566) and ++(78.7:0.51) .. (1.4, 1.5)
+                ..controls ++(-101.3:0.51) and ++(36.9:0.5) .. (0.2, 1.1) ..controls ++(-143.1:0.5) and ++(135:0.5) .. (0,0)
+        }
+
+        % Système à gauche (Newton)
+        \draw[system,xshift=-1cm] \systemshape;
+
+        % Système à droite (Lagrange) - exactement le même, mais décalé de 7 unités
+        \begin{scope}[xshift=6cm]
+            \draw[system] \systemshape;
+        \end{scope}
+
+        % --- 2. Dessin des catalogues de fonctions ---
+
+        % Catalogue Newtonien (Gauche) : large, peu d'information a priori
+        % Les cercles sont grands et couvrent une large zone inutile.
+        % \node[catalog_function, minimum size=2.8cm] at (0.2, 1.5) {};
+        \node[catalog_function, minimum size=2.5cm] at (1.5, 2.2) {};
+        \node[catalog_function, minimum size=3cm]   at (1.2, 0.4) {};
+        \node[catalog_function, minimum size=2.6cm] at (-1.1, 0.5) {};
+        \node[catalog_function, minimum size=2.2cm] at (-0.6, 2.4) {};
+
+        % Catalogue Lagrangien (Droite) : contraint, beaucoup d'information a priori
+        % Les cercles sont petits et ciblent parfaitement la forme du système.
+        \begin{scope}[xshift=7cm]
+            \node[catalog_function, minimum size=1.6cm] at (-0.2, 0.2) {};
+            \node[catalog_function, minimum size=1.5cm] at (1.45, 1.2) {};
+            \node[catalog_function, minimum size=1.35cm]   at (1, 1.7) {};
+            \node[catalog_function, minimum size=1.6cm] at (-0.6, 0.7) {};
+            \node[catalog_function, minimum size=1.5cm] at (0.6, 0.7) {};
+        \end{scope}
+
+        % --- 3. Ajout des titres et de la séparation ---
+
+        % Titres
+        \node[font=\bfseries] at (0.3, 3.9) {Lagrangian Catalog};
+        \node[font=\bfseries] at (7.3, 3.9) {Newtonian Catalog};
+        \node[below, text width=7cm, align=center] at (0.3, -1) 
+            {Large search space \\ (low structural prior)};
+        \node[below, text width=7cm, align=center] at (7.3, -1) 
+            {Constrained search space \\ (strong structural prior)};
+
+        % Ligne de séparation
+        \draw[dashed, thick, gray,xshift=0.63cm] (3.5, -2) -- (3.5, 4.2);
+    \end{tikzpicture}
+
+    \caption{\textbf{Catalog knowledge :} visual representation of knowledge coverage by different type of catalog. the brown ensemble is the system that we want to cover with our catalog. Each circle represent a function from our catalog that cover certain part of dynamics. Two phenomenum can be intuitively seen : dynamics overlap between function and coverage area of a single function}
+    \label{fig:catalog-knowledge}
+\end{figure}
 
 \section{Implementation detail}
 \textbf{\textcolor{blue}{[Novel Contribution]}}
@@ -802,6 +928,9 @@ Concerning the way to sample even if we are not going to present some quantitati
 
 \chapter{Results}
 \label{ch:results}
+
+\section{Data gathering strategy}
+\label{sec:data-gathering-strategy}
 
 % -------------------------------------------------------------------------
 %   BACK MATTER
