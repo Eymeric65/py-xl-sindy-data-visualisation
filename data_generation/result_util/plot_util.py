@@ -229,6 +229,8 @@ def filter_data(
         pd.DataFrame: The filtered data.
     """
 
+    #print(f"Starting with {len(data)} entries")
+
     if force_mode is not None:
         if force_mode == "explicit":
             data = data[data['force_scale_vector'].apply(
@@ -239,11 +241,16 @@ def filter_data(
                 lambda x: all([ coef == 0.0 for coef in ast.literal_eval(x)])
             )]
 
+    #print(f"Filtered data to {len(data)} entries before damping check")
+
     if no_damping:
+        print("Applying no damping filter")
         # Parse damping_coefficients string and filter for all zeros        
         data = data[data['damping_coefficients'].apply(
             lambda x: all([ coef == 0.0 for coef in ast.literal_eval(x)])
         )]
+
+    #print(f"Filtered data to {len(data)} entries after damping check")
 
     if len(data) == 0:
         return data
@@ -254,26 +261,37 @@ def filter_data(
             (data['regression_type'].isin([combo_filter.regression_type] if isinstance(combo_filter, Combo) else combo_filter.regression_type)) 
         ]
 
+    #print(f"Filtered data to {len(data)} entries after combo check")
+
     if algo_filter is not None:
         data = data[
             (data['optimizer'].isin([algo_filter.name] if isinstance(algo_filter, RegressionAlgorithm) else algo_filter.name))
         ]
 
+    #print(f"Filtered data to {len(data)} entries before system check")
 
     if system_filter is not None:
         data = data[
             (data['experiment_type'].isin([system_filter.name] if isinstance(system_filter, System) else system_filter.name))
         ]
 
+    #print(f"Filtered data to {len(data)} entries before time check")
+
     if end_time_treshold is not None:
         data = data[
             (data['end_simulation_time'] >= end_time_treshold)
         ]
 
-    return data[
+    #print(f"Filtered data to {len(data)} entries before validity")
+
+    data = data[
         (data['valid'] == True) &
         (data['timeout'] == False) 
     ]
+
+    #print(f"Filtered data to {len(data)} entries")
+
+    return data
 
 
 def generate_boxplot_data(
@@ -326,8 +344,21 @@ def generate_boxplot_data(
         )
         combo_data_list.append(bp_combo_data)
 
+    # Calculate valid_experiment_number from experiments that actually contributed data to any combo
+    all_experiment_ids = set()
+    for combo_data in combo_data_list:
+        for noise_data in combo_data.noise_data:
+            if len(noise_data.validation_errors) > 0:
+                # Get the experiment IDs for this combo and noise level
+                combo_filtered = filtered_data[
+                    (filtered_data['paradigm'] == combo_data.combo.paradigm) &
+                    (filtered_data['regression_type'] == combo_data.combo.regression_type) &
+                    (filtered_data['noise_level'] == noise_data.noise_level)
+                ]
+                all_experiment_ids.update(combo_filtered['experiment_id'].unique())
+
     bp_system_data = BPSystemData(
-        valid_experiment_number=len(filtered_data['experiment_id'].unique()),
+        valid_experiment_number=len(all_experiment_ids),
         system_registry=System(pretty_name=system_name, name=system_name),
         combo_data=combo_data_list
     )
@@ -395,6 +426,16 @@ def plot_boxplot(filename:str, box_plot_data: list[BPSystemData],output_dir: str
     output_path = Path(output_dir)
     output_path.mkdir(parents=True, exist_ok=True)
 
+    # Filter out systems with absolutely no data (no validation errors at all)
+    box_plot_data = [system_data for system_data in box_plot_data 
+                     if any(len(nd.validation_errors) > 0 
+                           for cd in system_data.combo_data 
+                           for nd in cd.noise_data)]
+    
+    if len(box_plot_data) == 0:
+        print("No data to plot for boxplot")
+        return
+
     n_rows = len(box_plot_data)
 
     fig, axes = plt.subplots(n_rows, 1, figsize=(14, 6.5*n_rows**0.5), squeeze=False)
@@ -425,13 +466,15 @@ def plot_boxplot(filename:str, box_plot_data: list[BPSystemData],output_dir: str
                 legend_elements.append(
                     Patch(facecolor=(gray_val, gray_val, gray_val), alpha=0.8, label=f'Noise: {noise}', edgecolor='black', linewidth=0.5)
                 )
-            ax.legend(handles=legend_elements, loc='upper left', fontsize=12, frameon=True, 
+            ax.legend(handles=legend_elements, loc='upper right', fontsize=12, frameon=True, 
                      fancybox=True, shadow=True, framealpha=0.95)
 
         # Prepare data for each combo across all noise levels
         all_plot_data = []
         all_positions = []
         all_colors = []
+        all_y_max_values = []  # Track y_max values for calculating average position
+        zero_rate_positions = []  # Track positions where success rate is 0
 
         position=2
 
@@ -475,16 +518,23 @@ def plot_boxplot(filename:str, box_plot_data: list[BPSystemData],output_dir: str
                     upper_quartile = np.percentile(noise_data.validation_errors, 75)
                     # Use upper_quartile * 2 if max is more than 50x the upper_quartile, otherwise use max * 1.5
                     y_pos = upper_quartile * 2 if y_max > 50 * upper_quartile else y_max * 1.5
+                    all_y_max_values.append(y_pos)
 
                     success_rate = (len(noise_data.validation_errors) / system_data.valid_experiment_number * 100) if system_data.valid_experiment_number > 0 else 0
 
                 else:
-                    y_pos = 1e0
                     success_rate = 0
+                    y_pos = None  # Will be set to average later
 
-                ax.text(position + local_position, y_pos, f'{success_rate:.0f}%', 
-                    ha='center', va='bottom', fontsize=10, style='italic', fontweight='bold',
-                    **style_dict['annotation_bbox'])
+                # Store position and success rate for later labeling
+                if success_rate > 0 and y_pos is not None:
+                    ax.text(position + local_position, y_pos, f'{success_rate:.0f}%', 
+                        ha='center', va='bottom', fontsize=10, style='italic', fontweight='bold',
+                        **style_dict['annotation_bbox'])
+                elif success_rate == 0:
+                    # Store position for zero labels to be added after calculating average
+                    zero_rate_positions.append(position + local_position)
+                    all_y_max_values.append(None)  # Placeholder
             
 
 
@@ -493,7 +543,19 @@ def plot_boxplot(filename:str, box_plot_data: list[BPSystemData],output_dir: str
 
             position += local_position +  2 # Extra space between combos
 
-        ax.set_xlim(1, position -1 )
+        # Calculate average y position for zero success rate labels from ALL data points in subplot
+        all_errors = []
+        for data_list in all_plot_data:
+            all_errors.extend(data_list)
+        avg_y_pos = np.mean(all_errors) if len(all_errors) > 0 else 1e0
+        
+        # Add zero success rate labels at average position
+        for pos in zero_rate_positions:
+            ax.text(pos, avg_y_pos, '0%', 
+                ha='center', va='bottom', fontsize=10, style='italic', fontweight='bold',
+                **style_dict['annotation_bbox'])
+
+        ax.set_xlim(1, position + 1)
 
         print(len(all_plot_data), "boxplots to plot")
         print(len(all_positions), "positions for boxplots")
@@ -535,15 +597,17 @@ def plot_boxplot(filename:str, box_plot_data: list[BPSystemData],output_dir: str
         ax.tick_params(axis='y', labelsize=11)
         ax.tick_params(axis='x', labelsize=11)
 
-        # Add n_max annotation in bottom right corner
-        ax.text(0.98, 0.08, f'$n_{{max}}={system_data.valid_experiment_number}$', 
+        # Add n_max annotation in bottom right corner (consistent position with success rate plot)
+        ax.text(0.98, 0.04, f'$n_{{max}}={system_data.valid_experiment_number}$', 
                 transform=ax.transAxes, 
                 fontsize=11, 
                 verticalalignment="bottom", 
                 horizontalalignment="right",
                 **style_dict['annotation_bbox']
                 )
-        
+    
+    # Add margins to prevent label cropping
+    plt.subplots_adjust(left=0.08, right=0.98, top=0.96, bottom=0.06)
     plot_to_file(output_path=output_path, filename=filename+"_"+style)
 
 def plot_success_rate(filename:str, box_plot_data: list[BPSystemData],output_dir: str="plots", style: str="white_background"):
@@ -559,6 +623,16 @@ def plot_success_rate(filename:str, box_plot_data: list[BPSystemData],output_dir
 
     output_path = Path(output_dir)
     output_path.mkdir(parents=True, exist_ok=True)
+
+    # Filter out systems with absolutely no data (no validation errors at all)
+    box_plot_data = [system_data for system_data in box_plot_data 
+                     if any(len(nd.validation_errors) > 0 
+                           for cd in system_data.combo_data 
+                           for nd in cd.noise_data)]
+    
+    if len(box_plot_data) == 0:
+        print("No data to plot for success rate")
+        return
 
     n_rows = len(box_plot_data)
 
@@ -646,7 +720,7 @@ def plot_success_rate(filename:str, box_plot_data: list[BPSystemData],output_dir
 
             position += local_position +  2 # Extra space between combos
 
-        ax.set_xlim(1, position -1 )
+        ax.set_xlim(1, position + 1)
 
         # Create enhanced bar chart
         bars = ax.bar(
@@ -681,15 +755,17 @@ def plot_success_rate(filename:str, box_plot_data: list[BPSystemData],output_dir
         ax.tick_params(axis='y', labelsize=11)
         ax.tick_params(axis='x', labelsize=11)
 
-        # Add n_max annotation in bottom right corner
-        ax.text(0.98, 0.08, f'$n_{{max}}={system_data.valid_experiment_number}$', 
+        # Add n_max annotation in bottom right corner (consistent position with boxplot)
+        ax.text(0.98, 0.04, f'$n_{{max}}={system_data.valid_experiment_number}$', 
                 transform=ax.transAxes, 
                 fontsize=11, 
-                verticalalignment="top", 
+                verticalalignment="bottom", 
                 horizontalalignment="right",
                 **style_dict['annotation_bbox']
                 )
-        
+    
+    # Add margins to prevent label cropping
+    plt.subplots_adjust(left=0.08, right=0.98, top=0.96, bottom=0.06)
     plot_to_file(output_path=output_path, filename=filename+"_"+style)
 
 

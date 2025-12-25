@@ -1,6 +1,6 @@
 data-archive/
 *.sif
-plots*/
+/plots*/
 backup/
 graphs_analysis/
 .venv/
@@ -10,7 +10,7 @@ __pycache__/
 *.pkl
 *.csv
 .VS*/
-results*/
+/results*/
 .VSCodeCounter/
 *.tar
 *.pdf

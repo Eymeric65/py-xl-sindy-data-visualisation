@@ -75,11 +75,12 @@ def batch_plot(
     if systems is not None:
         bp_data_filtered_by_system = [
             generate_boxplot_data(
-                filter_data(filtered_data, system_filter=system),
+                filter_data(data, system_filter=system,**kwargs),
                   combo_registry=combos,
-                  system_name=system.pretty_name
+                  system_name=system.pretty_name,
             ) for system in systems
         ]
+        #print(bp_data_filtered_by_system)
 
     for style in ['dark_background', 'white_background']:
 
@@ -125,7 +126,7 @@ if __name__ == "__main__":
 
     # Step 2: Filter data (you can chain multiple filters or create custom ones)
     algo_name = "lasso_regression"
-    end_time_threshold = 18
+    end_time_threshold = 19
 
     # No damping experiments with explicit forcing
     batch_plot(

@@ -804,6 +804,7 @@ One of the main way in order that the user change the amount of information befo
 As we are going to develop in Sec.~\ref{sec:data-gathering-strategy} about how did we generate data for different experiment, we have generally used some kind of random input forces to explore as much as possible the phase portrait in a minimum amount of time. We will detail in this section our observation between the input entropy of the forces and the entropy of the phase portrait, and ultimately link this with the performance of the different SINDy algorithm.
 
 \subsection{Concept of same input knowledge between different catalog type }
+\label{sec:same-knowledge-catalog}
 \textbf{\textcolor{blue}{[Novel Contribution]}}
 
 One of the most challenging aspects of comparing SINDy libraries across different physical paradigms is quantifying the intrinsic knowledge embedded within a catalog. When a user constructs a library of candidate functions, they are essentially injecting "structural priors"—expert knowledge about the system's underlying physics—into the regression process.
@@ -929,8 +930,101 @@ Concerning the way to sample even if we are not going to present some quantitati
 \chapter{Results}
 \label{ch:results}
 
+We will now presents the results from multiple simulated experiment before ending with a section about experiment on a real world robot.
+
 \section{Data gathering strategy}
 \label{sec:data-gathering-strategy}
+
+The different experiment data comes from simulated systems using the \textsc{mujoco} physics engine. Three system have been studied :
+\begin{itemize}
+    \item \textbf{Cartpole} : A single pendulum on a cart allowed to translate on an axis perpendicular of the pendulum 
+    \item \textbf{Double pendulum} : A double pendulum
+    \item \textbf{Cartpole double} : A double pendulum on a cart allowed to translate on an axis perpendicular of the pendulum.
+\end{itemize}
+
+Based on these three systems we have generate sub-system by varying the damping coefficient on these different values : $[0.0,0.5,1.0,2.0]$. We have after generated training trajectory by varying the coordinate in which we apply the external random forces (implicit,explicit and mixed) and by varying the random seed to generate these random forces. All the master variable are detailed in Table.~\ref{table:generation-settings}.
+
+\begin{table}
+    \centering
+    \begin{tabular}{lc}
+        \hline
+        \textbf{Settings} & \textbf{Value} \\
+        \hline
+        Bbatch number & 15 \\
+        Max time per batch & 10s \\
+        Initial condition standard deviation\footnote{on the start of each batch the initial condition are Randomised following a normal law} & 3 \\
+        \textbf{Cartpole} force amplitude & 1 \\
+        \textbf{Cartpole double} force amplitude & 2 \\
+        \textbf{Double pendulum} force amplitude & 0.5 \\
+        \hline
+
+    \end{tabular}
+    \caption{Master variables for generation of system trajectories}
+    \label{table:generation-settings}
+    
+\end{table}
+
+Following the protocol elaborated in Sec.~\ref{sec:same-knowledge-catalog} about the catalog of same knowledge, different paradigm posses different catalog size developped in Table.~\ref{table:catalog-size}. 
+
+\begin{table}
+    \centering
+    \begin{tabular}{l|ccc}
+        \hline
+        & \textbf{Cartpole} & \textbf{Cartpole Double} & \textbf{Double Pendulum} \\
+        \hline
+        \textbf{SINDy/SINDy-PI} & 540 & 3358 & 540 \\
+        \textbf{XL-SINDy} & 91 & 281 & 91 \\
+        \textbf{Mixed SINDy (ours)} & 95 & 290 & 95 \\
+        \hline
+    \end{tabular}
+    \caption{Catalog size for different paradigms and systems}
+    \label{table:catalog-size}
+    
+\end{table}
+
+
+\section{Result analysis of batch data}
+
+All subsequent graph presented in the following section are the result of the protocol developped in the previous Sec.~\ref{sec:data-gathering-strategy}. All the detailed graph from this study are displayed in the following Appendix Chapter \ref{ch:all-result-figures}. 
+
+In all the graph that are going to be presented in the section $n_max$ is the number of experiment where at least one regression paradigm on any level of noise, other experiment (where everything failed) are considered as bad experiment and are silently discarded.
+
+The goal of our study is to show that the new unified catalog paired with the mixed regression algorithm have equal or better performance on each of the area where past paradigm where proved efficient (Xl-SINDy, SINDy and SINDy-PI) but also to show that this new Uni-SINDy is more successful in the broader scope of mixed regression. 
+
+\subsection{No damping explicit experiment}
+
+In this first case study, we aim to show that the new Uni-SINDy is on par with Xl-SINDy on system without damping. 
+As we can see in Fig.~\ref{fig:no-damping-explicit} this expectation has been fulfilled. Over 5 valid experiment the new Uni-SINDy and Xl-SINDy have worked $100\%$ on low level of noise, while performance have decreased on high level of noise.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{result/plots_no_damping_explicit/noise_comparison_combined_white_background.eps}
+    
+    \vspace{0.5cm}
+    
+    \includegraphics[width=0.95\textwidth]{result/plots_no_damping_explicit/success_rate_combined_white_background.eps}
+    
+    \caption{\textbf{No damping explicit results:} validation error comparison (top) and success rate comparison (bottom) across all systems}
+    \label{fig:no-damping-explicit}
+\end{figure}
+
+\subsection{Damping explicit experiment}
+
+The second case study is about how does Uni-SINDy performs against SINDy on explicit system with damping. 
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{result/plots_damping_explicit/noise_comparison_combined_white_background.eps}
+    
+    \vspace{0.5cm}
+    
+    \includegraphics[width=0.95\textwidth]{result/plots_damping_explicit/success_rate_combined_white_background.eps}
+    
+    \caption{\textbf{Damping explicit results:} validation error comparison (top) and success rate comparison (bottom) across all systems}
+    \label{fig:damping-explicit}
+\end{figure}
+
+
 
 % -------------------------------------------------------------------------
 %   BACK MATTER
@@ -958,5 +1052,124 @@ def _weak_sparsity_rank_weighted(x):
         return weighted_sum / weight_total
 
 \end{lstlisting}
+
+\chapter{All data figures}
+\label{ch:all-result-figures}
+
+\section{Damping Explicit Results}
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.48\textwidth}
+        \includegraphics[width=\textwidth]{result/plots_damping_explicit/noise_comparison_white_background.eps}
+        \caption{Noise comparison}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.48\textwidth}
+        \includegraphics[width=\textwidth]{result/plots_damping_explicit/success_rate_white_background.eps}
+        \caption{Success rate}
+    \end{subfigure}
+    
+    \vspace{0.5cm}
+    
+    \begin{subfigure}[b]{0.48\textwidth}
+        \includegraphics[width=\textwidth]{result/plots_damping_explicit/noise_comparison_combined_white_background.eps}
+        \caption{Noise comparison combined}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.48\textwidth}
+        \includegraphics[width=\textwidth]{result/plots_damping_explicit/success_rate_combined_white_background.eps}
+        \caption{Success rate combined}
+    \end{subfigure}
+    \caption{Damping explicit results with varying noise levels}
+    \label{fig:damping_explicit_all}
+\end{figure}
+
+\section{Damping Implicit Results}
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.48\textwidth}
+        \includegraphics[width=\textwidth]{result/plots_damping_implicit/noise_comparison_white_background.eps}
+        \caption{Noise comparison}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.48\textwidth}
+        \includegraphics[width=\textwidth]{result/plots_damping_implicit/success_rate_white_background.eps}
+        \caption{Success rate}
+    \end{subfigure}
+    
+    \vspace{0.5cm}
+    
+    \begin{subfigure}[b]{0.48\textwidth}
+        \includegraphics[width=\textwidth]{result/plots_damping_implicit/noise_comparison_combined_white_background.eps}
+        \caption{Noise comparison combined}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.48\textwidth}
+        \includegraphics[width=\textwidth]{result/plots_damping_implicit/success_rate_combined_white_background.eps}
+        \caption{Success rate combined}
+    \end{subfigure}
+    \caption{Damping implicit results with varying noise levels}
+    \label{fig:damping_implicit_all}
+\end{figure}
+
+\section{Damping Mixed Results}
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.48\textwidth}
+        \includegraphics[width=\textwidth]{result/plots_damping_mixed/noise_comparison_white_background.eps}
+        \caption{Noise comparison}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.48\textwidth}
+        \includegraphics[width=\textwidth]{result/plots_damping_mixed/success_rate_white_background.eps}
+        \caption{Success rate}
+    \end{subfigure}
+    
+    \vspace{0.5cm}
+    
+    \begin{subfigure}[b]{0.48\textwidth}
+        \includegraphics[width=\textwidth]{result/plots_damping_mixed/noise_comparison_combined_white_background.eps}
+        \caption{Noise comparison combined}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.48\textwidth}
+        \includegraphics[width=\textwidth]{result/plots_damping_mixed/success_rate_combined_white_background.eps}
+        \caption{Success rate combined}
+    \end{subfigure}
+    \caption{Damping mixed results with varying noise levels}
+    \label{fig:damping_mixed_all}
+\end{figure}
+
+\section{No Damping Explicit Results}
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.48\textwidth}
+        \includegraphics[width=\textwidth]{result/plots_no_damping_explicit/noise_comparison_white_background.eps}
+        \caption{Noise comparison}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.48\textwidth}
+        \includegraphics[width=\textwidth]{result/plots_no_damping_explicit/success_rate_white_background.eps}
+        \caption{Success rate}
+    \end{subfigure}
+    
+    \vspace{0.5cm}
+    
+    \begin{subfigure}[b]{0.48\textwidth}
+        \includegraphics[width=\textwidth]{result/plots_no_damping_explicit/noise_comparison_combined_white_background.eps}
+        \caption{Noise comparison combined}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.48\textwidth}
+        \includegraphics[width=\textwidth]{result/plots_no_damping_explicit/success_rate_combined_white_background.eps}
+        \caption{Success rate combined}
+    \end{subfigure}
+    \caption{No damping explicit results with varying noise levels}
+    \label{fig:no_damping_explicit_all}
+\end{figure}
 
 \end{document}
