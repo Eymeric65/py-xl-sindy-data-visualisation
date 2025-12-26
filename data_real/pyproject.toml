@@ -1,0 +1,12 @@
+[project]
+name = "data-real"
+version = "0.1.0"
+description = "Submodule to execute regression on real system"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "hebi-py>=2.12.0",
+    "numpy>=2.3.1",
+    "pandas>=2.3.3",
+    "py-xl-sindy>=2.2.1",
+]
