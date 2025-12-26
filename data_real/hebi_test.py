@@ -1,11 +1,59 @@
+#!/usr/bin/env python3
+
 import hebi
-from time import sleep
+from math import pi, sin
+from time import sleep, time
+import numpy as np
 
 lookup = hebi.Lookup()
-# Give the Lookup process 2 seconds to discover modules
 
-sleep(2)
+# Wait 2 seconds for the module list to populate
+sleep(2.0)
 
-print('Modules found on network:')
-for entry in lookup.entrylist:
-  print(f'{entry.family} | {entry.name}')
+family_name = "X5-1"
+modules_name = ["Elbow","Shoulder"]
+
+group = lookup.get_group_from_names([family_name], modules_name)
+
+if group is None:
+    print('Group not found: Did you forget to set the module family and name above?')
+    exit(1)
+
+print("group size: ", group.size)
+
+group_command = hebi.GroupCommand(group.size)
+group_feedback = hebi.GroupFeedback(group.size)
+
+# Start logging in the background
+group.start_log('logs', mkdirs=True)
+
+freq_hz = 0.5              # [Hz]
+freq = freq_hz * 2.0 * pi  # [rad / sec]
+amp = .5                  # [rad]
+
+duration = 10.0            # [sec]
+start = time()
+t = time() - start
+
+while t < duration:
+    # Even though we don't use the feedback, getting feedback conveniently
+    # limits the loop rate to the feedback frequency
+    group.get_next_feedback(reuse_fbk=group_feedback)
+    t = time() - start
+    command = np.empty(group.size,np.float64)
+
+    command[0] = -amp * sin(freq * t)  # Elbow
+    command[1] = amp * sin(freq * t)                      # Shoulder
+    #command = np.array([[ -amp * sin(freq * t),0 ]])
+    print(f"t: {t:.2f}, command: {command}")
+    group_command.effort = command
+    group.send_command(group_command)
+
+# trajectory = hebi.trajectory.create_trajectory(time_vector, waypoints)
+# trajectory.get_state()
+
+# Stop logging. `log_file` contains the contents of the file
+log_file = group.stop_log()
+
+if log_file is not None:
+    hebi.util.plot_logs(log_file, 'effort')
