@@ -156,24 +156,27 @@
     \centering
     \vspace*{2cm}
     
-    {\scshape\LARGE University Name \par}
+    {\scshape\LARGE Tohoku University, School of engineering \par}
+    \vspace{0.5cm}
+    {\Large\itshape Department of Robotics, NeuroRobotic Laboratory \par}
     \vspace{1.5cm}
     
-    {\huge\bfseries Data-Driven Identification of Nonlinear Dynamics in Robotic Systems\par}
+    {\huge\bfseries Discovering Nonlinear Dynamics by Simultaneous Lagrangian and Newtonian
+Identification for Implicit and Explicit Sparse Identification \par}
     \vspace{0.5cm}
-    {\Large\itshape Application of the SINDy Algorithm\par}
+    {\Large\itshape Realisation of UNI-SINDy\par}
     
     \vspace{2cm}
     
-    {\Large \textbf{Your Name}\par}
+    {\Large \textbf{Eymeric Chauchat}\par}
     \vspace{1cm}
     {\large A thesis submitted in partial fulfillment of the requirements\\ for the degree of Master of Science in Robotics\par}
     
     \vspace{3cm}
     
     \begin{tabular}{rl}
-        \textbf{Supervisor:} & Prof. Dr. Jane Doe \\
-        \textbf{Co-Supervisor:} & Dr. John Smith
+        \textbf{Supervisor:} & Prof. Mitsuhiro Hayashibe \\
+        %\textbf{Co-Supervisor:} & Dr. John Smith
     \end{tabular}
     
     \vfill
@@ -202,6 +205,11 @@ Thanks to the lab, the supervisor, and coffee.
 % -------------------------------------------------------------------------
 
 %Start with \chapter{} after it is normal \section \subsection stuff
+
+\chapter{Introduction}
+
+In this first chapter, we are going to present what motivated our decision to pursue research in the field of Sparse Identification of Nonlinear Dynamics concerning robotics.
+
 \chapter{Methods}
 \label{ch:methods}
 
@@ -242,7 +250,7 @@ Note that while this resembles a matrix formulation, $f$ represents a general no
 \section{Core SINDy Principle}
 \textit{\textcolor{gray}{[Background - State of the Art]}}
 
-SINDy, as developed by Brunton et al.\cite{bruntonDiscoveringGoverningEquations2016}, relies on the decomposition of dynamics into linearly dependent components. In order to achieve this we assume that the dynamics will lies inside a set of predetermined non-linear and linear function (eg. $(cos,sin,\cdot^2,\sqrt{\cdot},\dots)$). This function catalog $\boldsymbol{\Theta} = (f_1(\mathcal{X}),f_2(\mathcal{X}),\dots,f_k(\mathcal{X}))$will bridge the gap between linear ODEs and non-linear ones. A particuliar attention should be made during the selection of the catalog. \TODO{link this with concerned chapter}
+SINDy, as developed by Brunton et al.\cite{bruntonDiscoveringGoverningEquations2016}, relies on the decomposition of dynamics into linearly dependent components. In order to achieve this we assume that the dynamics will lies inside a set of predetermined non-linear and linear function (eg. $(cos,sin,\cdot^2,\sqrt{\cdot},\dots)$). This function catalog $\boldsymbol{\Theta} = (f_1(\mathcal{X}),f_2(\mathcal{X}),\dots,f_k(\mathcal{X}))$will bridge the gap between linear ODEs and non-linear ones. A particuliar attention should be made during the selection of the catalog, this thematic will be presented in Sec.~\ref{sec:same-knowledge-catalog}
 
 It can be noted that in the next subsection we make the distinction between the different coordinate when applying a catalog function for ease of comprehension we introduce the following subscript notation $cos_2(\mathcal{X}(t))=cos(x_2(t))$.
 
@@ -819,7 +827,7 @@ A fundamental distinction lies in how a candidate function propagates through th
 
 As a result, even if two catalogs are of identical size (number of candidate functions), they may possess a different inductive bias. A catalog that covers a narrower "knowledge space" (as illustrated in Figure~\ref{fig:catalog-knowledge}) implies that the user has provided more specific information about the system's structure.
 
-Paradoxically, "covering less knowledge" means the search space is more constrained, effectively simplifying the optimization task for the SINDy algorithm. Therefore, any performance comparison must account for this bias: a paradigm may appear superior not because the algorithm is more efficient, but because the structural priors injected by the user have already solved a significant portion of the dynamical complexity.
+Paradoxically, "covering less knowledge" means the search space is more constrained, effectively simplifying the optimization task for the SINDy algorithm. Therefore, any performance comparison must account for this bias: a paradigm may appear superior not because the algorithm is more efficient, but because the structural priors injected by the user have already solved a significant portion of the dynamical complexity. \TODO{Add protocol of creation}
 
 \begin{figure}
     \centering
@@ -1091,6 +1099,91 @@ This is the most meaningfull result of our study because it emphasyze the real r
     \caption{\textbf{Any damping implicit results:} validation error comparison (top) and success rate comparison (bottom) across all systems}
     \label{fig:damping-mixed}
 \end{figure}
+
+\section{Result on real system}
+
+In order to validate our new algorithm on a real system, we have elaborated a simple passive double pendulum Fig.~\ref{fig:real-double-prendulum}. We have gathered data using approximately 100sec of passive experiment data (grab and release the pendulum at some different initial condition). Using a tracking script we have determined the angle, velocity and acceleration of both of the two coordinate. 
+
+Using this data we have executed a UNI-SINDy regression using the restrained catalog in Table.~\ref{table:catalog-real-pendulum}.
+
+\begin{table}[h]
+    \caption{Catalog of candidate terms for real double pendulum system}
+    \label{table:catalog-real-pendulum}
+    \centering
+    {
+    \small
+    \begin{tabular}{cl}
+        \hline
+        \textbf{Term \#} & \textbf{Expression} \\
+        \hline
+        \textbf{1}$^\dagger$ & $\dot{\theta}_1^2$ \\
+        \textbf{2}$^\dagger$ & $\dot{\theta}_2^2$ \\
+        3 & $\dot{\theta}_1 \dot{\theta}_2 \cos(\theta_1)$ \\
+        4 & $\dot{\theta}_1 \dot{\theta}_2 \sin(\theta_1)$ \\
+        5 & $\dot{\theta}_1 \dot{\theta}_2 \cos(\theta_2)$ \\
+        6 & $\dot{\theta}_1 \dot{\theta}_2 \sin(\theta_2)$ \\
+        7 & $\dot{\theta}_1 \dot{\theta}_2 \cos(\theta_1) \sin(\theta_2)$ \\
+        8 & $\dot{\theta}_1 \dot{\theta}_2 \sin(\theta_1) \cos(\theta_2)$ \\
+        9 & $\dot{\theta}_1 \dot{\theta}_2 \cos(\theta_1) \cos(\theta_2)$ \\
+        10 & $\dot{\theta}_1 \dot{\theta}_2 \sin(\theta_1) \sin(\theta_2)$ \\
+        11 & $\cos(\theta_1)$ \\
+        12 & $\cos(\theta_2)$ \\
+        13 & $\sin(\theta_1)$ \\
+        \hline
+    \end{tabular}
+    \hspace{1ex}
+    \begin{tabular}{cl}
+        \hline
+        \textbf{Term \#} & \textbf{Expression} \\
+        \hline
+        14 & $\sin(\theta_2)$ \\
+        15 & $\cos(\theta_1) \sin(\theta_2)$ \\
+        16 & $\sin(\theta_1) \cos(\theta_2)$ \\
+        17 & $\cos(\theta_1) \cos(\theta_2)$ \\
+        18 & $\sin(\theta_1) \sin(\theta_2)$ \\
+        19 & $\dot{\theta}_1 \cos(\theta_1)$ \\
+        20 & $\dot{\theta}_1 \cos(\theta_1)$ \\
+        21 & $\dot{\theta}_1 \cos(\theta_1)$ \\
+        22 & $\dot{\theta}_1 \cos(\theta_1)$ \\
+        23 & $\dot{\theta}_2 \cos(\theta_1)$ \\
+        24 & $\dot{\theta}_2 \cos(\theta_1)$ \\
+        25 & $\dot{\theta}_2 \cos(\theta_1)$ \\
+        26 & $\dot{\theta}_2 \cos(\theta_1)$ \\
+        \hline
+    \end{tabular}
+    }
+
+    \raggedright
+    \vspace{0.5ex}
+    $\dagger$ : Pre-knowledge term
+
+\end{table}
+
+As you may see in the table we haven't considered that the regression is passive, instead we have defined the kinematics terms $(\dot{\theta}_1^2,\dot{\theta}_2^2)$ as pre-knowledge for our regression. We have decided this because otherwise the complexity was too high since our pendulum is highly biased toward the gravity term (amplitude 300 times higher) due to the lenght and weight of the different arm. 
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.8\textwidth]{figures/real_double_pendulum.png}
+    \caption{\textbf{Real double pendulum :} A double pendulum composed of 3D printed part and bearing where any thick grease has been removed to guarantee lowest friction possible}
+    \label{fig:real-double-prendulum}
+\end{figure}
+
+In order to avoid any over-fitting, we have decided to use a data ratio of 1.5 which means 39 samples over our 100 seconds of training data. This resulted in a model of 13 terms that usually correctly predict the dynamics of our double pendulum 1 second ahead Fig.~\ref{fig:result-real-pendulum}. It can be noted that in the highly chaotic and un-damped nature of this tiny pendulum one second is already a long horizon for prediction of the dynamics. 
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.8\textwidth]{figures/result_real_pendulum.png}
+    \caption{\textbf{Real pendulum result on validation data : } One second forecast of the real system from an initial condition and comparison with the real system value. }
+    \label{fig:result-real-pendulum}
+\end{figure}
+
+Concerning the validation of the model we have decided to take another video of our real system, take a number of initial condition along the video, generate a forecast from this initial condition and compare it with the actual data (result Fig.~\ref{fig:result-real-pendulum}). Over multiple comparison we can see that the retrieved system quite closely capture the dynamics of the real system. A second analysis has been made on the actual lagrangian and friction forces, and we can see the different macro-term composing a classical double pendulum (cross trigonometric term and gravity potential term).
+
+A final experiment is being developped in order to use UNI-SINDy as part of the control of a mixed passive active system (cartpole and double pendulum on cart). The in-writing paper will probably have a section about this experiment. This experiment would finally show the superiority of UNI-SINDy on this class of sub-system that are mixed passive active robotic system.
+
+\chapter{Discussion}
+
+\chapter{Conclusion}
 
 % -------------------------------------------------------------------------
 %   BACK MATTER
