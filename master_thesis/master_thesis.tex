@@ -210,6 +210,14 @@ Thanks to the lab, the supervisor, and coffee.
 
 In this first chapter, we are going to present what motivated our decision to pursue research in the field of Sparse Identification of Nonlinear Dynamics concerning robotics.
 
+System identification is the first step and one of the most important when studying or creating control law for robot. One of the particularity of system identification is that it can be masked in other step, for example when using machine learning to create control law for robot, we obtain a control law that takes in account the system dynamics while not having to compute them. 
+
+This idea took root originally from hand optimized PID controller and other hand made control. At this time, if ones got access to the dynamics of the robot (by hand) he could craft a control law directly from it, otherwise he should stick to input output heuristic to compute a control law. This have been later enhanced with automatic determination of controller using data until the rize of neural network as control function. However from PID to neural network we can say that they operate as black box because the study of their component doesn't lead to an understanding of the system.
+
+This clear separation between system dynamics and control has always been present and shows the main strategy difference between determining the dynamics to control a robot or gathering data to control the robot. However only the former enable a precise analysis of the component inside a system. That's why when dealing with critical system (energy, nuclear, medical) the determination of the system is mandatory to have a perfect knowledge of the answer of the controller in order to have a mathematical proof of behavior. 
+
+Rooted in this result, research group have tried to find the dynamics of the robot from data in order to be able to analyse all behavior that a system can excerp. When some attempt has been made using black box model : modeling system using neural network, these offers limited advantages when wanting to analyse the dynamics deeply using mathematical analytical strategy. Second group focused on creating algorithm in order to found the model in a white box manner: providing the model in a way that human and mathematical tool are able to analyse these dynamics. That's in this effort that Sparse Identification of Nonlinear Dynamics (SINDy ) has been elaborated
+
 \chapter{Methods}
 \label{ch:methods}
 
