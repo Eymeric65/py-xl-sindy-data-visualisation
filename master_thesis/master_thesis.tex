@@ -188,10 +188,29 @@ Identification for Implicit and Explicit Sparse Identification \par}
 
 \chapter*{Abstract}
 \addcontentsline{toc}{chapter}{Abstract}
-Here you write the summary of your work. Since you are studying SINDy, you should mention the challenge of modeling complex robotic dynamics, the data collection process, and how sparse regression helped identify the governing equations.
+
+Accurate dynamic modeling is a prerequisite for the control, simulation, and safety verification of robotic systems. While data-driven approaches such as Neural Networks have achieved high predictive performance, they function as "black boxes," lacking the interpretability required for safety-critical applications. Conversely, analytical identification methods often fail to capture complex physical phenomena like friction or aerodynamic drag without rigid structural assumptions.
+
+Sparse Identification of Nonlinear Dynamics (SINDy) offers a promising middle ground by discovering governing equations directly from data. However, current SINDy formulations struggle to simultaneously address the multifaceted nature of robotic systems, which often combine conservative Lagrangian dynamics, non-conservative Newtonian forces (friction), and mixed actuation states (active vs. passive joints).
+
+This thesis introduces \textbf{UNI-SINDy} (Unified Simultaneous Lagrangian and Newtonian Identification), a novel framework designed to bridge this gap. We propose a \textbf{Unified Catalog} that integrates Lagrangian energy candidates with Newtonian force terms into a single regression matrix, allowing for the simultaneous identification of inertial parameters and dissipative forces. Furthermore, we develop a Mixed Implicit-Explicit Algorithm capable of recursively identifying dynamics in under-actuated systems, drastically reducing computational complexity compared to fully implicit solvers.
+
+The framework is validated through extensive simulation on under-actuated systems (Cartpole, Double Pendulum) and experimentally verified on a real-world passive double pendulum. Results demonstrate that UNI-SINDy significantly outperforms existing baselines in "mixed" scenarios, offering a robust, data-efficient, and interpretable pathway for robotic system identification.
 
 \chapter*{Acknowledgements}
-Thanks to the lab, the supervisor, and coffee.
+\addcontentsline{toc}{chapter}{Acknowledgements}
+
+This thesis marks the conclusion of my Master's degree, but it is the result of a journey that I did not walk alone.
+
+First and foremost, I would like to express my deepest gratitude to my supervisor, Prof. Mitsuhiro Hayashibe, for his invaluable guidance, patience, and for providing me with the opportunity to conduct research within the NeuroRobotic Laboratory. His insights into system identification and his constant encouragement to dig deeper into the mathematical foundations were instrumental in the development of this work.
+
+I am also deeply grateful to the members of the Department of Robotics, whose technical advice and camaraderie made the lab a stimulating environment to work in. Special thanks go to my colleagues for the countless discussions, the coffee breaks that turned into brainstorming sessions, and their support during the debugging of the real-world experiments.
+
+I would like to thank my family and friends for their unwavering support, belief in my abilities, and for keeping me grounded throughout this process.
+
+Finally, I would like to thank the open-source community. This work stands on the shoulders of giants, and without the tools shared by researchers before me, this thesis would not have been possible.
+
+\clearpage
 
 \tableofcontents
 \listoffigures
@@ -207,16 +226,87 @@ Thanks to the lab, the supervisor, and coffee.
 %Start with \chapter{} after it is normal \section \subsection stuff
 
 \chapter{Introduction}
+\label{ch:introduction}
 
-In this first chapter, we are going to present what motivated our decision to pursue research in the field of Sparse Identification of Nonlinear Dynamics concerning robotics.
+The precise modeling of dynamical systems stands as one of the fundamental pillars of modern robotics. Whether for the design of high-performance controllers, the simulation of complex environments, or the guarantee of safety in critical applications, the ability to predict how a system evolves over time is a prerequisite for autonomy. This thesis addresses the challenge of discovering these governing equations directly from data in a manner that is both interpretable and robust to the complex physical realities of robotic hardware—specifically, the coexistence of active actuation, passive dynamics, and non-conservative forces such as friction.
 
-System identification is the first step and one of the most important when studying or creating control law for robot. One of the particularity of system identification is that it can be masked in other step, for example when using machine learning to create control law for robot, we obtain a control law that takes in account the system dynamics while not having to compute them. 
+In this introductory chapter, we outline the historical progression of system identification, the dichotomy between black-box and white-box modeling, and the specific limitations in current literature that motivated the development of the \textit{Unified SINDy} (UNI-SINDy) framework.
 
-This idea took root originally from hand optimized PID controller and other hand made control. At this time, if ones got access to the dynamics of the robot (by hand) he could craft a control law directly from it, otherwise he should stick to input output heuristic to compute a control law. This have been later enhanced with automatic determination of controller using data until the rize of neural network as control function. However from PID to neural network we can say that they operate as black box because the study of their component doesn't lead to an understanding of the system.
+\section{The Imperative of Dynamics in Robotics}
 
-This clear separation between system dynamics and control has always been present and shows the main strategy difference between determining the dynamics to control a robot or gathering data to control the robot. However only the former enable a precise analysis of the component inside a system. That's why when dealing with critical system (energy, nuclear, medical) the determination of the system is mandatory to have a perfect knowledge of the answer of the controller in order to have a mathematical proof of behavior. 
+Classically, the control of robotic manipulators and mobile agents has relied on the existence of an analytical model derived from first principles. The Lagrangian formulation ($L = T - V$) and the Newtonian formulation ($F=ma$) allow engineers to derive the equations of motion (EOM) that describe how torques map to accelerations \cite{sciaviccoRoboticsModellingPlanning2009}. These models are essential for techniques such as Computed Torque Control, Model Predictive Control (MPC), and feedback linearization, which require an inverse dynamics model to cancel out nonlinearities in the system \cite{hollerbachDynamicsInverseDynamics2008}.
 
-Rooted in this result, research group have tried to find the dynamics of the robot from data in order to be able to analyse all behavior that a system can excerp. When some attempt has been made using black box model : modeling system using neural network, these offers limited advantages when wanting to analyse the dynamics deeply using mathematical analytical strategy. Second group focused on creating algorithm in order to found the model in a white box manner: providing the model in a way that human and mathematical tool are able to analyse these dynamics. That's in this effort that Sparse Identification of Nonlinear Dynamics (SINDy ) has been elaborated
+However, deriving these models analytically becomes exponentially difficult as systems grow in complexity. For rigid body systems, the recursive Newton-Euler algorithm provides a solution, but for soft robots, systems with significant friction, or robots interacting with unknown environments, the "true" parameters (mass, inertia, friction coefficients) are often unknown or time-varying. This uncertainty necessitates \textit{System Identification}—the process of building mathematical models of dynamical systems from measured data \cite{ljungSystemIdentificationTheory1999}.
+
+\section{From Analytical Models to Data-Driven Black Boxes}
+
+The history of system identification in robotics can be viewed as a pendulum swinging between rigid analytical structures and flexible, data-driven approximations.
+
+\subsection{Classical Identification and the Rise of the Black Box}
+Early approaches focused on parametric identification, where the structure of the equation was assumed known (e.g., a standard rigid body model), and optimization techniques were used to fit the inertial parameters. While effective for industrial manipulators, this approach fails when the assumed structure does not match reality—for instance, when unmodeled aerodynamic drag or complex stiction is present.
+
+To bypass the need for structural assumptions, the field turned toward non-parametric, "black-box" modeling. The rise of machine learning, and specifically Deep Neural Networks (DNNs), revolutionized this space. A neural network can approximate any continuous function to an arbitrary degree of accuracy, given sufficient data \cite{hornikMultilayerFeedforwardNetworks1989}. In robotics, this allowed for the creation of control laws and dynamic models that could learn implicitly from sensor data, bypassing the need for manual derivation. This paradigm shift facilitated significant advances in reinforcement learning, where agents learn policies directly from raw observations without an explicit understanding of the underlying physics \cite{mnihHumanlevelControlDeep2015}.
+
+\subsection{The Interpretability and Safety Gap}
+Despite the performance of neural networks, they suffer from a critical flaw: a lack of interpretability. A neural network weights matrix offers no insight into the physics of the system. It does not tell the engineer if the robot is behaving due to Coriolis forces, gravity, or friction.
+
+This "Black Box" nature presents a severe barrier to deployment in safety-critical fields such as medical robotics, nuclear decommissioning, or human-robot collaboration. In these domains, a statistical guarantee of performance is insufficient; a mathematical proof of stability is often required. If a medical robot deviates from its trajectory, engineers must be able to analyze the governing equations to understand \textit{why}. A black-box model, which obscures the dynamics within hidden layers, makes this analytical validation impossible. Furthermore, black-box models often generalize poorly outside their training distribution, leading to unpredictable behavior in novel states \cite{karniadakisPhysicsinformedMachineLearning2021}.
+
+Therefore, there is a distinct need for "White Box" modeling: methods that leverage the flexibility of data-driven learning but output parsimonious, human-readable differential equations.
+
+\section{Sparse Identification of Nonlinear Dynamics (SINDy)}
+
+To address the interpretability gap, the field of Symbolic Regression emerged, aiming to find both the structure and the parameters of a system simultaneously. The seminal work by Schmidt and Lipson demonstrated that evolutionary algorithms could distill natural laws from data \cite{schmidtDistillingFreeformNatural2009}. However, these genetic approaches were computationally expensive and prone to overfitting.
+
+A breakthrough occurred with the development of \textit{Sparse Identification of Nonlinear Dynamics} (SINDy) by Brunton et al. \cite{bruntonDiscoveringGoverningEquations2016}. SINDy reframes the model discovery problem as a sparse linear regression. It posits that the dynamics of most physical systems are sparse in the space of possible functions; that is, the equation of motion for a pendulum may contain $\sin(\theta)$ and $\dot{\theta}$, but it will likely not contain $e^{\theta^5}$.
+
+By constructing a library of candidate functions $\boldsymbol{\Theta}$ and employing sparse regularization (such as LASSO or Sequential Thresholded Least Squares), SINDy selects only the few terms necessary to describe the data. The result is a set of interpretable differential equations that balance accuracy with model complexity, adhering to the principle of Occam's Razor.
+
+\section{The Challenge: Complex Robotic Architectures}
+
+While SINDy has proven effective for canonical systems (e.g., Lorenz attractors, simple pendulums), applying it to complex robotic systems introduces three distinct challenges that current literature has yet to fully resolve simultaneously.
+
+\subsection{1. The Curse of Dimensionality and Prior Knowledge}
+Standard SINDy requires a candidate library $\boldsymbol{\Theta}$ that spans all possible interaction terms. For a robotic arm with multiple degrees of freedom (DoF), the number of polynomial and trigonometric combinations explodes. This makes the regression problem ill-posed and computationally intractable.
+Recent work by Purnomo et al. \cite{purnomoSparseIdentificationLagrangian2023} introduced \textit{Lagrangian SINDy}, which significantly reduces the search space by identifying the scalar Lagrangian energy function ($L$) rather than the vector field of accelerations. However, the Lagrangian formalism assumes a conservative system. It struggles to naturally incorporate non-conservative forces like complex friction or aerodynamic drag, which are governed by Newtonian mechanics.
+
+\subsection{2. Implicit Dynamics and Passive Joints}
+Traditional SINDy assumes an explicit system structure: $\dot{x} = f(x, u)$. However, many modern robots feature passive joints (under-actuation) or lack full proprioceptive torque sensing. In these cases, the inputs $u$ are not fully known, or the system dynamics are implicit ($F(\dot{x}, x, t) = 0$).
+Kaheman et al. introduced \textit{SINDy-PI} (Parallel Implicit) to handle rational functions and implicit dynamics \cite{kahemanSINDyPIRobustAlgorithm2020}. While theoretically robust, SINDy-PI is computationally intensive and treats all variables with equal uncertainty, failing to leverage the fact that robotics engineers often know \textit{some} inputs (e.g., current to a motor) while being ignorant of others (e.g., reaction forces).
+
+\subsection{3. The "Mixed" Reality of Robotics}
+Real-world robotic systems are rarely purely Lagrangian (conservative) or purely Newtonian (explicit). They are "mixed" systems. A standard manipulator has active motors (explicit inputs), passive joints (implicit dynamics), gravity and inertia (Lagrangian energy), and joint friction (Newtonian dissipative forces).
+Existing variations of SINDy tend to specialize in one domain:
+\begin{itemize}
+    \item \textbf{Standard SINDy:} Good for Newtonian, explicit systems. Bad for energy constraints.
+    \item \textbf{Lagrangian SINDy:} Good for energy conservation and compactness. Bad for friction.
+    \item \textbf{SINDy-PI:} Good for implicit dynamics. Computationally heavy and agnostic to physical structure.
+\end{itemize}
+
+There is currently no unified framework capable of identifying a system that exhibits all these characteristics simultaneously without manual tuning of the library for each specific case.
+
+\section{Thesis Objective and Contributions}
+
+This thesis proposes a novel framework, \textbf{UNI-SINDy} (Unified Simultaneous Lagrangian and Newtonian Identification), designed to bridge the gap between energy-based and force-based identification. We aim to create a "Grey Box" discovery method that allows the injection of physical prior knowledge (via the Lagrangian) while retaining the flexibility to identify non-conservative forces (via the Newtonian formulation) and handling partial information (Mixed Implicit/Explicit).
+
+The specific contributions of this work are as follows:
+
+\begin{enumerate}
+    \item \textbf{Development of the Unified Catalog:} We introduce a heterogeneous experiment matrix that combines Lagrangian candidate functions (subject to the Euler-Lagrange operator) with Newtonian candidate functions (subject to direct regression) and external forcing terms. This allows for the simultaneous identification of inertial parameters and friction models in a single regression step.
+    
+    \item \textbf{The Mixed Implicit-Explicit Algorithm:} We propose a recursive identification algorithm that intelligently segregates the system into "known" (explicit) and "unknown" (implicit) subspaces. This drastically reduces the computational burden compared to SINDy-PI by solving for implicit dynamics only where necessary (e.g., on passive coordinates).
+    
+    \item \textbf{Information-Theoretic Clustering for Solution Selection:} We enhance the robustness of the implicit solver by introducing a solution selection metric based on vector clustering and weak sparsity, addressing the issue of disjoint subspaces in high-dimensional catalogs.
+    
+    \item \textbf{Validation on Simulated and Physical Systems:} The framework is rigorously benchmarked against standard SINDy, SINDy-PI, and Lagrangian SINDy using MuJoCo simulations of under-actuated systems (Cartpole, Double Pendulum). Finally, we demonstrate the real-world applicability of the method by identifying the dynamics of a physical passive double pendulum from video data.
+\end{enumerate}
+
+\section{Thesis Outline}
+
+The remainder of this thesis is organized as follows:
+\textbf{Chapter \ref{ch:methods}} details the mathematical formulation of SINDy, the derivation of the Lagrangian and Unified catalogs, and the logic of the Mixed Algorithm. 
+\textbf{Chapter \ref{ch:results}} presents the comparative results on simulated benchmarks, analyzing robustness to noise and data scarcity, followed by the experimental validation on physical hardware. 
+Finally, \textbf{Chapter 5} discusses the implications of these results for the broader robotics community and outlines future avenues for research in physics-informed machine learning.
 
 \chapter{Methods}
 \label{ch:methods}
