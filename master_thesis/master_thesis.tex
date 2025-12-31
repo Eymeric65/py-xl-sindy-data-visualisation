@@ -5,7 +5,7 @@
 \documentclass[
     11pt,               % Standard font size
     a4paper,            % Paper size
-    oneside,            % Print on one side (change to 'twoside' for binding)
+    twoside,            % Print on one side (change to 'twoside' for binding)
     numbers=noenddot,   % Removes end dots in numbering (e.g. 1.1 not 1.1.)
     parskip=half,       % Adds space between paragraphs (modern look)
     listof=totoc,       % Adds Lists of Figures/Tables to TOC
@@ -142,7 +142,6 @@
 \definecolor{sindysolutionexplicit}{RGB}{129,114,179}
 \definecolor{sindysolutionimplicit}{RGB}{204,185,116}
 
-
 % --- Custom Commands for SINDy ---
 \newcommand{\TODO}[1]{\textcolor{red}{\textbf{TODO: #1}}}
 
@@ -200,13 +199,15 @@ The framework is validated through extensive simulation on under-actuated system
 \chapter*{Acknowledgements}
 \addcontentsline{toc}{chapter}{Acknowledgements}
 
-This thesis marks the conclusion of my Master's degree, but it is the result of a journey that I did not walk alone.
+While this thesis marks the conclusion of my Master's degree, it represents a journey that I could not have undertaken alone.
 
-\TODO{Fill part on lab and partner}
+I would like to extend my sincere appreciation to my supervisor, Professor Hayashibe, for accepting me into his laboratory. Over the past two and a half years, his mentorship has been pivotal, allowing me to navigate life in Japan and dive deeply into the research world. The autonomy I was afforded during this time was invaluable, providing me the space to explore this field creatively and broaden my technical horizons.
 
-I would like to thank my family and friends for their unwavering support, belief in my abilities, and for keeping me grounded throughout this process.
+I also owe a debt of gratitude to my partner, whom I was lucky to meet during this program. Thank you for the time we spent working side by side; your support provided the essential energy and drive required to reach this finish line.
 
-Finally, I would like to thank the open-source community. This work stands on the shoulders of giants, and without the tools shared by researchers before me, this thesis would not have been possible.
+To my family and friends, thank you for your unwavering support and for believing in my potential. You have kept me grounded and motivated throughout every step of this process.
+
+Lastly, I wish to acknowledge the open-source community. As the saying goes, we stand on the shoulders of giants; without the collaborative spirit and the tools shared by previous researchers, this work would not have been possible.
 
 \clearpage
 
@@ -223,10 +224,11 @@ Finally, I would like to thank the open-source community. This work stands on th
 
 %Start with \chapter{} after it is normal \section \subsection stuff
 
+\cleardoublepage
 \chapter{Introduction}
 \label{ch:introduction}
 
-The precise modeling of dynamical systems stands as one of the fundamental pillars of modern robotics. Whether for the design of high-performance controllers, the simulation of complex environments, or the guarantee of safety in critical applications, the ability to predict how a system evolves over time is a prerequisite for autonomy. This thesis addresses the challenge of discovering these governing equations directly from data in a manner that is both interpretable and robust to the complex physical realities of robotic hardware—specifically, the coexistence of active actuation, passive dynamics, and non-conservative forces such as friction.
+The precise modeling of dynamical systems stands as one of the fundamental pillars of modern robotics. Whether for the design of high-performance controllers, the simulation of complex environments, or the guarantee of safety in critical applications, the ability to predict how a system evolves over time is a prerequisite for autonomy. This thesis addresses the challenge of discovering these governing equations directly from data in a manner that is both interpretable and robust to the complex physical realities of robotic hardware, specifically, the coexistence of active actuation, passive dynamics, and non-conservative forces such as friction.
 
 In this introductory chapter, we outline the historical progression of system identification, the dichotomy between black-box and white-box modeling, and the specific limitations in current literature that motivated the development of the \textit{Unified SINDy} (UNI-SINDy) framework.
 
@@ -234,14 +236,14 @@ In this introductory chapter, we outline the historical progression of system id
 
 Classically, the control of robotic manipulators and mobile agents has relied on the existence of an analytical model derived from first principles. The Lagrangian formulation ($L = T - V$) and the Newtonian formulation ($F=ma$) allow engineers to derive the equations of motion (EOM) that describe how torques map to accelerations \cite{sciaviccoRoboticsModellingPlanning2009}. These models are essential for techniques such as Computed Torque Control, Model Predictive Control (MPC), and feedback linearization, which require an inverse dynamics model to cancel out nonlinearities in the system \cite{hollerbachDynamicsInverseDynamics2008}.
 
-However, deriving these models analytically becomes exponentially difficult as systems grow in complexity. For rigid body systems, the recursive Newton-Euler algorithm provides a solution, but for soft robots, systems with significant friction, or robots interacting with unknown environments, the "true" parameters (mass, inertia, friction coefficients) are often unknown or time-varying. This uncertainty necessitates \textit{System Identification}—the process of building mathematical models of dynamical systems from measured data \cite{ljungSystemIdentificationTheory1999}.
+However, deriving these models analytically becomes exponentially difficult as systems grow in complexity. For rigid body systems, the recursive Newton-Euler algorithm provides a solution, but for soft robots, systems with significant friction, or robots interacting with unknown environments, the "true" parameters (mass, inertia, friction coefficients) are often unknown or time-varying. This uncertainty necessitates \textit{System Identification}, the process of building mathematical models of dynamical systems from measured data \cite{ljungSystemIdentificationTheory1999}.
 
 \section{From Analytical Models to Data-Driven Black Boxes}
 
 The history of system identification in robotics can be viewed as a pendulum swinging between rigid analytical structures and flexible, data-driven approximations.
 
 \subsection{Classical Identification and the Rise of the Black Box}
-Early approaches focused on parametric identification, where the structure of the equation was assumed known (e.g., a standard rigid body model), and optimization techniques were used to fit the inertial parameters. While effective for industrial manipulators, this approach fails when the assumed structure does not match reality—for instance, when unmodeled aerodynamic drag or complex stiction is present.
+Early approaches focused on parametric identification, where the structure of the equation was assumed known (e.g., a standard rigid body model), and optimization techniques were used to fit the inertial parameters. While effective for industrial manipulators, this approach fails when the assumed structure does not match reality, for instance, when unmodeled aerodynamic drag or complex stiction is present.
 
 To bypass the need for structural assumptions, the field turned toward non-parametric, "black-box" modeling. The rise of machine learning, and specifically Deep Neural Networks (DNNs), revolutionized this space. A neural network can approximate any continuous function to an arbitrary degree of accuracy, given sufficient data \cite{hornikMultilayerFeedforwardNetworks1989}. In robotics, this allowed for the creation of control laws and dynamic models that could learn implicitly from sensor data, bypassing the need for manual derivation. This paradigm shift facilitated significant advances in reinforcement learning, where agents learn policies directly from raw observations without an explicit understanding of the underlying physics \cite{mnihHumanlevelControlDeep2015}.
 
@@ -306,6 +308,8 @@ The remainder of this thesis is organized as follows:
 \textbf{Chapter \ref{ch:results}} presents the comparative results on simulated benchmarks, analyzing robustness to noise and data scarcity, followed by the experimental validation on physical hardware. 
 Finally, \textbf{Chapter 5} discusses the implications of these results for the broader robotics community and outlines future avenues for research in physics-informed machine learning.
 
+
+\cleardoublepage
 \chapter{Methods}
 \label{ch:methods}
 
@@ -346,7 +350,7 @@ Note that while this resembles a matrix formulation, $f$ represents a general no
 \section{Core SINDy Principle}
 \textit{\textcolor{gray}{[Background - State of the Art]}}
 
-SINDy, as developed by Brunton et al.\cite{bruntonDiscoveringGoverningEquations2016}, relies on the decomposition of dynamics into linearly dependent components. In order to achieve this we assume that the dynamics will lies inside a set of predetermined non-linear and linear function (eg. $(cos,sin,\cdot^2,\sqrt{\cdot},\dots)$). This function catalog $\boldsymbol{\Theta} = (f_1(\mathcal{X}),f_2(\mathcal{X}),\dots,f_k(\mathcal{X}))$will bridge the gap between linear ODEs and non-linear ones. A particuliar attention should be made during the selection of the catalog, this thematic will be presented in Sec.~\ref{sec:same-knowledge-catalog}
+SINDy, as developed by Brunton et al.\cite{bruntonDiscoveringGoverningEquations2016}, relies on the decomposition of dynamics into linearly dependent components. In order to achieve this we assume that the dynamics will lies inside a set of predetermined non-linear and linear function (eg. $(cos,sin,\bullet^2,\sqrt{\bullet},\dots)$). This function catalog $\boldsymbol{\Theta} = (f_1(\mathcal{X}),f_2(\mathcal{X}),\dots,f_k(\mathcal{X}))$will bridge the gap between linear ODEs and non-linear ones. A particuliar attention should be made during the selection of the catalog, this thematic will be presented in Sec.~\ref{sec:same-knowledge-catalog}
 
 It can be noted that in the next subsection we make the distinction between the different coordinate when applying a catalog function for ease of comprehension we introduce the following subscript notation $cos_2(\mathcal{X}(t))=cos(x_2(t))$.
 
@@ -448,7 +452,7 @@ The first goal of the lab (precedent work before this thesis) has been to levera
 \subsection{Lagrangian formalism}
 \textit{\textcolor{gray}{[Background - Classical Mechanics]}}
 
-The lagrangian is an alternate formulation of classical mechanics founded on the d'Alembert principle of virtual work \TODO{cite something here}. In a totally abstract manner Lagrangian can be seen as a "projection" of Newton Law in a space with more constraint rule. Lagrangian mechanics uses the energies in the system. The central quantity in Lagrangian mechanics is the Lagrangian a function that will summarize the dynamics of our system. In our case we are going to focus in the non-relativistic Lagrangian which is defined by :
+The lagrangian is an alternate formulation of classical mechanics founded on the d'Alembert principle of virtual work\cite{goldsteinClassicalMechanics2002}. In a totally abstract manner Lagrangian can be seen as a "projection" of Newton Law in a space with more constraint rule. Lagrangian mechanics uses the energies in the system. The central quantity in Lagrangian mechanics is the Lagrangian a function that will summarize the dynamics of our system. In our case we are going to focus in the non-relativistic Lagrangian which is defined by :
 \begin{equation}
     L = T - V 
     \label{eq:lagrangian}
@@ -871,6 +875,72 @@ Using this algorithm we have been able to retrieve all the solution of every cat
 \label{sec:sparse-linear-algorithm}
 \textit{\textcolor{gray}{[Background - Implementation Details]}}
 
+During this study we have used multiple sparse linear regression algorithm. Each of these algorithms have advantages and drawbacks. Even if in the result chapter we have mainly used \textsc{lasso} regression, in pre-study like in \cite{echauchatSparseIdentificationNonlinear2024} we have implemented in \textsc{py-xl-sindy} library other one. 
+
+In the next section we are goind to develop the following algorithm :
+\begin{itemize}
+    \item \textsc{lasso} : One of the first regression algorithm developped based on classical linear regression.
+    \item \textsc{proximal gradient descent} : used by \cite{purnomoSparseIdentificationLagrangian2023}, based on gradient descent with a sparsity promoting term.
+    \item \textsc{Hard tresholding linear regression} : developped by Brunton et al.\cite{bruntonDiscoveringGoverningEquations2016} and later proved in \cite{zhangConvergenceSINDyAlgorithm2019}.
+\end{itemize}
+
+As developped in the original SINDy paper \cite{bruntonDiscoveringGoverningEquations2016} in theory \textsc{lasso} is the best algorithm suited for SINDy but the high computational overhead can be the main pain point when dealing with bigger catalog.
+
+\subsection{Lasso algorithm}
+\textit{\textcolor{gray}{[Background - Implementation Details]}}
+
+\textsc{lasso} algorithm is the most well known when dealing with sparse regression, we are going to use the coordinate descent lasso implemented in \textsc{scikit-learn}. The optimization objective for lasso is the following :
+
+\begin{equation}
+    \frac{1 }{2  n_{samples}}  ||y - X w ||^2_2 + \alpha ||w||_1
+    \label{eq:lasso-objective}
+\end{equation}
+
+Detail on coordinate descent implemented in \textsc{scikit-learn} can be found on their website \footnote{\url{https://scikit-learn.org/stable/modules/linear_model.html}}.
+
+Coordinate descent is dependent on one hyper parameter $\alpha$ which is the tendency to sparsity of the algorithm. This hyperparameter is tuned at inference automatically using cross validation estimator found in \textsc{LassoCV}. The hyper parameter of \textsc{LassoCV} has been tuned before hand and are the same for all the experiment found in Result Chapter. 
+The hyper parameter value are the following :
+\begin{itemize}
+    \item tol\footnote{optimization stop when update is smaller than tol } : $1e-5$
+    \item eps\footnote{lenght of the optimization path $\alpha_{min} / \alpha_{max}$ } : $5e-4$
+\end{itemize}
+
+\subsection{Proximal Gradient Descent}
+\textit{\textcolor{gray}{[Background - Implementation Details]}}
+
+For the proximal gradient descent, we implemented the Iterative Soft-Thresholding Algorithm (ISTA). This approach minimizes the same objective function as Lasso (Equation.~\ref{eq:lasso-objective}) but separates the optimization into two distinct steps: a gradient descent step on the smooth convex loss (mean squared error) and a proximal operator (soft-thresholding) to handle the non-smooth $L_1$ regularization term.
+
+Unlike the \textsc{scikit-learn} implementation, our custom implementation allows for explicit control over the learning rate using the Lipschitz constant. To ensure numerical stability, the input matrix is normalized ($z$-score) prior to fitting. The step size $\eta$ is adapted automatically based on the spectral norm of the data matrix:
+
+\begin{equation}
+    \eta = \frac{1}{L} \quad \text{where} \quad L = \lambda_{max}\left(\frac{X^T X}{n_{samples}}\right)
+\end{equation}
+
+The hyperparameters defined in our implementation are the following:
+\begin{itemize}
+    \item Tolerance\footnote{Convergence is reached when the maximum coefficient change is smaller than this threshold}: $1e-5$
+    \item Max iterations: $10^4$
+    \item Learning rate: Adaptive (Inverse of the Lipschitz constant)
+\end{itemize}
+
+\subsection{Hard thresholding linear regression}
+\textit{\textcolor{gray}{[Background - Implementation Details]}}
+
+For the hard thresholding approach, we implemented the sequential thresholded least-squares (STLS) algorithm. This iterative method alternates between optimizing a standard least-squares objective and explicitly pruning insignificant coefficients. 
+
+Unlike the Lasso or Proximal Gradient Descent, this algorithm does not minimize a single convex objective function but rather performs an iterative refinement. At each step, the system is solved using ordinary least squares (\textsc{numpy.linalg.lstsq}). Subsequently, a pruning step is applied using a \textit{relative} thresholding strategy. Features are retained only if their condition value (normalized by the maximum value in the current iteration) exceeds the defined threshold:
+
+\begin{equation}
+    \frac{\text{condition}(w_i)}{\max(\text{condition}(w))} > \lambda
+\end{equation}
+
+The algorithm continues to loop, re-fitting the model on the reduced subset of features, until the number of active features stabilizes (i.e., no further variables are amputated in a subsequent step).
+
+The hyper parameter defined in our implementation is:
+\begin{itemize}
+    \item Threshold ($\lambda$)\footnote{Determines the relative cut-off for feature retention}: $0.03$
+\end{itemize}
+
 \section{Input knowledge and catalog creation}
 \textbf{\textcolor{blue}{[Novel Contribution]}}
 
@@ -923,7 +993,7 @@ A fundamental distinction lies in how a candidate function propagates through th
 
 As a result, even if two catalogs are of identical size (number of candidate functions), they may possess a different inductive bias. A catalog that covers a narrower "knowledge space" (as illustrated in Figure~\ref{fig:catalog-knowledge}) implies that the user has provided more specific information about the system's structure.
 
-Paradoxically, "covering less knowledge" means the search space is more constrained, effectively simplifying the optimization task for the SINDy algorithm. Therefore, any performance comparison must account for this bias: a paradigm may appear superior not because the algorithm is more efficient, but because the structural priors injected by the user have already solved a significant portion of the dynamical complexity. \TODO{Add protocol of creation}
+Paradoxically, "covering less knowledge" means the search space is more constrained, effectively simplifying the optimization task for the SINDy algorithm. Therefore, any performance comparison must account for this bias: a paradigm may appear superior not because the algorithm is more efficient, but because the structural priors injected by the user have already solved a significant portion of the dynamical complexity.
 
 \begin{figure}
     \centering
@@ -985,6 +1055,22 @@ Paradoxically, "covering less knowledge" means the search space is more constrai
     \label{fig:catalog-knowledge}
 \end{figure}
 
+\subsection{Protocol to create a catalog of same knowledge}
+\textbf{\textcolor{blue}{[Novel Contribution]}}
+
+Since our definition of knowledge for catalog is not perfectly mathematicaly strict, it is also hard to bring an unique way to create the catalog in practice. We are going to present one of the way that worked in practice to compare Newton and Lagrangian catalog.
+
+To build our catalog, we are going to take as base function : $(cos(\bullet),sin(\bullet),\bullet,\dot{\bullet})$,after we are going to apply these functions on every coordinate (eg. $(cos(q_1),cos(q_2),\cdots)$). The last step is to create a set of polynome of a certain order using the base catalog. In practice we have generated all the polynome of second order in $(cos(q_1),sin(q_1),cos(q_2),sin(q_2))$ and the one from $(q_1,q_2,\dot{q_1},\dot{q_2})$ and after we have applied the cross product on these two set (in practice we get all the term from $q_1,cos(q_1)$ to more complex like $q_1 \dot{q_2} cos^2(q_1)$).
+
+Now in order to get the difference between Newton and Lagrange, since Lagrange is inherantly more compact we are going to apply euler-lagrange Eq.~\ref{eq:euler-lagrange}, on every coordinate, on the augmented catalog in order to obtain a set of term. One could think that this set could directly be the Newton catalog but it would actually handicap the Lagrange paradigm since we are going to pass down to Newton a catalog that have some benefit of the euler-lagrange sparsity. In order to obtain the Newton catalog, using brute force, we are going to find the minimum space generated by polynomial augmentation and cross product (same as in the lagrangian catalog) that covers the euler-lagrange catalog. By doing this we guarantee the minimal "continuous"\footnote{continuous by polynomial augmentation and cross product} space that cover the euler lagrange catalog. 
+
+By following this protocol we get two different catalog that is virtually created by the same input knowledge. 
+
+In practice the difference in catalog size can be seen in Table.~\ref{table:catalog-size}, in the Result chapter. As said earlier, it is really hard to come up with two catalog that exercpt no biase toward any of the paradigm and this short protocol is the first of its kind on this matter.
+
+
+
+
 \section{Implementation detail}
 \textbf{\textcolor{blue}{[Novel Contribution]}}
 
@@ -1031,6 +1117,8 @@ Concerning the way to sample even if we are not going to present some quantitati
 \end{itemize}
 \noindent This shouldn't be mistaken with training data lenght and batch size. Longer experiment with an high number of batch lead inevitably to better result (even if the same number of end sample were taken from the training data)
 
+
+\cleardoublepage
 \chapter{Results}
 \label{ch:results}
 
@@ -1277,8 +1365,12 @@ Concerning the validation of the model we have decided to take another video of 
 
 A final experiment is being developped in order to use UNI-SINDy as part of the control of a mixed passive active system (cartpole and double pendulum on cart). The in-writing paper will probably have a section about this experiment. This experiment would finally show the superiority of UNI-SINDy on this class of sub-system that are mixed passive active robotic system.
 
+
+\cleardoublepage
 \chapter{Discussion}
 
+
+\cleardoublepage
 \chapter{Conclusion}
 
 % -------------------------------------------------------------------------
