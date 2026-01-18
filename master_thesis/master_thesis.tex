@@ -13,24 +13,38 @@
 ]{scrreprt}
 
 % --- Essential Packages ---
-\usepackage[utf8]{inputenc}
-\usepackage[T1]{fontenc}
+\usepackage{fontspec}       % For XeLaTeX font management
 \usepackage[english]{babel}
 \usepackage{microtype}      % Improves character kerning (essential for 'classy' look)
-\usepackage[margin=2.5cm, bindingoffset=1cm]{geometry} % Clean margins
+\usepackage[left=25mm, right=25mm, top=20mm, bottom=25mm]{geometry} % Margins: L25mm R25mm T20mm B25mm
+
+% --- Mathematics & Robotics Specifics (Load BEFORE fonts for compatibility) ---
+\usepackage{amsmath}
+\usepackage{mathtools}
+\usepackage{amssymb}
+\usepackage{siunitx}        % Correct unit formatting (e.g. \SI{5}{\meter\per\second})
+
+% --- Fonts (Optimized for XeLaTeX) ---
+\setmainfont{Latin Modern Roman}[
+    Ligatures=TeX
+]
+\setsansfont{Latin Modern Sans}[
+    Scale=0.9,
+    Ligatures=TeX
+]
+\setmonofont{Latin Modern Mono}[
+    Scale=0.9
+]
+
+% --- Math Font ---
+
+% --- Japanese Font Support ---
+\usepackage{xeCJK}
+\setCJKmainfont{IPAexMincho} % For CJK characters
+\setCJKsansfont{IPAexGothic} % for \sffamily
 
 \usepackage{scrhack} % listing issue
 \usepackage{csquotes} % babel quote
-
-% --- Fonts (Palatino for text, Euler for math - very readable) ---
-\usepackage{newpxtext}      % Palatino-like font
-\usepackage{newpxmath}      % Matching math font
-\usepackage[scaled=0.9]{helvet} % Helvetica for sans-serif (headers)
-
-% --- Mathematics & Robotics Specifics ---
-\usepackage{amsmath}
-\usepackage{mathtools}
-\usepackage{bm}             % Bold math symbols (\bm{x})
 \usepackage{siunitx}        % Correct unit formatting (e.g. \SI{5}{\meter\per\second})
 
 % --- Graphics & Tables ---
@@ -48,7 +62,7 @@
 \usepackage[automark,headsepline]{scrlayer-scrpage}
 \clearpairofpagestyles
 \ihead{\headmark}
-\ohead{\pagemark}
+\cfoot*{\pagemark}  % * makes it apply to both plain and scrheadings styles
 \pagestyle{scrheadings}
 
 % --- Hyperlinks (Must be loaded last) ---
@@ -145,77 +159,135 @@
 % --- Custom Commands for SINDy ---
 \newcommand{\TODO}[1]{\textcolor{red}{\textbf{TODO: #1}}}
 
+\newcommand{\thesisunderline}[1]{\noindent\vbox{#1\par\vspace{-2pt}\hrule height 0.4pt width \hsize}}
+
 % -------------------------------------------------------------------------
 %   DOCUMENT BEGINS
 % -------------------------------------------------------------------------
 \begin{document}
+
+% --- Cover Page (Japanese/English Format) ---
+\begin{titlepage}
+    \centering
+    \vspace*{0.75cm}
+    
+    {\fontsize{28pt}{30pt}\selectfont 修士学位論文 \par}
+    \vspace{0.2cm}
+    {\fontsize{28pt}{30pt}\selectfont Master's Thesis \par}
+    
+    \vspace{1.5cm}
+    
+    {\fontsize{16pt}{18pt}\selectfont 論文題目 \par}
+    \vspace{0.2cm}
+    {\fontsize{14pt}{16pt}\selectfont Thesis Title \par}
+    
+    \vspace{1.5cm}
+    
+    {
+    \fontsize{16pt}{18pt}\selectfont
+    \thesisunderline{ \textbf{Discovering Nonlinear Dynamics by Simultaneous}}\par
+    \thesisunderline{ \textbf{Lagrangian and Newtonian Identification for}}\par
+    \thesisunderline{ \textbf{Implicit and Explicit Sparse Identification}}\par
+    \thesisunderline{}
+    }
+    
+    \vspace{2cm}
+    
+    {\fontsize{14pt}{16pt}\selectfont 東北大学大学院工学研究科 \par}
+    \vspace{0.1cm}
+    {\fontsize{14pt}{16pt}\selectfont Graduate School of Engineering, \par}
+    \vspace{0.1cm}
+    {\fontsize{14pt}{16pt}\selectfont TOHOKU UNIVERSITY \par}
+    
+    \vfill
+    
+    \raggedright
+    \thesisunderline{\fontsize{14pt}{16pt}\selectfont 専攻/Department: Robotics} \par
+    \vspace{0.4cm}
+    \thesisunderline{\fontsize{14pt}{16pt}\selectfont 学籍番号/ID No: C4TM1417  }\par
+    \vspace{0.4cm}
+    \thesisunderline{\fontsize{14pt}{16pt}\selectfont 氏名/Name: Eymeric CHAUCHAT }\par
+    
+    
+\end{titlepage}
 
 % --- Title Page ---
 \begin{titlepage}
     \centering
     \vspace*{2cm}
     
-    {\scshape\LARGE Tohoku University, School of engineering \par}
-    \vspace{0.5cm}
-    {\Large\itshape Department of Robotics, NeuroRobotic Laboratory \par}
-    \vspace{1.5cm}
+    {\Large TOHOKU UNIVERSITY \par}
+    \vspace{0.3cm}
+    {\large Graduate School of Engineering \par}
+    \vspace{3cm}
     
-    {\huge\bfseries Discovering Nonlinear Dynamics by Simultaneous Lagrangian and Newtonian
-Identification for Implicit and Explicit Sparse Identification \par}
-    \vspace{0.5cm}
-    {\Large\itshape Realisation of UNI-SINDy\par}
-    
-    \vspace{2cm}
-    
-    {\Large \textbf{Eymeric Chauchat}\par}
-    \vspace{1cm}
-    {\large A thesis submitted in partial fulfillment of the requirements\\ for the degree of Master of Science in Robotics\par}
+    {\large\bfseries Discovering Nonlinear Dynamics by Simultaneous Lagrangian and Newtonian Identification for Implicit and Explicit Sparse Identification \par}
+    {\large (陰的および陽的スパース同定のためのラグランジアンとニュートン力学の同時同定に
+よる非線形力学の発見) \par}
     
     \vspace{3cm}
     
-    \begin{tabular}{rl}
-        \textbf{Supervisor:} & Prof. Mitsuhiro Hayashibe \\
-        %\textbf{Co-Supervisor:} & Dr. John Smith
-    \end{tabular}
+    {\normalsize A dissertation submitted for the Master's degree (Engineering)\par}
     
-    \vfill
-    {\large \today \par}
+    \vspace{0.5cm}
+    
+    {\normalsize Department of Robotics \par}
+    
+    \vspace{1cm}
+    
+    {\normalsize by \par}
+    \vspace{0.25 cm}
+    {\normalsize Eymeric CHAUCHAT \par}
+    
+    \vspace{1cm}
+    {\normalsize \today \par}
 \end{titlepage}
+
+\cleardoublepage
 
 % --- Front Matter ---
 \pagenumbering{roman} 
 
-\chapter*{Abstract}
-\addcontentsline{toc}{chapter}{Abstract}
+% --- Abstract Page (Following Supplementary Note 3 Requirements) ---
+\thispagestyle{empty}
+\begin{center}
+    {\fontsize{12pt}{14pt}\selectfont\textbf{Discovering Nonlinear Dynamics by Simultaneous Lagrangian and Newtonian Identification for Implicit and Explicit Sparse Identification}}\\[0.5cm]
+    {\fontsize{12pt}{14pt}\selectfont\textbf{Eymeric Chauchat}}\\[1cm]
+    {\fontsize{10pt}{12pt}\selectfont\textbf{Abstract}}
+\end{center}
 
-Accurate dynamic modeling is a prerequisite for the control, simulation, and safety verification of robotic systems. While data-driven approaches such as Neural Networks have achieved high predictive performance, they function as "black boxes," lacking the interpretability required for safety-critical applications. Conversely, analytical identification methods often fail to capture complex physical phenomena like friction or aerodynamic drag without rigid structural assumptions.
+\vspace{0.5cm}
 
-Sparse Identification of Nonlinear Dynamics (SINDy) offers a promising middle ground by discovering governing equations directly from data. However, current SINDy formulations struggle to simultaneously address the multifaceted nature of robotic systems, which often combine conservative Lagrangian dynamics, non-conservative Newtonian forces (friction), and mixed actuation states (active vs. passive joints).
+{% Abstract environment with specific formatting
+\fontspec{Liberation Serif}[Scale=1.0] % Times New Roman equivalent for XeLaTeX
+\fontsize{10pt}{12pt}\selectfont % 10pt font, single spacing (12pt = 10pt * 1.2)
+\noindent
+Accurate dynamic modeling constitutes the foundational bedrock of modern robotics, serving as a prerequisite for high-performance control, high-fidelity simulation, and the rigorous verification of safety in autonomous systems. Historically, the field has been divided into two distinct modeling paradigms: analytical "white-box" identification, which derives equations from first principles but struggles to capture complex unmodeled phenomena like friction or aerodynamics; and data-driven "black-box" approaches, such as Deep Neural Networks, which offer superior predictive accuracy but lack the interpretability required for safety-critical applications. This thesis addresses the urgent need for a "grey-box" solution that combines the flexibility of data-driven learning with the mathematical parsimony and physical interpretability of classical mechanics.
 
-This thesis introduces \textbf{UNI-SINDy} (Unified Simultaneous Lagrangian and Newtonian Identification), a novel framework designed to bridge this gap. We propose a \textbf{Unified Catalog} that integrates Lagrangian energy candidates with Newtonian force terms into a single regression matrix, allowing for the simultaneous identification of inertial parameters and dissipative forces. Furthermore, we develop a Mixed Implicit-Explicit Algorithm capable of recursively identifying dynamics in under-actuated systems, drastically reducing computational complexity compared to fully implicit solvers.
+The specific focus of this research is the \textit{Sparse Identification of Nonlinear Dynamics} (SINDy) framework. While SINDy has proven effective for canonical low-dimensional systems, its application to complex robotic hardware has been hindered by three interconnected challenges: the "Curse of Dimensionality" inherent in creating library catalogs for multi-degree-of-freedom systems; the difficulty of simultaneously identifying conservative inertial dynamics and non-conservative dissipative forces; and the architectural ambiguity of "mixed" systems that possess both active actuation (explicit inputs) and passive degrees of freedom (implicit dynamics). Existing variations in the literature—such as Lagrangian SINDy (XL-SINDy) or Parallel Implicit SINDy (SINDy-PI)—typically address only one of these facets in isolation, failing to provide a unified solution for realistic robotic platforms.
 
-The framework is validated through extensive simulation on under-actuated systems (Cartpole, Double Pendulum) and experimentally verified on a real-world passive double pendulum. Results demonstrate that UNI-SINDy significantly outperforms existing baselines in "mixed" scenarios, offering a robust, data-efficient, and interpretable pathway for robotic system identification.
+This thesis introduces \textbf{UNI-SINDy} (Unified Simultaneous Lagrangian and Newtonian Identification), a novel framework designed to bridge the gap between energy-based and force-based identification. The core innovation of UNI-SINDy is the \textbf{Unified Catalog}, a heterogeneous experiment matrix that integrates Lagrangian energy candidates with Newtonian force terms into a single regression architecture. By applying the Euler-Lagrange operator to a scalar energy library, the framework drastically reduces the search space for inertial parameters, thereby mitigating the combinatorial explosion that paralyzes standard Newtonian approaches. Simultaneously, the inclusion of a targeted Newtonian sub-catalog allows for the explicit regression of non-conservative forces, such as friction and external disturbances, which cannot be naturally represented by a potential energy function. This duality ensures that the identified models respect the principle of least action while accurately capturing real-world dissipative phenomena.
 
-\chapter*{Acknowledgements}
-\addcontentsline{toc}{chapter}{Acknowledgements}
+To address the challenge of under-actuated and hybrid systems, this thesis develops the \textbf{Mixed Implicit-Explicit Algorithm}. Standard implicit solvers (like SINDy-PI) are computationally expensive and prone to convergence on trivial solutions because they treat the entire system as a null-space problem. The proposed Mixed Algorithm employs a recursive "divide-and-conquer" strategy. It first analyzes the system topology to identify the "Actuated Subspace"—the set of coordinates subject to known external inputs. It performs an explicit regression to solve for these dynamics, effectively "cleaning" the signal. Subsequently, it isolates the residuals associated with the passive degrees of freedom and solves a reduced-order implicit regression problem. This structured approach significantly improves numerical stability and data efficiency by leveraging partial knowledge of the control inputs.
 
-While this thesis marks the conclusion of my Master's degree, it represents a journey that I could not have undertaken alone.
+Furthermore, to enhance the robustness of the implicit solver, we introduce a novel solution selection metric based on \textbf{Information-Theoretic Clustering}. Traditional methods rely solely on sparsity (Occam's Razor) to select candidate models, which often leads to the selection of disjoint or physically inconsistent solutions in high-dimensional spaces. The proposed clustering algorithm analyzes the geometric directionality of candidate coefficient vectors, aggregating partial solutions to robustly identify the true global dynamics even in the presence of noise and disjoint subspaces.
 
-I would like to extend my sincere appreciation to my supervisor, Professor Hayashibe, for accepting me into his laboratory. Over the past two and a half years, his mentorship has been pivotal, allowing me to navigate life in Japan and dive deeply into the research world. The autonomy I was afforded during this time was invaluable, providing me the space to explore this field creatively and broaden my technical horizons.
+The framework is validated through an extensive suite of benchmarks comprising both high-fidelity simulation and physical experimentation. We utilized the MuJoCo physics engine to generate datasets for three distinct robotic topologies: a Cartpole, a Double Pendulum, and a highly under-actuated "Cartpole Double" (3-DOF) system. These systems were tested under varying conditions, including fully explicit actuation, fully implicit dynamics, and mixed actuation with varying degrees of viscous damping. To ensure a rigorous comparison, we established a "Protocol of Equivalent Input Knowledge," normalizing the inductive bias provided to the candidate libraries of competing paradigms.
 
-I also owe a debt of gratitude to my partner, whom I was lucky to meet during this program. Thank you for the time we spent working side by side; your support provided the essential energy and drive required to reach this finish line.
+The simulation results demonstrate that UNI-SINDy significantly outperforms existing baselines. In the "Mixed" experimental category, which most closely mimics real-world robotics, UNI-SINDy achieved superior identification success rates compared to both Standard SINDy and XL-SINDy. Most notably, in the challenging 3-DOF Cartpole Double experiment, the standard SINDy-PI algorithm failed completely (0\% success rate) due to the combinatorial expansion of the library, whereas UNI-SINDy successfully identified the governing equations. This result provides strong empirical evidence that the injection of structural physical priors via the Unified Catalog is necessary for the tractability of high-dimensional identification.
 
-To my family and friends, thank you for your unwavering support and for believing in my potential. You have kept me grounded and motivated throughout every step of this process.
+Finally, the practical utility of the framework was verified on a physical experimental setup: a 3D-printed passive double pendulum. Using noisy kinematic data extracted via computer vision, UNI-SINDy successfully discovered the system's equations of motion. This experiment highlighted a critical advantage of the "White Box" approach: the ability to inject "Pre-knowledge." Due to the physical scale of the device, gravitational torques were approximately 300 times larger than inertial terms, causing standard regression to neglect the inertial dynamics. By anchoring the regression with known kinetic energy terms within the Unified Catalog, UNI-SINDy was able to recover the subtle inertial couplings that black-box methods missed, yielding a model capable of accurate long-horizon forecasting.
 
-Lastly, I wish to acknowledge the open-source community. As the saying goes, we stand on the shoulders of giants; without the collaborative spirit and the tools shared by previous researchers, this work would not have been possible.
+In conclusion, this thesis presents UNI-SINDy as a robust, data-efficient, and interpretable pathway for robotic system identification. By unifying the Lagrangian and Newtonian formalisms and introducing a structured algorithmic approach to mixed actuation, this work overcomes the limitations of previous methods, offering a viable tool for the discovery of nonlinear dynamics in complex, under-actuated robotic systems.
+}
 
-\clearpage
+\cleardoublepage
 
 \tableofcontents
 \listoffigures
 \listoftables
 
-\clearpage
+\cleardoublepage
 \pagenumbering{arabic} 
 
 % -------------------------------------------------------------------------
@@ -948,7 +1020,7 @@ Although the results presented in the subsequent chapter primarily utilize \text
 In the following sections, we provide a detailed development of the three primary algorithms utilized:
 \begin{itemize}
     \item \textsc{Lasso} (Least Absolute Shrinkage and Selection Operator): One of the foundational algorithms for sparse regression, effectively serving as a convex relaxation of the subset selection problem.
-    \item \textsc{Proximal Gradient Descent}: Specifically, the Iterative Soft-Thresholding Algorithm (ISTA), as employed by \cite{purnomoSparseIdentificationLagrangian2023}. This method combines gradient descent dynamics with a sparsity-promoting proximal operator.
+    \item \textsc{Proximal Gradient Descent}: Specifically, the Iterative Soft Thresholding Algorithm (ISTA), as employed by \cite{purnomoSparseIdentificationLagrangian2023}. This method combines gradient descent dynamics with a sparsity-promoting proximal operator.
     \item \textsc{Hard Thresholding Linear Regression}: A non-convex, iterative approach developed by Brunton et al. \cite{bruntonDiscoveringGoverningEquations2016} and mathematically validated regarding convergence in \cite{zhangConvergenceSINDyAlgorithm2019}.
 \end{itemize}
 
@@ -980,7 +1052,7 @@ The specific solver hyperparameters used for all experiments in the Results Chap
 \subsection{Proximal Gradient Descent}
 \textit{\textcolor{gray}{[Background - Implementation Details]}}
 
-For the proximal gradient descent approach, we implemented the Iterative Soft-Thresholding Algorithm (ISTA). This method is particularly effective for large-scale problems where computing the full inverse (or factorization) of the covariance matrix is computationally prohibitive. ISTA minimizes the same composite objective function as Lasso (Eq.~\ref{eq:lasso-objective}) but decouples the optimization into two distinct, alternating steps: a gradient descent step on the smooth, differentiable data-fidelity term (Mean Squared Error), and a proximal operator step to handle the non-smooth $L_1$ regularization term.
+For the proximal gradient descent approach, we implemented the Iterative Soft Thresholding Algorithm (ISTA). This method is particularly effective for large-scale problems where computing the full inverse (or factorization) of the covariance matrix is computationally prohibitive. ISTA minimizes the same composite objective function as Lasso (Eq.~\ref{eq:lasso-objective}) but decouples the optimization into two distinct, alternating steps: a gradient descent step on the smooth, differentiable data-fidelity term (Mean Squared Error), and a proximal operator step to handle the non-smooth $L_1$ regularization term.
 
 The update rule at iteration $k$ is given by:
 \begin{equation}
@@ -1158,7 +1230,11 @@ The practical implications of this protocol, specifically the resulting differen
 
 Although we intend to maintain brevity in this section to focus on the theoretical contributions, it is imperative to elucidate specific critical implementation details that enable the practical application of this work. Since a primary objective of this research was to democratize access to these advanced architectures, we have prioritized the development of a robust software ecosystem. It has been decided to create a comprehensive, modular Python library that encapsulates both standard SINDy methods and our novel contributions, thereby facilitating direct algorithmic comparison and benchmarking.
 
-The resulting library, \textsc{py-xl-sindy}, is open-source and available at: \url{https://github.com/Eymeric65/py-xl-sindy}. This library serves as the computational backbone for the \textbf{unified catalog} architecture and the \textbf{mixed implicit-explicit algorithm}. Furthermore, to ensure self-containment and performance optimization, several key optimization solvers—specifically \textbf{Lasso}, \textbf{Proximal Gradient Descent}, and interfaces for the \textbf{Clarabel} solver—have been natively reimplemented or linked within this framework. This integration allows for seamless interaction directly with the unified experiment matrix structure.
+The resulting library, \textsc{py-xl-sindy}, is open-source and available at: 
+
+\url{https://github.com/Eymeric65/py-xl-sindy}. 
+
+This library serves as the computational backbone for the \textbf{unified catalog} architecture and the \textbf{mixed implicit-explicit algorithm}. Furthermore, to ensure self-containment and performance optimization, several key optimization solvers—specifically \textbf{Lasso}, \textbf{Proximal Gradient Descent}, and interfaces for the \textbf{Clarabel} solver—have been natively reimplemented or linked within this framework. This integration allows for seamless interaction directly with the unified experiment matrix structure.
 
 Regarding the catalog definitions, the library provides built-in support for the three fundamental archetypes discussed throughout this thesis, each serving a distinct physical role:
 \begin{itemize}
@@ -1171,7 +1247,11 @@ Beyond the core algorithms, the library includes a suite of utility modules desi
 
 \subsection{Data Generation and Visualization Repository}
 
-Complementary to the core algorithmic library, a secondary repository has been established to house the results analysis, visualization tools, and academic resources associated with this research. This repository, accessible at \url{https://github.com/Eymeric65/py-xl-sindy-data-visualisation}, serves as a centralized hub containing the following resources:
+Complementary to the core algorithmic library, a secondary repository has been established to house the results analysis, visualization tools, and academic resources associated with this research. This repository, accessible at :
+
+\url{https://github.com/Eymeric65/py-xl-sindy-data-visualisation}
+
+Serves as a centralized hub containing the following resources:
 \begin{itemize}
     \item The initial research poster detailing the Unified Catalog and SINDy applications for robotic systems.
     \item Source code for the presentation slides (utilizing the \textsc{manim} animation engine) developed for this master's defense.
@@ -1571,6 +1651,19 @@ In conclusion, this thesis presents a compelling argument for the adoption of "W
 
 While challenges remain—specifically regarding the dependency on high-quality derivative data and the symbolic scalability for hyper-redundant systems—this work lays a solid foundation for future research. By providing a tool that "speaks the language" of physics, we take a significant step closer to robotic systems that not only learn how to move but understand the laws that govern their motion.
 
+
+\chapter*{Acknowledgements}
+
+While this thesis marks the conclusion of my Master's degree, it represents a journey that I could not have undertaken alone.
+
+I would like to extend my sincere appreciation to my supervisor, Professor Hayashibe, for accepting me into his laboratory. Over the past two and a half years, his mentorship has been pivotal, allowing me to navigate life in Japan and dive deeply into the research world. The autonomy I was afforded during this time was invaluable, providing me the space to explore this field creatively and broaden my technical horizons.
+
+I also owe a debt of gratitude to my partner, whom I was lucky to meet during this program. Thank you for the time we spent working side by side; your support provided the essential energy and drive required to reach this finish line.
+
+To my family and friends, thank you for your unwavering support and for believing in my potential. You have kept me grounded and motivated throughout every step of this process.
+
+Lastly, I wish to acknowledge the open-source community. As the saying goes, we stand on the shoulders of giants; without the collaborative spirit and the tools shared by previous researchers, this work would not have been possible.
+
 % -------------------------------------------------------------------------
 %   BACK MATTER
 % -------------------------------------------------------------------------
@@ -1603,7 +1696,7 @@ def _weak_sparsity_rank_weighted(x):
 
 \section{Damping Explicit Results}
 
-\begin{figure}
+\begin{figure}[H]
     \centering
     \begin{subfigure}[b]{0.95\textwidth}
         \includegraphics[width=\textwidth]{result/plots_damping_explicit/noise_comparison_white_background.eps}
@@ -1620,7 +1713,7 @@ def _weak_sparsity_rank_weighted(x):
     \label{fig:damping_explicit_validation}
 \end{figure}
 
-\begin{figure}
+\begin{figure}[H]
     \centering
     \begin{subfigure}[b]{0.95\textwidth}
         \includegraphics[width=\textwidth]{result/plots_damping_explicit/success_rate_white_background.eps}
@@ -1639,7 +1732,7 @@ def _weak_sparsity_rank_weighted(x):
 
 \section{Damping Implicit Results}
 
-\begin{figure}
+\begin{figure}[H]
     \centering
     \begin{subfigure}[b]{0.95\textwidth}
         \includegraphics[width=\textwidth]{result/plots_damping_implicit/noise_comparison_white_background.eps}
@@ -1656,7 +1749,7 @@ def _weak_sparsity_rank_weighted(x):
     \label{fig:damping_implicit_validation}
 \end{figure}
 
-\begin{figure}
+\begin{figure}[H]
     \centering
     \begin{subfigure}[b]{0.95\textwidth}
         \includegraphics[width=\textwidth]{result/plots_damping_implicit/success_rate_white_background.eps}
@@ -1675,7 +1768,7 @@ def _weak_sparsity_rank_weighted(x):
 
 \section{Damping Mixed Results}
 
-\begin{figure}
+\begin{figure}[H]
     \centering
     \begin{subfigure}[b]{0.95\textwidth}
         \includegraphics[width=\textwidth]{result/plots_damping_mixed/noise_comparison_white_background.eps}
@@ -1692,7 +1785,7 @@ def _weak_sparsity_rank_weighted(x):
     \label{fig:damping_mixed_validation}
 \end{figure}
 
-\begin{figure}
+\begin{figure}[H]
     \centering
     \begin{subfigure}[b]{0.95\textwidth}
         \includegraphics[width=\textwidth]{result/plots_damping_mixed/success_rate_white_background.eps}
@@ -1711,7 +1804,7 @@ def _weak_sparsity_rank_weighted(x):
 
 \section{No Damping Explicit Results}
 
-\begin{figure}
+\begin{figure}[H]
     \centering
     \begin{subfigure}[b]{0.95\textwidth}
         \includegraphics[width=\textwidth]{result/plots_no_damping_explicit/noise_comparison_white_background.eps}
@@ -1728,7 +1821,7 @@ def _weak_sparsity_rank_weighted(x):
     \label{fig:no_damping_explicit_validation}
 \end{figure}
 
-\begin{figure}
+\begin{figure}[H]
     \centering
     \begin{subfigure}[b]{0.95\textwidth}
         \includegraphics[width=\textwidth]{result/plots_no_damping_explicit/success_rate_white_background.eps}
