@@ -29,5 +29,6 @@ __pycache__/
 *.out
 *.run.xml
 *.toc
+*.xdv
 
 automatic_align*
