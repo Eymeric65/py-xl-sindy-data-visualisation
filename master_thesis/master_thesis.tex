@@ -3,7 +3,7 @@
 %   Modern Minimalist Master Thesis Template - Robotics (SINDy)
 % -------------------------------------------------------------------------
 \documentclass[
-    11pt,               % Standard font size
+    12pt,               % Standard font size
     a4paper,            % Paper size
     twoside,            % Print on one side (change to 'twoside' for binding)
     numbers=noenddot,   % Removes end dots in numbering (e.g. 1.1 not 1.1.)
@@ -12,11 +12,12 @@
     bibliography=totoc  % Adds Bibliography to TOC
 ]{scrreprt}
 
+
 % --- Essential Packages ---
 \usepackage{fontspec}       % For XeLaTeX font management
 \usepackage[english]{babel}
 \usepackage{microtype}      % Improves character kerning (essential for 'classy' look)
-\usepackage[left=25mm, right=25mm, top=20mm, bottom=25mm]{geometry} % Margins: L25mm R25mm T20mm B25mm
+\usepackage[left=25mm, right=25mm, top=20mm, bottom=25mm,includeheadfoot]{geometry} % Margins: L25mm R25mm T20mm B25mm
 
 % --- Mathematics & Robotics Specifics (Load BEFORE fonts for compatibility) ---
 \usepackage{amsmath}
@@ -60,6 +61,7 @@
 
 % --- Header & Footer Styling (Clean/Minimalist) ---
 \usepackage[automark,headsepline]{scrlayer-scrpage}
+% Make header/footer respect the text area width (geometry margins)
 \clearpairofpagestyles
 \ihead{\headmark}
 \cfoot*{\pagemark}  % * makes it apply to both plain and scrheadings styles
@@ -288,7 +290,9 @@ In conclusion, this thesis presents UNI-SINDy as a robust, data-efficient, and i
 \listoftables
 
 \cleardoublepage
-\pagenumbering{arabic} 
+\pagenumbering{arabic}
+
+\linespread{2}\selectfont % standard 2. interline
 
 % -------------------------------------------------------------------------
 %   MAIN CONTENT
@@ -1379,25 +1383,57 @@ The overarching objective of this comparative study is twofold. First, we aim to
 
 In this initial case study, we focus on the baseline scenario of explicit systems devoid of dissipative forces. The primary metric of success here is to verify that the proposed Uni-SINDy architecture retains the high identification fidelity characteristic of the XL-SINDy approach, which was specifically optimized for conservative Lagrangian systems.
 
+\subsubsection{Intermediate results}
+
+\TODO{Fill in intermediate results graph and catalog listing}
+
+\subsubsection{Aggregated results}
+
 As evidenced by the results illustrated in Fig.~\ref{fig:no-damping-explicit}, this hypothesis is strongly supported. Across the set of 5 viable experiments ($n_{max}=5$), both Uni-SINDy and XL-SINDy achieved a perfect 100\% success rate at low noise intensities. As expected, the performance of both algorithms degrades in a similar fashion as the signal-to-noise ratio decreases at higher noise levels. This parallel degradation confirms that the overhead of the unified framework does not introduce numerical fragility when applied to simple, conservative systems.
 
 It is worth noting that the rejection rate for this category was approximately 44\%. While this figure appears high, its statistical significance is somewhat tempered by the small sample size of the initial pool (9 experiments). Physically, however, this high failure rate provides an important insight: the absence of damping makes data generation inherently difficult. Without friction to dissipate energy, the random forcing functions frequently drove the system into unstable or high-velocity regimes that challenged the physics engine, rendering the resulting trajectory data unsuitable for regression regardless of the algorithm employed.
 
-\begin{figure}[h]
+More precisely, system by system Fig.~\ref{fig:no-damping-explicit-detail}, we can see that there is no successful experiment for the double pendulum cartpole, this is likely due to an high chaotic behavior. 
+
+Concerning the cartpole experiment UNI-SINDY and XL-SINDy have a perfect success rate on the ensemble of experiment ($n_{max}=3$) while SINDy have only 2 successful experiment and a slightly bigger validation error.
+
+On the double pendulum UNI-SINDy and XL-SINDy have a perfect success rate only on two of the three experiment and SINDy failed to retrieve any model from it.
+
+In conclusion for this case study, this validate the result from Purmono et al. \cite{purnomoSparseIdentificationLagrangian2023} where XL-SINDy outperform SINDy on the non damping subset of experiment
+
+\begin{figure}[H]
     \centering
-    \includegraphics[width=0.95\textwidth]{result/plots_no_damping_explicit/noise_comparison_combined_white_background.eps}
+    \includegraphics[width=0.8\textwidth]{result/plots_no_damping_explicit/noise_comparison_combined_white_background.eps}
     
-    \vspace{0.5cm}
+    \vspace{0.1cm}
     
-    \includegraphics[width=0.95\textwidth]{result/plots_no_damping_explicit/success_rate_combined_white_background.eps}
+    \includegraphics[width=0.8\textwidth]{result/plots_no_damping_explicit/success_rate_combined_white_background.eps}
     
     \caption{\textbf{No damping explicit results:} validation error comparison (top) and success rate comparison (bottom) across all systems}
     \label{fig:no-damping-explicit}
 \end{figure}
 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{result/plots_no_damping_explicit/noise_comparison_white_background.eps}
+    
+    \vspace{0.1cm}
+    
+    \includegraphics[width=0.8\textwidth]{result/plots_no_damping_explicit/success_rate_white_background.eps}
+    
+    \caption{\textbf{No damping explicit results system details:} validation error comparison (top) and success rate comparison (bottom) across all systems}
+    \label{fig:no-damping-explicit-detail}
+\end{figure}
+
 \subsection{Any Damping Explicit Experiment}
 
 The second case study expands our scope to investigate the performance of Uni-SINDy against the standard SINDy architecture in explicitly actuated systems subject to viscous damping. This comparison is critical, as it evaluates the framework's ability to generalize beyond ideal conservative mechanics and handle non-conservative, dissipative phenomena which are ubiquitous in real-world robotics.
+
+\subsubsection{Intermediate results}
+
+\TODO{Fill in intermediate results graph and catalog listing}
+
+\subsubsection{Aggregated results}
 
 As hypothesized, the performance of the standard XL-SINDy algorithm degrades precipitously in this category. This failure is not a numerical artifact but a structural inevitability: the basic XL-SINDy formulation relies strictly on the Euler-Lagrange optimization of a scalar energy function $L = T - V$. Without an explicit extension to include a Rayleigh dissipation function, the algorithm is mathematically incapable of representing the friction terms present in the underlying dynamics. Consequently, the non-zero success rate observed for XL-SINDy is almost exclusively attributable to the subset of experiments within this category where the damping coefficient was zero (i.e., the conservative cases carried over from the previous section).
 
@@ -1407,21 +1443,46 @@ It is important to highlight that Uni-SINDy's superior aggregate success rate is
 
 Finally, the percentage of discarded experiments for this category stands at $36\%$. This is a notable improvement over the $44\%$ observed in the undamped case. This reduction suggests that the introduction of damping acts as a stabilizing factor during data generation, preventing the chaotic divergence of trajectories and resulting in a higher yield of physically valid training data.
 
-\begin{figure}[h]
+Concerning the result system by system Fig.~\ref{fig:damping-explicit-detail}, we can see that for the first time UNI-SINDy successfully retrieve the double pendulum cartpole system on 3 experiment over 12 possibles. It can be noted that UNI-SINDy succeeded while SINDy couldn't likely due to the higher dimensionality of the catalog provided.
+
+The performance on the cartpole system are quite equivalent between UNI-SINDy and SINDy even though UNI-SINDy has slightly higher success rate and a smaller validation error than SINDy. All the 12 experiments have been taken in account which signify a perfect retrievation in any condition. 
+
+However concerning the double pendulum result are much more surprising, classical SINDy performed twice as much as UNI-SINDy with a validation error much lower than the one in UNI-SINDy.
+
+\begin{figure}[H]
     \centering
-    \includegraphics[width=0.95\textwidth]{result/plots_damping_explicit/noise_comparison_combined_white_background.eps}
+    \includegraphics[width=0.8\textwidth]{result/plots_damping_explicit/noise_comparison_combined_white_background.eps}
     
-    \vspace{0.5cm}
+    \vspace{0.1cm}
     
-    \includegraphics[width=0.95\textwidth]{result/plots_damping_explicit/success_rate_combined_white_background.eps}
+    \includegraphics[width=0.8\textwidth]{result/plots_damping_explicit/success_rate_combined_white_background.eps}
     
     \caption{\textbf{Any damping explicit results:} validation error comparison (top) and success rate comparison (bottom) across all systems}
     \label{fig:damping-explicit}
 \end{figure}
 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{result/plots_damping_explicit/noise_comparison_white_background.eps}
+    
+    \vspace{0.1cm}
+    
+    \includegraphics[width=0.8\textwidth]{result/plots_damping_explicit/success_rate_white_background.eps}
+    
+    \caption{\textbf{Any damping explicit results system details:} validation error comparison (top) and success rate comparison (bottom) across all systems}
+    \label{fig:damping-explicit-detail}
+\end{figure}
+
 \subsection{Any Damping Implicit Experiment}
 
+
 The third case study constitutes one of the most critical and revealing components of our research, as it isolates the challenge of pure implicit system identification. In this scenario, we perform a direct comparative analysis between the established SINDy-PI framework and our proposed Uni-SINDy architecture.
+
+\subsubsection{Intermediate results}
+
+\TODO{Fill in intermediate results graph and catalog listing}
+
+\subsubsection{Aggregated results}
 
 The results highlight a dramatic divergence in performance driven primarily by library dimensionality. As detailed previously in Table~\ref{table:catalog-size}, the strict enforcement of the "same knowledge" protocol results in a combinatorial explosion of the candidate library for the standard Newtonian formulation. This dimensional curse is so severe that, even for the relatively lower-dimensional systems like the \textbf{cartpole} and \textbf{double pendulum}, SINDy-PI failed to successfully identify the dynamics in a single instance. The algorithm was effectively overwhelmed by the sheer volume of candidate functions required to represent the implicit null-space.
 
@@ -1429,21 +1490,45 @@ This outcome presents a methodological dilemma. To achieve a non-zero success ra
 
 Finally, the percentage of discarded experiments in this category rose to $53\%$. This rate is noticeably higher than that observed in the explicit cases, reflecting the inherent difficulty of the implicit regression task. Unlike the explicit scenarios, where random forcing functions actively excite the system and continuously expose the phase space structure, implicit experiments rely exclusively on the energy injected via random initial conditions. As the system dissipates this energy through damping, the signal-to-noise ratio decays rapidly, making the "informational window" much shorter and the regression task significantly more computationally burdensome.
 
-\begin{figure}[h]
+In detail system by system Fig.~\ref{fig:damping-implicit-detail}, we can see that's once again double pendulum cartpole haven't been successfully retrieved. Otherwise on the double pendulum experiment the 12 experiments have been successfully retrieved on the lower noise treshold. 
+
+Concerning the cartpole system, only 3 experiment over the 12 have lead to a successful retrieval of the system.
+
+These highly contrasted results shows how challenging the implicit retrieval is for SINDY method even with the help of the new catalog definition.
+
+\begin{figure}[H]
     \centering
-    \includegraphics[width=0.95\textwidth]{result/plots_damping_implicit/noise_comparison_combined_white_background.eps}
+    \includegraphics[width=0.8\textwidth]{result/plots_damping_implicit/noise_comparison_combined_white_background.eps}
     
-    \vspace{0.5cm}
+    \vspace{0.1cm}
     
-    \includegraphics[width=0.95\textwidth]{result/plots_damping_implicit/success_rate_combined_white_background.eps}
+    \includegraphics[width=0.8\textwidth]{result/plots_damping_implicit/success_rate_combined_white_background.eps}
     
     \caption{\textbf{Any damping implicit results:} validation error comparison (top) and success rate comparison (bottom) across all systems}
     \label{fig:damping-implicit}
 \end{figure}
 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{result/plots_damping_implicit/noise_comparison_white_background.eps}
+    
+    \vspace{0.1cm}
+    
+    \includegraphics[width=0.8\textwidth]{result/plots_damping_implicit/success_rate_white_background.eps}
+    
+    \caption{\textbf{Any damping implicit results system details:} validation error comparison (top) and success rate comparison (bottom) across all systems}
+    \label{fig:damping-implicit-detail}
+\end{figure}
+
 \subsection{Any Damping Mixed Experiment}
 
 This final experimental subset represents the most comprehensive aggregation of our testing protocols. It encompasses the entirety of the previously discussed scenarios—including fully explicit, fully implicit, damped, and undamped systems—while incorporating the novel "mixed" category. This specific class involves systems subjected to heterogeneous actuation topologies, where external forces are applied to only a subset of the generalized coordinates.
+
+\subsubsection{Intermediate results}
+
+\TODO{Fill in intermediate results graph and catalog listing}
+
+\subsubsection{Aggregated results}
 
 This category yields arguably the most significant results of our study, as it most accurately reflects the complex realities of physical robotic systems. Real-world platforms, ranging from walking humanoids to soft robots, frequently exhibit hybrid dynamics characterized by a combination of active joints (motors) and passive degrees of freedom (elasticity, unactuated linkages). As illustrated in Fig.~\ref{fig:damping-mixed}, Uni-SINDy demonstrates superior performance in this challenging domain, emerging as the most robust architecture in terms of identification success rate.
 
@@ -1457,16 +1542,34 @@ The overall complexity of this category is reflected in the statistics. Aggregat
     \item \textbf{Cartpole Double (3-DOF):} $79\%$ discarded experiments (76/96). This significantly higher failure rate underscores the extreme challenge of identifying high-dimensional, under-actuated systems solely from random exploration, confirming that this system represents the current frontier for data-driven identification methods.
 \end{itemize}
 
-\begin{figure}[h]
+Concerning the system per system detail Fig.~\ref{fig:damping-explicit-detail}, we can observe that these 31 successful retrieval has been lead in majority by the new UNI-SINDy framework while SINDy and XL-SINDy have roughly the same successful rate. If we look closer the validation error is slightly lower for UNI-SINDy in comparison with the other methods.
+
+Only UNI-SINDy successfully retrieved mixed experiment in the double cart pole system with a validation error in the order of the other system.
+
+Finally, UNI-SINDy also dominates the success rate in the double pendulum experiment with however a clear cut as soon as noise is introduce, this phenomenum could be the source of some post studies.
+
+\begin{figure}[H]
     \centering
-    \includegraphics[width=0.95\textwidth]{result/plots_damping_mixed/noise_comparison_combined_white_background.eps}
+    \includegraphics[width=0.8\textwidth]{result/plots_damping_mixed/noise_comparison_combined_white_background.eps}
     
-    \vspace{0.5cm}
+    \vspace{0.1cm}
     
-    \includegraphics[width=0.95\textwidth]{result/plots_damping_mixed/success_rate_combined_white_background.eps}
+    \includegraphics[width=0.8\textwidth]{result/plots_damping_mixed/success_rate_combined_white_background.eps}
     
     \caption{\textbf{Any damping implicit results:} validation error comparison (top) and success rate comparison (bottom) across all systems}
     \label{fig:damping-mixed}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{result/plots_damping_mixed/noise_comparison_white_background.eps}
+    
+    \vspace{0.1cm}
+    
+    \includegraphics[width=0.8\textwidth]{result/plots_damping_mixed/success_rate_white_background.eps}
+    
+    \caption{\textbf{Any damping implicit results system details:} validation error comparison (top) and success rate comparison (bottom) across all systems}
+    \label{fig:damping-mixed-detail}
 \end{figure}
 
 \section{Results on Real System}
@@ -1691,151 +1794,151 @@ def _weak_sparsity_rank_weighted(x):
 
 \end{lstlisting}
 
-\chapter{All data figures}
-\label{ch:all-result-figures}
+% \chapter{All data figures}
+% \label{ch:all-result-figures}
 
-\section{Damping Explicit Results}
+% \section{Damping Explicit Results}
 
-\begin{figure}[H]
-    \centering
-    \begin{subfigure}[b]{0.95\textwidth}
-        \includegraphics[width=\textwidth]{result/plots_damping_explicit/noise_comparison_white_background.eps}
-        \caption{Noise comparison}
-    \end{subfigure}
+% \begin{figure}[H]
+%     \centering
+%     \begin{subfigure}[b]{0.95\textwidth}
+%         \includegraphics[width=\textwidth]{result/plots_damping_explicit/noise_comparison_white_background.eps}
+%         \caption{Noise comparison}
+%     \end{subfigure}
     
-    \vspace{0.5cm}
+%     \vspace{0.5cm}
     
-    \begin{subfigure}[b]{0.95\textwidth}
-        \includegraphics[width=\textwidth]{result/plots_damping_explicit/noise_comparison_combined_white_background.eps}
-        \caption{Noise comparison combined}
-    \end{subfigure}
-    \caption{Damping explicit - Validation error comparison}
-    \label{fig:damping_explicit_validation}
-\end{figure}
+%     \begin{subfigure}[b]{0.95\textwidth}
+%         \includegraphics[width=\textwidth]{result/plots_damping_explicit/noise_comparison_combined_white_background.eps}
+%         \caption{Noise comparison combined}
+%     \end{subfigure}
+%     \caption{Damping explicit - Validation error comparison}
+%     \label{fig:damping_explicit_validation}
+% \end{figure}
 
-\begin{figure}[H]
-    \centering
-    \begin{subfigure}[b]{0.95\textwidth}
-        \includegraphics[width=\textwidth]{result/plots_damping_explicit/success_rate_white_background.eps}
-        \caption{Success rate}
-    \end{subfigure}
+% \begin{figure}[H]
+%     \centering
+%     \begin{subfigure}[b]{0.95\textwidth}
+%         \includegraphics[width=\textwidth]{result/plots_damping_explicit/success_rate_white_background.eps}
+%         \caption{Success rate}
+%     \end{subfigure}
     
-    \vspace{0.5cm}
+%     \vspace{0.5cm}
     
-    \begin{subfigure}[b]{0.95\textwidth}
-        \includegraphics[width=\textwidth]{result/plots_damping_explicit/success_rate_combined_white_background.eps}
-        \caption{Success rate combined}
-    \end{subfigure}
-    \caption{Damping explicit - Success rate comparison}
-    \label{fig:damping_explicit_success}
-\end{figure}
+%     \begin{subfigure}[b]{0.95\textwidth}
+%         \includegraphics[width=\textwidth]{result/plots_damping_explicit/success_rate_combined_white_background.eps}
+%         \caption{Success rate combined}
+%     \end{subfigure}
+%     \caption{Damping explicit - Success rate comparison}
+%     \label{fig:damping_explicit_success}
+% \end{figure}
 
-\section{Damping Implicit Results}
+% \section{Damping Implicit Results}
 
-\begin{figure}[H]
-    \centering
-    \begin{subfigure}[b]{0.95\textwidth}
-        \includegraphics[width=\textwidth]{result/plots_damping_implicit/noise_comparison_white_background.eps}
-        \caption{Noise comparison}
-    \end{subfigure}
+% \begin{figure}[H]
+%     \centering
+%     \begin{subfigure}[b]{0.95\textwidth}
+%         \includegraphics[width=\textwidth]{result/plots_damping_implicit/noise_comparison_white_background.eps}
+%         \caption{Noise comparison}
+%     \end{subfigure}
     
-    \vspace{0.5cm}
+%     \vspace{0.5cm}
     
-    \begin{subfigure}[b]{0.95\textwidth}
-        \includegraphics[width=\textwidth]{result/plots_damping_implicit/noise_comparison_combined_white_background.eps}
-        \caption{Noise comparison combined}
-    \end{subfigure}
-    \caption{Damping implicit - Validation error comparison}
-    \label{fig:damping_implicit_validation}
-\end{figure}
+%     \begin{subfigure}[b]{0.95\textwidth}
+%         \includegraphics[width=\textwidth]{result/plots_damping_implicit/noise_comparison_combined_white_background.eps}
+%         \caption{Noise comparison combined}
+%     \end{subfigure}
+%     \caption{Damping implicit - Validation error comparison}
+%     \label{fig:damping_implicit_validation}
+% \end{figure}
 
-\begin{figure}[H]
-    \centering
-    \begin{subfigure}[b]{0.95\textwidth}
-        \includegraphics[width=\textwidth]{result/plots_damping_implicit/success_rate_white_background.eps}
-        \caption{Success rate}
-    \end{subfigure}
+% \begin{figure}[H]
+%     \centering
+%     \begin{subfigure}[b]{0.95\textwidth}
+%         \includegraphics[width=\textwidth]{result/plots_damping_implicit/success_rate_white_background.eps}
+%         \caption{Success rate}
+%     \end{subfigure}
     
-    \vspace{0.5cm}
+%     \vspace{0.5cm}
     
-    \begin{subfigure}[b]{0.95\textwidth}
-        \includegraphics[width=\textwidth]{result/plots_damping_implicit/success_rate_combined_white_background.eps}
-        \caption{Success rate combined}
-    \end{subfigure}
-    \caption{Damping implicit - Success rate comparison}
-    \label{fig:damping_implicit_success}
-\end{figure}
+%     \begin{subfigure}[b]{0.95\textwidth}
+%         \includegraphics[width=\textwidth]{result/plots_damping_implicit/success_rate_combined_white_background.eps}
+%         \caption{Success rate combined}
+%     \end{subfigure}
+%     \caption{Damping implicit - Success rate comparison}
+%     \label{fig:damping_implicit_success}
+% \end{figure}
 
-\section{Damping Mixed Results}
+% \section{Damping Mixed Results}
 
-\begin{figure}[H]
-    \centering
-    \begin{subfigure}[b]{0.95\textwidth}
-        \includegraphics[width=\textwidth]{result/plots_damping_mixed/noise_comparison_white_background.eps}
-        \caption{Noise comparison}
-    \end{subfigure}
+% \begin{figure}[H]
+%     \centering
+%     \begin{subfigure}[b]{0.95\textwidth}
+%         \includegraphics[width=\textwidth]{result/plots_damping_mixed/noise_comparison_white_background.eps}
+%         \caption{Noise comparison}
+%     \end{subfigure}
     
-    \vspace{0.5cm}
+%     \vspace{0.5cm}
     
-    \begin{subfigure}[b]{0.95\textwidth}
-        \includegraphics[width=\textwidth]{result/plots_damping_mixed/noise_comparison_combined_white_background.eps}
-        \caption{Noise comparison combined}
-    \end{subfigure}
-    \caption{Damping mixed - Validation error comparison}
-    \label{fig:damping_mixed_validation}
-\end{figure}
+%     \begin{subfigure}[b]{0.95\textwidth}
+%         \includegraphics[width=\textwidth]{result/plots_damping_mixed/noise_comparison_combined_white_background.eps}
+%         \caption{Noise comparison combined}
+%     \end{subfigure}
+%     \caption{Damping mixed - Validation error comparison}
+%     \label{fig:damping_mixed_validation}
+% \end{figure}
 
-\begin{figure}[H]
-    \centering
-    \begin{subfigure}[b]{0.95\textwidth}
-        \includegraphics[width=\textwidth]{result/plots_damping_mixed/success_rate_white_background.eps}
-        \caption{Success rate}
-    \end{subfigure}
+% \begin{figure}[H]
+%     \centering
+%     \begin{subfigure}[b]{0.95\textwidth}
+%         \includegraphics[width=\textwidth]{result/plots_damping_mixed/success_rate_white_background.eps}
+%         \caption{Success rate}
+%     \end{subfigure}
     
-    \vspace{0.5cm}
+%     \vspace{0.5cm}
     
-    \begin{subfigure}[b]{0.95\textwidth}
-        \includegraphics[width=\textwidth]{result/plots_damping_mixed/success_rate_combined_white_background.eps}
-        \caption{Success rate combined}
-    \end{subfigure}
-    \caption{Damping mixed - Success rate comparison}
-    \label{fig:damping_mixed_success}
-\end{figure}
+%     \begin{subfigure}[b]{0.95\textwidth}
+%         \includegraphics[width=\textwidth]{result/plots_damping_mixed/success_rate_combined_white_background.eps}
+%         \caption{Success rate combined}
+%     \end{subfigure}
+%     \caption{Damping mixed - Success rate comparison}
+%     \label{fig:damping_mixed_success}
+% \end{figure}
 
-\section{No Damping Explicit Results}
+% \section{No Damping Explicit Results}
 
-\begin{figure}[H]
-    \centering
-    \begin{subfigure}[b]{0.95\textwidth}
-        \includegraphics[width=\textwidth]{result/plots_no_damping_explicit/noise_comparison_white_background.eps}
-        \caption{Noise comparison}
-    \end{subfigure}
+% \begin{figure}[H]
+%     \centering
+%     \begin{subfigure}[b]{0.95\textwidth}
+%         \includegraphics[width=\textwidth]{result/plots_no_damping_explicit/noise_comparison_white_background.eps}
+%         \caption{Noise comparison}
+%     \end{subfigure}
     
-    \vspace{0.5cm}
+%     \vspace{0.5cm}
     
-    \begin{subfigure}[b]{0.95\textwidth}
-        \includegraphics[width=\textwidth]{result/plots_no_damping_explicit/noise_comparison_combined_white_background.eps}
-        \caption{Noise comparison combined}
-    \end{subfigure}
-    \caption{No damping explicit - Validation error comparison}
-    \label{fig:no_damping_explicit_validation}
-\end{figure}
+%     \begin{subfigure}[b]{0.95\textwidth}
+%         \includegraphics[width=\textwidth]{result/plots_no_damping_explicit/noise_comparison_combined_white_background.eps}
+%         \caption{Noise comparison combined}
+%     \end{subfigure}
+%     \caption{No damping explicit - Validation error comparison}
+%     \label{fig:no_damping_explicit_validation}
+% \end{figure}
 
-\begin{figure}[H]
-    \centering
-    \begin{subfigure}[b]{0.95\textwidth}
-        \includegraphics[width=\textwidth]{result/plots_no_damping_explicit/success_rate_white_background.eps}
-        \caption{Success rate}
-    \end{subfigure}
+% \begin{figure}[H]
+%     \centering
+%     \begin{subfigure}[b]{0.95\textwidth}
+%         \includegraphics[width=\textwidth]{result/plots_no_damping_explicit/success_rate_white_background.eps}
+%         \caption{Success rate}
+%     \end{subfigure}
     
-    \vspace{0.5cm}
+%     \vspace{0.5cm}
     
-    \begin{subfigure}[b]{0.95\textwidth}
-        \includegraphics[width=\textwidth]{result/plots_no_damping_explicit/success_rate_combined_white_background.eps}
-        \caption{Success rate combined}
-    \end{subfigure}
-    \caption{No damping explicit - Success rate comparison}
-    \label{fig:no_damping_explicit_success}
-\end{figure}
+%     \begin{subfigure}[b]{0.95\textwidth}
+%         \includegraphics[width=\textwidth]{result/plots_no_damping_explicit/success_rate_combined_white_background.eps}
+%         \caption{Success rate combined}
+%     \end{subfigure}
+%     \caption{No damping explicit - Success rate comparison}
+%     \label{fig:no_damping_explicit_success}
+% \end{figure}
 
 \end{document}
