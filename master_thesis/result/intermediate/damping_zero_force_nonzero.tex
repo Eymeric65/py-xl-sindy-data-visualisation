@@ -1,0 +1,88 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{longtable}
+\begin{document}
+
+\section*{Solution Analysis Tables}
+
+\subsection*{Table 1: Complete Function Library}
+{\scriptsize
+\begin{longtable}{|c|l|c|l|c|l|}
+\hline
+\# & Function Label & \# & Function Label & \# & Function Label \\
+\hline
+\endfirsthead
+\hline
+\# & Function Label & \# & Function Label & \# & Function Label \\
+\hline
+\endhead
+\hline
+\endfoot
+0 & $F_{ext_{0}}$ & 1 & $F_{ext_{1}}$ & 2 & ${\dot{{q}}}_{1}{\left(t \right)} \sin{\left(q_{1}{\left(t \right)} \right)}$ \\
+3 & ${\dot{{q}}}_{1}{\left(t \right)} \cos{\left(q_{0}{\left(t \right)} \right)}$ & 4 & ${\dot{{q}}}_{1}{\left(t \right)} \cos{\left(q_{1}{\left(t \right)} \right)}$ & 5 & ${\dot{{q}}}_{1}{\left(t \right)} \sin{\left(q_{0}{\left(t \right)} \right)}$ \\
+6 & ${\dot{{q}}}_{1}{\left(t \right)} \sin{\left(q_{1}{\left(t \right)} \right)} \cos{\left(q_{0}{\left(t \right)} \right)}$ & 7 & ${\dot{{q}}}_{1}{\left(t \right)} \sin{\left(q_{1}{\left(t \right)} \right)} \cos{\left(q_{1}{\left(t \right)} \right)}$ & 8 & ${\dot{{q}}}_{1}{\left(t \right)} \sin^{2}{\left(q_{1}{\left(t \right)} \right)}$ \\
+9 & ${\dot{{q}}}_{1}{\left(t \right)} \cos{\left(q_{0}{\left(t \right)} \right)} \cos{\left(q_{1}{\left(t \right)} \right)}$ & 10 & ${\dot{{q}}}_{1}{\left(t \right)} \cos^{2}{\left(q_{0}{\left(t \right)} \right)}$ & 11 & ${\dot{{q}}}_{1}{\left(t \right)} \cos^{2}{\left(q_{1}{\left(t \right)} \right)}$ \\
+12 & ${\dot{{q}}}_{1}{\left(t \right)} \sin{\left(q_{0}{\left(t \right)} \right)} \sin{\left(q_{1}{\left(t \right)} \right)}$ & 13 & ${\dot{{q}}}_{1}{\left(t \right)} \sin{\left(q_{0}{\left(t \right)} \right)} \cos{\left(q_{0}{\left(t \right)} \right)}$ & 14 & ${\dot{{q}}}_{1}{\left(t \right)} \sin{\left(q_{0}{\left(t \right)} \right)} \cos{\left(q_{1}{\left(t \right)} \right)}$ \\
+15 & ${\dot{{q}}}_{1}{\left(t \right)} \sin^{2}{\left(q_{0}{\left(t \right)} \right)}$ & 16 & ${\dot{{q}}}_{0}{\left(t \right)} \sin{\left(q_{1}{\left(t \right)} \right)}$ & 17 & ${\dot{{q}}}_{0}{\left(t \right)} \cos{\left(q_{0}{\left(t \right)} \right)}$ \\
+18 & ${\dot{{q}}}_{0}{\left(t \right)} \cos{\left(q_{1}{\left(t \right)} \right)}$ & 19 & ${\dot{{q}}}_{0}{\left(t \right)} \sin{\left(q_{0}{\left(t \right)} \right)}$ & 20 & ${\dot{{q}}}_{0}{\left(t \right)} \sin{\left(q_{1}{\left(t \right)} \right)} \cos{\left(q_{0}{\left(t \right)} \right)}$ \\
+21 & ${\dot{{q}}}_{0}{\left(t \right)} \sin{\left(q_{1}{\left(t \right)} \right)} \cos{\left(q_{1}{\left(t \right)} \right)}$ & 22 & ${\dot{{q}}}_{0}{\left(t \right)} \sin^{2}{\left(q_{1}{\left(t \right)} \right)}$ & 23 & ${\dot{{q}}}_{0}{\left(t \right)} \cos{\left(q_{0}{\left(t \right)} \right)} \cos{\left(q_{1}{\left(t \right)} \right)}$ \\
+24 & ${\dot{{q}}}_{0}{\left(t \right)} \cos^{2}{\left(q_{0}{\left(t \right)} \right)}$ & 25 & ${\dot{{q}}}_{0}{\left(t \right)} \cos^{2}{\left(q_{1}{\left(t \right)} \right)}$ & 26 & ${\dot{{q}}}_{0}{\left(t \right)} \sin{\left(q_{0}{\left(t \right)} \right)} \sin{\left(q_{1}{\left(t \right)} \right)}$ \\
+27 & ${\dot{{q}}}_{0}{\left(t \right)} \sin{\left(q_{0}{\left(t \right)} \right)} \cos{\left(q_{0}{\left(t \right)} \right)}$ & 28 & ${\dot{{q}}}_{0}{\left(t \right)} \sin{\left(q_{0}{\left(t \right)} \right)} \cos{\left(q_{1}{\left(t \right)} \right)}$ & 29 & ${\dot{{q}}}_{0}{\left(t \right)} \sin^{2}{\left(q_{0}{\left(t \right)} \right)}$ \\
+30 & ${\dot{{q}}}_{1}^{2}{\left(t \right)} \sin{\left(q_{1}{\left(t \right)} \right)}$ & 31 & ${\dot{{q}}}_{1}^{2}{\left(t \right)} \cos{\left(q_{0}{\left(t \right)} \right)}$ & 32 & ${\dot{{q}}}_{1}^{2}{\left(t \right)} \cos{\left(q_{1}{\left(t \right)} \right)}$ \\
+33 & ${\dot{{q}}}_{1}^{2}{\left(t \right)} \sin{\left(q_{0}{\left(t \right)} \right)}$ & 34 & ${\dot{{q}}}_{1}^{2}{\left(t \right)} \sin{\left(q_{1}{\left(t \right)} \right)} \cos{\left(q_{0}{\left(t \right)} \right)}$ & 35 & ${\dot{{q}}}_{1}^{2}{\left(t \right)} \sin{\left(q_{1}{\left(t \right)} \right)} \cos{\left(q_{1}{\left(t \right)} \right)}$ \\
+36 & ${\dot{{q}}}_{1}^{2}{\left(t \right)} \sin^{2}{\left(q_{1}{\left(t \right)} \right)}$ & 37 & ${\dot{{q}}}_{1}^{2}{\left(t \right)} \cos{\left(q_{0}{\left(t \right)} \right)} \cos{\left(q_{1}{\left(t \right)} \right)}$ & 38 & ${\dot{{q}}}_{1}^{2}{\left(t \right)} \cos^{2}{\left(q_{0}{\left(t \right)} \right)}$ \\
+39 & ${\dot{{q}}}_{1}^{2}{\left(t \right)} \cos^{2}{\left(q_{1}{\left(t \right)} \right)}$ & 40 & ${\dot{{q}}}_{1}^{2}{\left(t \right)} \sin{\left(q_{0}{\left(t \right)} \right)} \sin{\left(q_{1}{\left(t \right)} \right)}$ & 41 & ${\dot{{q}}}_{1}^{2}{\left(t \right)} \sin{\left(q_{0}{\left(t \right)} \right)} \cos{\left(q_{0}{\left(t \right)} \right)}$ \\
+42 & ${\dot{{q}}}_{1}^{2}{\left(t \right)} \sin{\left(q_{0}{\left(t \right)} \right)} \cos{\left(q_{1}{\left(t \right)} \right)}$ & 43 & ${\dot{{q}}}_{1}^{2}{\left(t \right)} \sin^{2}{\left(q_{0}{\left(t \right)} \right)}$ & 44 & ${\dot{{q}}}_{0}{\left(t \right)} {\dot{{q}}}_{1}{\left(t \right)} \sin{\left(q_{1}{\left(t \right)} \right)}$ \\
+45 & ${\dot{{q}}}_{0}{\left(t \right)} {\dot{{q}}}_{1}{\left(t \right)} \cos{\left(q_{0}{\left(t \right)} \right)}$ & 46 & ${\dot{{q}}}_{0}{\left(t \right)} {\dot{{q}}}_{1}{\left(t \right)} \cos{\left(q_{1}{\left(t \right)} \right)}$ & 47 & ${\dot{{q}}}_{0}{\left(t \right)} {\dot{{q}}}_{1}{\left(t \right)} \sin{\left(q_{0}{\left(t \right)} \right)}$ \\
+48 & ${\dot{{q}}}_{0}{\left(t \right)} {\dot{{q}}}_{1}{\left(t \right)} \sin{\left(q_{1}{\left(t \right)} \right)} \cos{\left(q_{0}{\left(t \right)} \right)}$ & 49 & ${\dot{{q}}}_{0}{\left(t \right)} {\dot{{q}}}_{1}{\left(t \right)} \sin{\left(q_{1}{\left(t \right)} \right)} \cos{\left(q_{1}{\left(t \right)} \right)}$ & 50 & ${\dot{{q}}}_{0}{\left(t \right)} {\dot{{q}}}_{1}{\left(t \right)} \sin^{2}{\left(q_{1}{\left(t \right)} \right)}$ \\
+51 & ${\dot{{q}}}_{0}{\left(t \right)} {\dot{{q}}}_{1}{\left(t \right)} \cos{\left(q_{0}{\left(t \right)} \right)} \cos{\left(q_{1}{\left(t \right)} \right)}$ & 52 & ${\dot{{q}}}_{0}{\left(t \right)} {\dot{{q}}}_{1}{\left(t \right)} \cos^{2}{\left(q_{0}{\left(t \right)} \right)}$ & 53 & ${\dot{{q}}}_{0}{\left(t \right)} {\dot{{q}}}_{1}{\left(t \right)} \cos^{2}{\left(q_{1}{\left(t \right)} \right)}$ \\
+54 & ${\dot{{q}}}_{0}{\left(t \right)} {\dot{{q}}}_{1}{\left(t \right)} \sin{\left(q_{0}{\left(t \right)} \right)} \sin{\left(q_{1}{\left(t \right)} \right)}$ & 55 & ${\dot{{q}}}_{0}{\left(t \right)} {\dot{{q}}}_{1}{\left(t \right)} \sin{\left(q_{0}{\left(t \right)} \right)} \cos{\left(q_{0}{\left(t \right)} \right)}$ & 56 & ${\dot{{q}}}_{0}{\left(t \right)} {\dot{{q}}}_{1}{\left(t \right)} \sin{\left(q_{0}{\left(t \right)} \right)} \cos{\left(q_{1}{\left(t \right)} \right)}$ \\
+57 & ${\dot{{q}}}_{0}{\left(t \right)} {\dot{{q}}}_{1}{\left(t \right)} \sin^{2}{\left(q_{0}{\left(t \right)} \right)}$ & 58 & ${\dot{{q}}}_{0}^{2}{\left(t \right)} \sin{\left(q_{1}{\left(t \right)} \right)}$ & 59 & ${\dot{{q}}}_{0}^{2}{\left(t \right)} \cos{\left(q_{0}{\left(t \right)} \right)}$ \\
+60 & ${\dot{{q}}}_{0}^{2}{\left(t \right)} \cos{\left(q_{1}{\left(t \right)} \right)}$ & 61 & ${\dot{{q}}}_{0}^{2}{\left(t \right)} \sin{\left(q_{0}{\left(t \right)} \right)}$ & 62 & ${\dot{{q}}}_{0}^{2}{\left(t \right)} \sin{\left(q_{1}{\left(t \right)} \right)} \cos{\left(q_{0}{\left(t \right)} \right)}$ \\
+63 & ${\dot{{q}}}_{0}^{2}{\left(t \right)} \sin{\left(q_{1}{\left(t \right)} \right)} \cos{\left(q_{1}{\left(t \right)} \right)}$ & 64 & ${\dot{{q}}}_{0}^{2}{\left(t \right)} \sin^{2}{\left(q_{1}{\left(t \right)} \right)}$ & 65 & ${\dot{{q}}}_{0}^{2}{\left(t \right)} \cos{\left(q_{0}{\left(t \right)} \right)} \cos{\left(q_{1}{\left(t \right)} \right)}$ \\
+66 & ${\dot{{q}}}_{0}^{2}{\left(t \right)} \cos^{2}{\left(q_{0}{\left(t \right)} \right)}$ & 67 & ${\dot{{q}}}_{0}^{2}{\left(t \right)} \cos^{2}{\left(q_{1}{\left(t \right)} \right)}$ & 68 & ${\dot{{q}}}_{0}^{2}{\left(t \right)} \sin{\left(q_{0}{\left(t \right)} \right)} \sin{\left(q_{1}{\left(t \right)} \right)}$ \\
+69 & ${\dot{{q}}}_{0}^{2}{\left(t \right)} \sin{\left(q_{0}{\left(t \right)} \right)} \cos{\left(q_{0}{\left(t \right)} \right)}$ & 70 & ${\dot{{q}}}_{0}^{2}{\left(t \right)} \sin{\left(q_{0}{\left(t \right)} \right)} \cos{\left(q_{1}{\left(t \right)} \right)}$ & 71 & ${\dot{{q}}}_{0}^{2}{\left(t \right)} \sin^{2}{\left(q_{0}{\left(t \right)} \right)}$ \\
+72 & ${\dot{{q}}}_{1}{\left(t \right)}$ & 73 & ${\dot{{q}}}_{0}{\left(t \right)}$ & 74 & ${\dot{{q}}}_{1}^{2}{\left(t \right)}$ \\
+75 & ${\dot{{q}}}_{0}{\left(t \right)} {\dot{{q}}}_{1}{\left(t \right)}$ & 76 & ${\dot{{q}}}_{0}^{2}{\left(t \right)}$ & 77 & $\sin{\left(q_{1}{\left(t \right)} \right)}$ \\
+78 & $\cos{\left(q_{0}{\left(t \right)} \right)}$ & 79 & $\cos{\left(q_{1}{\left(t \right)} \right)}$ & 80 & $\sin{\left(q_{0}{\left(t \right)} \right)}$ \\
+81 & $\sin{\left(q_{1}{\left(t \right)} \right)} \cos{\left(q_{0}{\left(t \right)} \right)}$ & 82 & $\sin{\left(q_{1}{\left(t \right)} \right)} \cos{\left(q_{1}{\left(t \right)} \right)}$ & 83 & $\sin^{2}{\left(q_{1}{\left(t \right)} \right)}$ \\
+84 & $\cos{\left(q_{0}{\left(t \right)} \right)} \cos{\left(q_{1}{\left(t \right)} \right)}$ & 85 & $\cos^{2}{\left(q_{0}{\left(t \right)} \right)}$ & 86 & $\cos^{2}{\left(q_{1}{\left(t \right)} \right)}$ \\
+87 & $\sin{\left(q_{0}{\left(t \right)} \right)} \sin{\left(q_{1}{\left(t \right)} \right)}$ & 88 & $\sin{\left(q_{0}{\left(t \right)} \right)} \cos{\left(q_{0}{\left(t \right)} \right)}$ & 89 & $\sin{\left(q_{0}{\left(t \right)} \right)} \cos{\left(q_{1}{\left(t \right)} \right)}$ \\
+90 & $\sin^{2}{\left(q_{0}{\left(t \right)} \right)}$ & 91 & $\text{coordinate}_{0} \ {\dot{{q}}}_{0}{\left(t \right)}$ & 92 & $\text{coordinate}_{1} \ {\dot{{q}}}_{0}{\left(t \right)}$ \\
+93 & $\text{coordinate}_{0} \ {\dot{{q}}}_{1}{\left(t \right)}$ & 94 & $\text{coordinate}_{1} \ {\dot{{q}}}_{1}{\left(t \right)}$ &  &  \\
+\hline
+\end{longtable}
+}
+
+\clearpage
+
+\subsection*{Table 2: Non-null Coefficients Comparison}
+{\scriptsize
+\begin{longtable}{|l|r|r|}
+\hline
+Function Label & Ideal Value & Retrieved Value \\
+\hline
+\endfirsthead
+\hline
+Function Label & Ideal Value & Retrieved Value \\
+\hline
+\endhead
+\hline
+\endfoot
+$\cos{\left(q_{1}{\left(t \right)} \right)}$ & -4.905000 & -4.796501 \\
+$F_{ext_{0}}$ & -1.000000 & -1.000000 \\
+$F_{ext_{1}}$ & -1.000000 & -1.000000 \\
+${\dot{{q}}}_{0}^{2}{\left(t \right)}$ & 0.650000 & 0.511607 \\
+${\dot{{q}}}_{0}{\left(t \right)} {\dot{{q}}}_{1}{\left(t \right)} \cos{\left(q_{1}{\left(t \right)} \right)}$ & -0.500000 & -0.497426 \\
+${\dot{{q}}}_{1}^{2}{\left(t \right)}$ & 0.250000 & 0.192596 \\
+${\dot{{q}}}_{0}^{2}{\left(t \right)} \sin^{2}{\left(q_{1}{\left(t \right)} \right)}$ & 0.000000 & 0.063948 \\
+${\dot{{q}}}_{0}^{2}{\left(t \right)} \cos^{2}{\left(q_{0}{\left(t \right)} \right)}$ & 0.000000 & 0.070963 \\
+${\dot{{q}}}_{0}^{2}{\left(t \right)} \cos^{2}{\left(q_{1}{\left(t \right)} \right)}$ & 0.000000 & 0.064029 \\
+${\dot{{q}}}_{0}^{2}{\left(t \right)} \sin^{2}{\left(q_{0}{\left(t \right)} \right)}$ & 0.000000 & 0.070958 \\
+\hline
+\end{longtable}
+}
+
+\end{document}

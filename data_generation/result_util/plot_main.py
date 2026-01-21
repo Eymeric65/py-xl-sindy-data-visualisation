@@ -44,7 +44,7 @@ COMBOS_IMPLICIT = ComboRegistry([
 # Pretty names for experiment types
 SYSTEMS = {
     "cartpole": System(pretty_name='Cartpole', name='cart_pole'),
-    "cartpole_double": System(pretty_name='Double Pendulum on Cartpole', name='cart_pole_double'),
+    "cartpole_double": System(pretty_name='Double Cartpole', name='cart_pole_double'),
     "double_pendulum_pm": System(pretty_name='Double Pendulum', name='double_pendulum_pm')
 }
 

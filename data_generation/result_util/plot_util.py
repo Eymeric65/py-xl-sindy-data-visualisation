@@ -6,6 +6,7 @@ import pandas as pd
 
 import matplotlib.pyplot as plt
 from matplotlib.patches import Patch
+from matplotlib import ticker
 import seaborn as sns
 
 from pydantic import BaseModel,ConfigDict
@@ -118,7 +119,7 @@ TARGET_COMBOS = ComboRegistry([
 # Pretty names for experiment types
 SYSTEMS = {
     "cartpole": System(pretty_name='Cartpole', name='cart_pole'),
-    "cartpole_double": System(pretty_name='Double Pendulum on Cartpole', name='cart_pole_double'),
+    "cartpole_double": System(pretty_name='Double Cartpole', name='cart_pole_double'),
     "double_pendulum_pm": System(pretty_name='Double Pendulum', name='double_pendulum_pm')
 }
 
@@ -454,6 +455,12 @@ def plot_boxplot(filename:str, box_plot_data: list[BPSystemData],output_dir: str
     for row_idx, system_data in enumerate(box_plot_data):
 
         ax = axes[row_idx, 0]
+
+        # Add enhanced grid
+        ax.grid(True, alpha=0.4, axis='y', which='major', linestyle='-', linewidth=0.8)
+        ax.grid(True, alpha=0.2, axis='y', which='minor', linestyle=':', linewidth=0.5)
+        ax.tick_params(axis='y',which='both', labelsize=20)
+        ax.tick_params(axis='x',which='both', labelsize=20)
         
         # Add legend only for first subplot showing noise levels with gradient
         if row_idx == 0:
@@ -466,7 +473,7 @@ def plot_boxplot(filename:str, box_plot_data: list[BPSystemData],output_dir: str
                 legend_elements.append(
                     Patch(facecolor=(gray_val, gray_val, gray_val), alpha=0.8, label=f'Noise: {noise}', edgecolor='black', linewidth=0.5)
                 )
-            ax.legend(handles=legend_elements, loc='upper right', fontsize=12, frameon=True, 
+            ax.legend(handles=legend_elements, loc='upper right', fontsize=16, frameon=True, 
                      fancybox=True, shadow=True, framealpha=0.95)
 
         # Prepare data for each combo across all noise levels
@@ -517,7 +524,7 @@ def plot_boxplot(filename:str, box_plot_data: list[BPSystemData],output_dir: str
                     y_max = max(noise_data.validation_errors)
                     upper_quartile = np.percentile(noise_data.validation_errors, 75)
                     # Use upper_quartile * 2 if max is more than 50x the upper_quartile, otherwise use max * 1.5
-                    y_pos = upper_quartile * 2 if y_max > 50 * upper_quartile else y_max * 1.5
+                    y_pos = upper_quartile if y_max > 50 * upper_quartile else y_max * 1.5
                     all_y_max_values.append(y_pos)
 
                     success_rate = (len(noise_data.validation_errors) / system_data.valid_experiment_number * 100) if system_data.valid_experiment_number > 0 else 0
@@ -528,9 +535,10 @@ def plot_boxplot(filename:str, box_plot_data: list[BPSystemData],output_dir: str
 
                 # Store position and success rate for later labeling
                 if success_rate > 0 and y_pos is not None:
-                    ax.text(position + local_position, y_pos, f'{success_rate:.0f}%', 
-                        ha='center', va='bottom', fontsize=10, style='italic', fontweight='bold',
-                        **style_dict['annotation_bbox'])
+                    # ax.text(position + local_position, y_pos, f'{success_rate:.0f}%', 
+                    #     ha='center', va='bottom', fontsize=10, style='italic', fontweight='bold',
+                    #     **style_dict['annotation_bbox'])
+                    pass
                 elif success_rate == 0:
                     # Store position for zero labels to be added after calculating average
                     zero_rate_positions.append(position + local_position)
@@ -539,7 +547,11 @@ def plot_boxplot(filename:str, box_plot_data: list[BPSystemData],output_dir: str
 
 
             x_ticks.append(position + (local_position) / 2)
-            x_labels.append(combo_data.combo.pretty_name)
+
+            if row_idx == len(box_plot_data) -1:
+                x_labels.append(combo_data.combo.pretty_name)
+            else:
+                x_labels.append("")
 
             position += local_position +  2 # Extra space between combos
 
@@ -551,11 +563,12 @@ def plot_boxplot(filename:str, box_plot_data: list[BPSystemData],output_dir: str
         
         # Add zero success rate labels at average position
         for pos in zero_rate_positions:
-            ax.text(pos, avg_y_pos, '0%', 
-                ha='center', va='bottom', fontsize=10, style='italic', fontweight='bold',
-                **style_dict['annotation_bbox'])
+            # ax.text(pos, avg_y_pos, '0%', 
+            #     ha='center', va='bottom', fontsize=10, style='italic', fontweight='bold',
+            #     **style_dict['annotation_bbox'])
+            pass
 
-        ax.set_xlim(1, position + 1)
+        ax.set_xlim(1, position + 1.5)
 
         print(len(all_plot_data), "boxplots to plot")
         print(len(all_positions), "positions for boxplots")
@@ -581,26 +594,21 @@ def plot_boxplot(filename:str, box_plot_data: list[BPSystemData],output_dir: str
         # Set log scale
         ax.set_yscale('log')
         
+        # Configure scientific notation formatter for consistent font size
+        formatter = ticker.LogFormatterSciNotation()
+        ax.yaxis.set_major_formatter(formatter)
+        
         # Set x-axis ticks and labels (centered on each group of 4 noise levels)
         ax.set_xticks(x_ticks)
-        ax.set_xticklabels(x_labels, fontsize=11)
+        ax.set_xticklabels(x_labels, fontsize=22)
 
-        if row_idx == n_rows - 1:
-            ax.set_xlabel('Method (noise levels: 0.0, 0.001, 0.01, 0.1 - only systems converging over full validation period)', fontsize=9)
-        
         # Set y-axis
-        ax.set_ylabel(f'{system_data.system_registry.pretty_name}\nValidation Error (log)', fontsize=12, fontweight='bold')
-        
-        # Add enhanced grid
-        ax.grid(True, alpha=0.4, axis='y', which='major', linestyle='-', linewidth=0.8)
-        ax.grid(True, alpha=0.2, axis='y', which='minor', linestyle=':', linewidth=0.5)
-        ax.tick_params(axis='y', labelsize=11)
-        ax.tick_params(axis='x', labelsize=11)
+        ax.set_ylabel(system_data.system_registry.pretty_name, fontsize=20, fontweight='bold')
 
         # Add n_max annotation in bottom right corner (consistent position with success rate plot)
-        ax.text(0.98, 0.04, f'$n_{{max}}={system_data.valid_experiment_number}$', 
+        ax.text(0.98, 0.06, f'$n_{{max}}={system_data.valid_experiment_number}$', 
                 transform=ax.transAxes, 
-                fontsize=11, 
+                fontsize=16, 
                 verticalalignment="bottom", 
                 horizontalalignment="right",
                 **style_dict['annotation_bbox']
@@ -665,7 +673,7 @@ def plot_success_rate(filename:str, box_plot_data: list[BPSystemData],output_dir
                 legend_elements.append(
                     Patch(facecolor=(gray_val, gray_val, gray_val), alpha=0.8, label=f'Noise: {noise}', edgecolor='black', linewidth=0.5)
                 )
-            ax.legend(handles=legend_elements, loc='upper right', fontsize=12, frameon=True,
+            ax.legend(handles=legend_elements, loc='upper right', fontsize=16, frameon=True,
                      fancybox=True, shadow=True, framealpha=0.95)
 
         # Prepare data for each combo across all noise levels
@@ -716,7 +724,10 @@ def plot_success_rate(filename:str, box_plot_data: list[BPSystemData],output_dir
                 all_positions.append(position + local_position)
 
             x_ticks.append(position + (local_position) / 2)
-            x_labels.append(combo_data.combo.pretty_name)
+            if row_idx == len(box_plot_data) -1:
+                x_labels.append(combo_data.combo.pretty_name)
+            else:
+                x_labels.append("")
 
             position += local_position +  2 # Extra space between combos
 
@@ -736,29 +747,26 @@ def plot_success_rate(filename:str, box_plot_data: list[BPSystemData],output_dir
         # Add value labels on top of bars
         for i, (pos, val) in enumerate(zip(all_positions, all_plot_data)):
             if val > 0:
-                ax.text(pos, val + 1, f'{val:.0f}%', ha='center', va='bottom', fontsize=9, fontweight='bold')
+                ax.text(pos, val + 1, f'{val:.0f}%', ha='center', va='bottom', fontsize=12, fontweight='bold')
 
         # Set x-axis ticks and labels (centered on each group of 4 noise levels)
         ax.set_xticks(x_ticks)
-        ax.set_xticklabels(x_labels, fontsize=11)
+        ax.set_xticklabels(x_labels, fontsize=22)
 
-        if row_idx == n_rows - 1:
-            ax.set_xlabel('Method (noise levels: 0.0, 0.01, 0.1, 0.2 - only systems converging over full validation period)', fontsize=9)
-        
         # Set y-axis with enhanced styling
-        ax.set_ylabel(f'{system_data.system_registry.pretty_name}\nSuccess Rate (%)', fontsize=12, fontweight='bold')
-        ax.set_ylim(0, 105)  # Set y-axis from 0 to 105%
+        ax.set_ylabel(system_data.system_registry.pretty_name, fontsize=20, fontweight='bold')
+        ax.set_ylim(0, 110)  # Set y-axis from 0 to 105%
         
         # Add enhanced grid
         ax.grid(True, alpha=0.4, axis='y', which='major', linestyle='-', linewidth=0.8)
         ax.grid(True, alpha=0.2, axis='y', which='minor', linestyle=':', linewidth=0.5)
-        ax.tick_params(axis='y', labelsize=11)
-        ax.tick_params(axis='x', labelsize=11)
-
+        ax.tick_params(axis='y', labelsize=20)
+        ax.tick_params(axis='x', labelsize=20)
+        
         # Add n_max annotation in bottom right corner (consistent position with boxplot)
-        ax.text(0.98, 0.04, f'$n_{{max}}={system_data.valid_experiment_number}$', 
+        ax.text(0.98, 0.06, f'$n_{{max}}={system_data.valid_experiment_number}$', 
                 transform=ax.transAxes, 
-                fontsize=11, 
+                fontsize=16, 
                 verticalalignment="bottom", 
                 horizontalalignment="right",
                 **style_dict['annotation_bbox']
