@@ -314,7 +314,7 @@ In conclusion, this thesis presents UNI-SINDy as a robust, data-efficient, and i
 \cleardoublepage
 \pagenumbering{arabic}
 
-\linespread{2}\selectfont % standard 2. interline
+\linespread{1}\selectfont % standard 2. interline
 
 % Set caption linespread to 1
 \captionsetup{font={stretch=0.5}}
@@ -347,8 +347,10 @@ The history of system identification in robotics can be viewed as a pendulum swi
 \subsection{Classical Identification and the Rise of the Black Box}
 Early approaches focused on parametric identification, where the structure of the equation was assumed known (e.g., a standard rigid body model), and optimization techniques were used to fit the inertial parameters. While effective for industrial manipulators, this approach fails when the assumed structure does not match reality, for instance, when unmodeled aerodynamic drag or complex stiction is present.
 
-To bypass the need for structural assumptions, the field turned toward non-parametric, "black-box" modeling. The rise of machine learning, and specifically Deep Neural Networks (DNNs), revolutionized this space. A neural network can approximate any continuous function to an arbitrary degree of accuracy, given sufficient data \cite{hornikMultilayerFeedforwardNetworks1989}. In robotics, this allowed for the creation of control laws and dynamic models that could learn implicitly from sensor data, bypassing the need for manual derivation. This paradigm shift facilitated significant advances in reinforcement learning, where agents learn policies directly from raw observations without an explicit understanding of the underlying physics \cite{mnihHumanlevelControlDeep2015}.
-A intermediate "grey box" paradigm have been atteigned by \cite{schulzeContextAwareDeepLagrangian2025} which team have successfully controlled a robot from an approximated lagrangian by neural network with a model predictive control algorithm.
+To bypass the need for structural assumptions, the field turned toward non-parametric, "black-box" modeling. The rise of machine learning, and specifically Deep Neural Networks (DNNs), revolutionized this space. A neural network can approximate any continuous function to an arbitrary degree of accuracy, given sufficient data \cite{hornikMultilayerFeedforwardNetworks1989}. In robotics, this allowed for the creation of control laws and dynamic models that could learn implicitly from sensor data, bypassing the need for manual derivation, such as in \cite{martiusExtrapolationLearningEquations2016} which enable the discovery of system dynamics by neural networks. 
+
+This paradigm shift facilitated significant advances in reinforcement learning, where agents learn policies directly from raw observations without an explicit understanding of the underlying physics \cite{mnihHumanlevelControlDeep2015}.
+A intermediate "grey box" paradigm have been atteigned by \cite{schulzeContextAwareDeepLagrangian2025,lutterDeepLagrangianNetworks2019} which team have successfully controlled a robot from an approximated lagrangian by neural network with a model predictive control algorithm. Another team \cite{greydanusHamiltonianNeuralNetworks2019} have successfully approximated the hamiltonian from a neural networks, same for \cite{cranmerLagrangianNeuralNetworks2020} concerning the Lagrangian
 
 \subsection{The Interpretability and Safety Gap}
 Despite the performance of neural networks, they suffer from a critical flaw: a lack of interpretability. A neural network weights matrix offers no insight into the physics of the system. It does not tell the engineer if the robot is behaving due to Coriolis forces, gravity, or friction.
@@ -364,6 +366,8 @@ To address the interpretability gap, the field of Symbolic Regression emerged, a
 A breakthrough occurred with the development of \textit{Sparse Identification of Nonlinear Dynamics} (SINDy) by Brunton et al. \cite{bruntonDiscoveringGoverningEquations2016}. SINDy reframes the model discovery problem as a sparse linear regression. It posits that the dynamics of most physical systems are sparse in the space of possible functions; that is, the equation of motion for a pendulum may contain $\sin(\theta)$ and $\dot{\theta}$, but it will likely not contain $e^{\theta^5}$.
 
 By constructing a library of candidate functions $\boldsymbol{\Theta}$ and employing sparse regularization (such as LASSO or Sequential Thresholded Least Squares), SINDy selects only the few terms necessary to describe the data. The result is a set of interpretable differential equations that balance accuracy with model complexity, adhering to the principle of Occam's Razor.
+
+The initial research team of SINDy have successfully combined reinforment learning and SINDy in order to control dynamics system only from data \cite{zolmanSINDyRLInterpretableEfficient2024}. Another paper from the team used model predictive control instead of reinforcement learning \cite{kaiserSparseIdentificationNonlinear2018}
 
 Even if they don't call it SINDy per se, other team have also converged to the same type of regression \cite{pikulinskiDatadrivenInverseDynamics2025}
 
@@ -418,6 +422,8 @@ Finally, \textbf{Chapter \ref{ch:discussion}} discusses the implications of thes
 \chapter{Methods}
 \label{ch:methods}
 This chapter thoroughly details the working principles of the Sparse Identification of Nonlinear Dynamics (SINDy) algorithm. It also outlines our specific contributions to the presented method.
+
+SINDy is rooted in classical dynamics studies, the reader can find an introduction book in \cite{felizHandbookSpringerRobotics}
 
 SINDy represents a data-driven framework explicitly designed to \textbf{identify} governing equations directly from available data. This framework applies to nonlinear ordinary differential equations (ODEs), which are defined generally in Eq.~\eqref{eq:ode} and Eq.~\eqref{eq:ode:ex}. Furthermore, it can be extended to partial differential equations (PDEs) as demonstrated in Eq.~\eqref{eq:pde} and Eq.~\eqref{eq:pde:ex}:
 
@@ -615,7 +621,7 @@ While this section has focused on mechanical systems, it is worth noting that th
 \subsection{Lagrangian SINDy}
 \textit{\textcolor{gray}{[Background - Prior Lab Work]}}
 
-Building upon the theoretical foundation established above, Purnomo et al., in the second laboratory paper regarding SINDy \cite{purnomoSparseIdentificationLagrangian2023}, utilized the Lagrangian formalism to transform the candidate function catalog via the Euler-Lagrange operator. 
+A first work on Lagrangian and SINDy has been made in the laboratory\cite{chuDiscoveringInterpretableDynamics2020} but the cornerstone of mixing euler lagrange and the lagrangian to allow great accuracy, as been made by Purnomo et al., in the second laboratory paper regarding SINDy \cite{purnomoSparseIdentificationLagrangian2023}.
 
 In the standard SINDy formulation, one seeks to identify the coefficient matrix $\boldsymbol{\Xi}$ by relating the library of functions to the observed accelerations (or derivatives of the state). This is analogous to solving for the dynamics in the Newtonian frame ($F=ma$):
 \begin{align}
@@ -2122,7 +2128,7 @@ Like all SINDy-based approaches, our framework is strictly dependent on the avai
 The "Unified" nature of our catalog assumes that the true dynamics can be represented as a linear combination of the provided basis functions. While the Lagrangian sub-catalog handles rigid body dynamics robustly, the Newtonian sub-catalog relies on the user to populate it with appropriate friction models (Coulomb, Viscous, Stribeck). If the physical system exhibits complex hysteretic friction or non-polynomial aerodynamic drag that is not present in the library, the algorithm will fail to capture these effects, potentially compensating by overfitting other terms.
 
 \subsection{Computational Cost of the Symbolic Engine}
-While the regression step is efficient, the symbolic construction of the Lagrangian library involves applying the Euler-Lagrange operator to a symbolic expression. As the number of degrees of freedom increases, the symbolic length of the equations of motion grows exponentially. For systems with $N > 10$ DOF, the time required to generate the library matrix $\boldsymbol{\Theta}$ may become a bottleneck, necessitating more efficient symbolic engines or automatic differentiation techniques.
+While the regression step is efficient, the symbolic construction of the Lagrangian library involves applying the Euler-Lagrange operator to a symbolic expression. As the number of degrees of freedom increases, the symbolic length of the equations of motion grows exponentially. For systems with $N > 10$ DOF, the time required to generate the library matrix $\boldsymbol{\Theta}$ may become a bottleneck, necessitating more efficient symbolic engines or automatic differentiation techniques. Such issue may be mitigated by applying ensembling technique such as in ensemble SINDy works\cite{faselEnsembleSINDyRobustSparse2022} 
 
 \section{Implications for Robotics and Future Work}
 
