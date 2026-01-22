@@ -1,219 +1,444 @@
-% --- Standard Robotics & Control Textbooks ---
-
-@book{sciaviccoRoboticsModellingPlanning2009,
-  title={Robotics: Modelling, Planning and Control},
-  author={Siciliano, Bruno and Sciavicco, Lorenzo and Villani, Luigi and Oriolo, Giuseppe},
-  year={2009},
-  publisher={Springer Science \& Business Media}
+@article{badarinSiciliano2009Robotics,
+  title = {Siciliano 2009 {{Robotics Modelling}}, {{Planning}} and {{Control}}},
+  author = {Badarin, Izzeldeen M. O. H. A. M. M. A. D.},
+  doi = {10.1007/978-1-84628-642-1},
+  urldate = {2026-01-22},
+  abstract = {The use of registered names, trademarks, etc. in this publication does not imply, even in the absence of a specific statement, that such names are exempt from the relevant laws and regulations and therefore free for general use. The publisher makes}
 }
-
-@incollection{hollerbachDynamicsInverseDynamics2008,
-  title={Dynamics},
-  author={Hollerbach, John M and Khalil, Wisama and Gautier, Maxime},
-  booktitle={Springer Handbook of Robotics},
-  pages={323--358},
-  year={2008},
-  publisher={Springer}
-}
-
-@book{ljungSystemIdentificationTheory1999,
-  title={System Identification: Theory for the User},
-  author={Ljung, Lennart},
-  edition={2nd},
-  year={1999},
-  publisher={Prentice Hall PTR}
-}
-
-% --- Machine Learning & Neural Networks ---
-
-@article{hornikMultilayerFeedforwardNetworks1989,
-  title={Multilayer feedforward networks are universal approximators},
-  author={Hornik, Kurt and Stinchcombe, Maxwell and White, Halbert},
-  journal={Neural Networks},
-  volume={2},
-  number={5},
-  pages={359--366},
-  year={1989},
-  publisher={Elsevier}
-}
-
-@article{mnihHumanlevelControlDeep2015,
-  title={Human-level control through deep reinforcement learning},
-  author={Mnih, Volodymyr and Kavukcuoglu, Koray and Silver, David and Rusu, Andrei A and Veness, Joel and Bellemare, Marc G and Graves, Alex and Riedmiller, Martin and Fidjeland, Andreas K and Ostrovski, Georg and others},
-  journal={Nature},
-  volume={518},
-  number={7540},
-  pages={529--533},
-  year={2015},
-  publisher={Nature Publishing Group}
-}
-
-@article{karniadakisPhysicsinformedMachineLearning2021,
-  title={Physics-informed machine learning},
-  author={Karniadakis, George Em and Kevrekidis, Ioannis G and Lu, Lu and Perdikaris, Paris and Wang, Sifan and Yang, Liu},
-  journal={Nature Reviews Physics},
-  volume={3},
-  number={6},
-  pages={422--440},
-  year={2021},
-  publisher={Nature Publishing Group}
-}
-
-% --- Symbolic Regression & SINDy Foundations ---
-
-@article{schmidtDistillingFreeformNatural2009,
-  title={Distilling free-form natural laws from experimental data},
-  author={Schmidt, Michael and Lipson, Hod},
-  journal={Science},
-  volume={324},
-  number={5923},
-  pages={81--85},
-  year={2009},
-  publisher={American Association for the Advancement of Science}
-}
-
-
-% --- SINDy Variants (Implicit & Lagrangian) ---
-
-
-
 
 @article{bruntonDiscoveringGoverningEquations2016,
   title = {Discovering Governing Equations from Data: {{Sparse}} Identification of Nonlinear Dynamical Systems},
   shorttitle = {Discovering Governing Equations from Data},
   author = {Brunton, Steven L. and Proctor, Joshua L. and Kutz, J. Nathan},
-  date = {2016-04-12},
-  journaltitle = {Proceedings of the National Academy of Sciences},
-  shortjournal = {Proc. Natl. Acad. Sci. U.S.A.},
+  year = 2016,
+  month = apr,
+  journal = {Proceedings of the National Academy of Sciences},
   volume = {113},
   number = {15},
   eprint = {1509.03580},
-  eprinttype = {arXiv},
-  eprintclass = {math},
+  primaryclass = {math},
   pages = {3932--3937},
   issn = {0027-8424, 1091-6490},
   doi = {10.1073/pnas.1517384113},
-  url = {http://arxiv.org/abs/1509.03580},
   urldate = {2024-11-08},
-  abstract = {The ability to discover physical laws and governing equations from data is one of humankind’s greatest intellectual achievements. A quantitative understanding of dynamic constraints and balances in nature has facilitated rapid development of knowledge and enabled advanced technological achievements, including aircraft, combustion engines, satellites, and electrical power. In this work, we combine sparsity-promoting techniques and machine learning with nonlinear dynamical systems to discover governing physical equations from measurement data. The only assumption about the structure of the model is that there are only a few important terms that govern the dynamics, so that the equations are sparse in the space of possible functions; this assumption holds for many physical systems. In particular, we use sparse regression to determine the fewest terms in the dynamic governing equations required to accurately represent the data. The resulting models are parsimonious, balancing model complexity with descriptive ability while avoiding overfitting. We demonstrate the algorithm on a wide range of problems, from simple canonical systems, including linear and nonlinear oscillators and the chaotic Lorenz system, to the fluid vortex shedding behind an obstacle. The fluid example illustrates the ability of this method to discover the underlying dynamics of a system that took experts in the community nearly 30 years to resolve. We also show that this method generalizes to parameterized, time-varying, or externally forced systems.},
+  abstract = {The ability to discover physical laws and governing equations from data is one of humankind's greatest intellectual achievements. A quantitative understanding of dynamic constraints and balances in nature has facilitated rapid development of knowledge and enabled advanced technological achievements, including aircraft, combustion engines, satellites, and electrical power. In this work, we combine sparsity-promoting techniques and machine learning with nonlinear dynamical systems to discover governing physical equations from measurement data. The only assumption about the structure of the model is that there are only a few important terms that govern the dynamics, so that the equations are sparse in the space of possible functions; this assumption holds for many physical systems. In particular, we use sparse regression to determine the fewest terms in the dynamic governing equations required to accurately represent the data. The resulting models are parsimonious, balancing model complexity with descriptive ability while avoiding overfitting. We demonstrate the algorithm on a wide range of problems, from simple canonical systems, including linear and nonlinear oscillators and the chaotic Lorenz system, to the fluid vortex shedding behind an obstacle. The fluid example illustrates the ability of this method to discover the underlying dynamics of a system that took experts in the community nearly 30 years to resolve. We also show that this method generalizes to parameterized, time-varying, or externally forced systems.},
+  archiveprefix = {arXiv},
   langid = {english},
   keywords = {Mathematics - Dynamical Systems},
-  file = {/home/echauchat/Zotero/storage/FK27MANU/Brunton et al. - 2016 - Discovering governing equations from data Sparse identification of nonlinear dynamical systems.pdf}
+  file = {C:\Users\Eymeric\Zotero\storage\FK27MANU\Brunton et al. - 2016 - Discovering governing equations from data Sparse identification of nonlinear dynamical systems.pdf}
+}
+
+@misc{chauchatLagrangianSindybasedReinforcement2025,
+  type = {Poster Presentation},
+  title = {Lagrangian Sindy-Based Reinforcement Learning for Reducing Full-Order System Inter- Actions.},
+  author = {Chauchat, Eymeric},
+  year = 2025,
+  month = dec,
+  address = {Tohoku University}
 }
 
 @article{chuDiscoveringInterpretableDynamics2020,
   title = {Discovering {{Interpretable Dynamics}} by {{Sparsity Promotion}} on {{Energy}} and the {{Lagrangian}}},
   author = {Chu, Hoang K. and Hayashibe, Mitsuhiro},
-  date = {2020-04},
-  journaltitle = {IEEE Robotics and Automation Letters},
+  year = 2020,
+  month = apr,
+  journal = {IEEE Robotics and Automation Letters},
   volume = {5},
   number = {2},
   pages = {2154--2160},
   issn = {2377-3766},
   doi = {10.1109/LRA.2020.2970626},
-  url = {https://ieeexplore.ieee.org/document/8977323/?arnumber=8977323},
   urldate = {2025-02-03},
   abstract = {Data-driven modeling frameworks that adopt sparse regression techniques, such as sparse identification of nonlinear dynamics (SINDy) and its modifications, are developed to resolve difficulties in extracting underlying dynamics from experimental data. In contrast to neural-network-based methods, these methods are designed to obtain white-box analytical models. In this work, we incorporate the concept of SINDy and knowledge in the field of classical mechanics to identify interpretable and sparse expressions of total energy and the Lagrangian that shelters the hidden dynamics. Moreover, our method (hereafter referred as Lagrangian-SINDy) is developed to use knowledge of simple systems that form the system being analyzed to ensure the likelihood of correct results and to improve the learning pace. Lagrangian-SINDy is highly accurate in discovering interpretable dynamics via energy-related physical quantities. Its performance is validated with three popular multi-DOF nonlinear dynamical systems, namely the spherical pendulum, double pendulum and cart-pendulum system. Comparisons with other SINDy-based methods are made and Lagrangian-SINDy is found to provide the most compact analytical models.},
-  eventtitle = {{{IEEE Robotics}} and {{Automation Letters}}},
   keywords = {Analytical models,Biological neural networks,calibration and identification dynamics,Data mining,Data models,Dynamics,Force,model learning for control,Nonlinear dynamical systems,Task analysis},
-  file = {/home/echauchat/Zotero/storage/82YV3TFA/Chu と Hayashibe - 2020 - Discovering Interpretable Dynamics by Sparsity Promotion on Energy and the Lagrangian.pdf;/home/echauchat/Zotero/storage/6RW6R4NX/8977323.html}
+  file = {C\:\\Users\\Eymeric\\Zotero\\storage\\82YV3TFA\\Chu と Hayashibe - 2020 - Discovering Interpretable Dynamics by Sparsity Promotion on Energy and the Lagrangian.pdf;C\:\\Users\\Eymeric\\Zotero\\storage\\6RW6R4NX\\8977323.html}
+}
+
+@misc{cranmerLagrangianNeuralNetworks2020,
+  title = {Lagrangian {{Neural Networks}}},
+  author = {Cranmer, Miles and Greydanus, Sam and Hoyer, Stephan and Battaglia, Peter and Spergel, David and Ho, Shirley},
+  year = 2020,
+  month = jul,
+  number = {arXiv:2003.04630},
+  eprint = {2003.04630},
+  primaryclass = {cs},
+  publisher = {arXiv},
+  doi = {10.48550/arXiv.2003.04630},
+  urldate = {2026-01-22},
+  abstract = {Accurate models of the world are built upon notions of its underlying symmetries. In physics, these symmetries correspond to conservation laws, such as for energy and momentum. Yet even though neural network models see increasing use in the physical sciences, they struggle to learn these symmetries. In this paper, we propose Lagrangian Neural Networks (LNNs), which can parameterize arbitrary Lagrangians using neural networks. In contrast to models that learn Hamiltonians, LNNs do not require canonical coordinates, and thus perform well in situations where canonical momenta are unknown or difficult to compute. Unlike previous approaches, our method does not restrict the functional form of learned energies and will produce energy-conserving models for a variety of tasks. We test our approach on a double pendulum and a relativistic particle, demonstrating energy conservation where a baseline approach incurs dissipation and modeling relativity without canonical coordinates where a Hamiltonian approach fails. Finally, we show how this model can be applied to graphs and continuous systems using a Lagrangian Graph Network, and demonstrate it on the 1D wave equation.},
+  archiveprefix = {arXiv},
+  keywords = {Computer Science - Machine Learning,Mathematics - Dynamical Systems,Physics - Computational Physics,Physics - Data Analysis Statistics and Probability,Statistics - Machine Learning},
+  file = {C\:\\Users\\Eymeric\\Zotero\\storage\\2R9SHS5C\\Cranmer et al. - 2020 - Lagrangian Neural Networks.pdf;C\:\\Users\\Eymeric\\Zotero\\storage\\IIRHFL4Q\\2003.html}
 }
 
 @article{faselEnsembleSINDyRobustSparse2022,
   title = {Ensemble-{{SINDy}}: {{Robust}} Sparse Model Discovery in the Low-Data, High-Noise Limit, with Active Learning and Control},
   shorttitle = {Ensemble-{{SINDy}}},
   author = {Fasel, Urban and Kutz, J. Nathan and Brunton, Bingni W. and Brunton, Steven L.},
-  date = {2022-04},
-  journaltitle = {Proceedings of the Royal Society A: Mathematical, Physical and Engineering Sciences},
-  shortjournal = {Proc. R. Soc. A.},
+  year = 2022,
+  month = apr,
+  journal = {Proceedings of the Royal Society A: Mathematical, Physical and Engineering Sciences},
   volume = {478},
   number = {2260},
   eprint = {2111.10992},
-  eprinttype = {arXiv},
-  eprintclass = {math},
+  primaryclass = {math},
   pages = {20210904},
   issn = {1364-5021, 1471-2946},
   doi = {10.1098/rspa.2021.0904},
-  url = {http://arxiv.org/abs/2111.10992},
   urldate = {2025-02-04},
   abstract = {Sparse model identification enables the discovery of nonlinear dynamical systems purely from data; however, this approach is sensitive to noise, especially in the low-data limit. In this work, we leverage the statistical approach of bootstrap aggregating (bagging) to robustify the sparse identification of nonlinear dynamics (SINDy) algorithm. First, an ensemble of SINDy models is identified from subsets of limited and noisy data. The aggregate model statistics are then used to produce inclusion probabilities of the candidate functions, which enables uncertainty quantification and probabilistic forecasts. We apply this ensemble-SINDy (E-SINDy) algorithm to several synthetic and real-world data sets and demonstrate substantial improvements to the accuracy and robustness of model discovery from extremely noisy and limited data. For example, E-SINDy uncovers partial differential equations models from data with more than twice as much measurement noise as has been previously reported. Similarly, E-SINDy learns the Lotka Volterra dynamics from remarkably limited data of yearly lynx and hare pelts collected from 1900-1920. E-SINDy is computationally efficient, with similar scaling as standard SINDy. Finally, we show that ensemble statistics from E-SINDy can be exploited for active learning and improved model predictive control.},
+  archiveprefix = {arXiv},
   keywords = {Computer Science - Numerical Analysis,Mathematics - Dynamical Systems,Mathematics - Numerical Analysis,Mathematics - Optimization and Control},
-  file = {/home/echauchat/Zotero/storage/CM2YYW4E/Fasel et al. - 2022 - Ensemble-SINDy Robust sparse model discovery in the low-data, high-noise limit, with active learnin.pdf;/home/echauchat/Zotero/storage/M4IP9E5H/2111.html}
+  file = {C\:\\Users\\Eymeric\\Zotero\\storage\\CM2YYW4E\\Fasel et al. - 2022 - Ensemble-SINDy Robust sparse model discovery in the low-data, high-noise limit, with active learnin.pdf;C\:\\Users\\Eymeric\\Zotero\\storage\\M4IP9E5H\\2111.html}
+}
+
+@article{felizHandbookSpringerRobotics,
+  title = {Handbook {{Springer}} of {{Robotics}}},
+  author = {Feliz, Julio},
+  urldate = {2026-01-22},
+  abstract = {Handbook Springer of Robotics}
+}
+
+@article{goldsteinClassicalMechanics3rd2002,
+  title = {{\emph{Classical }}{{{\emph{Mechanics}}}}{\emph{, 3rd Ed.}}},
+  author = {Goldstein, Herbert and Poole, Charles and Safko, John and Addison, Stephen R.},
+  year = 2002,
+  month = jul,
+  journal = {American Journal of Physics},
+  volume = {70},
+  number = {7},
+  pages = {782--783},
+  issn = {0002-9505, 1943-2909},
+  doi = {10.1119/1.1484149},
+  urldate = {2026-01-22},
+  langid = {english}
+}
+
+@inproceedings{greydanusHamiltonianNeuralNetworks2019,
+  title = {Hamiltonian {{Neural Networks}}},
+  booktitle = {Advances in {{Neural Information Processing Systems}}},
+  author = {Greydanus, Samuel and Dzamba, Misko and Yosinski, Jason},
+  year = 2019,
+  volume = {32},
+  publisher = {Curran Associates, Inc.},
+  urldate = {2026-01-22},
+  file = {C:\Users\Eymeric\Zotero\storage\YGMR8FHY\Greydanus et al. - 2019 - Hamiltonian Neural Networks.pdf}
+}
+
+@article{hamiltonXVGeneralMethod1834,
+  title = {{{XV}}. {{On}} a General Method in Dynamics; by Which the Study of the Motions of All Free Systems of Attracting or Repelling Points Is Reduced to the Search and Differentiation of One Central Relation, or Characteristic Function},
+  author = {Hamilton, William Rowan},
+  year = 1834,
+  month = dec,
+  journal = {Philosophical Transactions of the Royal Society of London},
+  number = {124},
+  pages = {247--308},
+  issn = {0261-0523},
+  doi = {10.1098/rstl.1834.0017},
+  urldate = {2026-01-22},
+  abstract = {The theoretical development of the laws of motion of bodies is a problem of such interest and importance, that it has engaged the attention of all the most eminent mathematicians, since the invention of dynamics as a mathematical science by Galileo, and especially since the wonderful extension which was given to that science by Newton. Among the successors of those illustrious men, Lagrange has perhaps done more than any other analyst, to give extent and harmony to such deductive researches, by showing that the most varied consequences respecting the motions of systems of bodies may be derived from one radical formula; the beauty of the method so suiting the dignity of the results, as to make of his great work a kind of scientific poem. But the science of force, or of power acting by law in space and time, has undergone already another revolution, and has become already more dynamic, by having almost dismissed the conceptions of solidity and cohesion, and those other material ties, or geometrically imaginable conditions, which Lagrange so happily reasoned on, and by tending more and more to resolve all connexions and actions of bodies into attractions and repulsions of points: and while the science is advancing thus in one direction by the improvement of physical views, it may advance in another direction also by the invention of mathematical methods. And the method proposed in the present essay, for the deductive study of the motions of attracting or repelling systems, will perhaps be received with indulgence, as an attempt to assist in carrying forward so high an inquiry. In the methods commonly employed, the determination of the motion of a free point in space, under the influence of accelerating forces, depends on the integration of three equations in ordinary differentials of the second order; and the determination of the motions of a system of free points, attracting or repelling one another, depends on the integration of a system of such equations, in number threefold the number of the attracting or repelling points, unless we previously diminish by unity this latter number, by considering only relative motions. Thus, in the solar system, when we consider only the mutual attractions of the sun and of the ten known planets, the determination of the motions of the latter about the former is reduced, by the usual methods, to the integration of a system of thirty ordinary differential equations of the second order, between the coordinates and the time; or, by a transformation of Lagrange, to the integration of a system of sixty ordinary differential equations of the first order, between the time and the elliptic elements: by which integrations, the thirty varying coordinates, or the sixty varying elements, are to be found as functions of the time. In the method of the present essay, this problem is reduced to the search and differentiation of a single function, which satisfies two partial differential equations of the first order and of the second degree: and every other dynamical problem, respecting the motions of any system, however numerous, of attracting or repelling points, (even if we suppose those points restricted by any conditions of connexion consistent with the law of living force,) is reduced, in like manner, to the study of one central function, of which the form marks out and characterizes the properties of the moving system, and is to be determined by a pair of partial differential equations of the first order, combined with some simple considerations. The difficulty is therefore at least transferred from the integration of many equations of one class to the integration of two of another: and even if it should be thought that no practical facility is gained, yet an intellectual pleasure may result from the reduction of the most complex and, probably., of all researches respecting the forces and motions of body, to the study of one characteristic function, the unfolding of one central relation.},
+  file = {C\:\\Users\\Eymeric\\Zotero\\storage\\WITPRNGY\\Hamilton - 1834 - XV. On a general method in dynamics\; by which the study of the motions of all free systems of attrac.pdf;C\:\\Users\\Eymeric\\Zotero\\storage\\U3AP25W6\\rstl.1834.html}
+}
+
+@incollection{hollerbachModelIdentification2008,
+  title = {Model {{Identification}}},
+  booktitle = {Springer {{Handbook}} of {{Robotics}}},
+  author = {Hollerbach, John and Khalil, Wisama and Gautier, Maxime},
+  year = 2008,
+  pages = {321--344},
+  publisher = {Springer, Berlin, Heidelberg},
+  doi = {10.1007/978-3-540-30301-5_15},
+  urldate = {2026-01-22},
+  abstract = {This chapter discusses how to determine the kinematic parameters and the inertial parameters of robot manipulators. Both instances of model identification are cast into a\&\#160;common framework of least-squares parameter estimation, and are shown to...},
+  isbn = {978-3-540-30301-5},
+  langid = {english}
+}
+
+@article{hornikMultilayerFeedforwardNetworks1989,
+  title = {Multilayer Feedforward Networks Are Universal Approximators},
+  author = {Hornik, Kurt and Stinchcombe, Maxwell and White, Halbert},
+  year = 1989,
+  month = jan,
+  journal = {Neural Networks},
+  volume = {2},
+  number = {5},
+  pages = {359--366},
+  issn = {0893-6080},
+  doi = {10.1016/0893-6080(89)90020-8},
+  urldate = {2026-01-22},
+  abstract = {This paper rigorously establishes that standard multilayer feedforward networks with as few as one hidden layer using arbitrary squashing functions are capable of approximating any Borel measurable function from one finite dimensional space to another to any desired degree of accuracy, provided sufficiently many hidden units are available. In this sense, multilayer feedforward networks are a class of universal approximators.},
+  keywords = {Back-propagation networks,Feedforward networks,Mapping networks,Network representation capability,Sigma-Pi networks,Squashing functions,Stone-Weierstrass Theorem,Universal approximation},
+  file = {C:\Users\Eymeric\Zotero\storage\BBNH8T75\0893608089900208.html}
 }
 
 @article{kahemanSINDyPIRobustAlgorithm2020,
   title = {{{SINDy-PI}}: {{A Robust Algorithm}} for {{Parallel Implicit Sparse Identification}} of {{Nonlinear Dynamics}}},
   shorttitle = {{{SINDy-PI}}},
   author = {Kaheman, Kadierdan and Kutz, J. Nathan and Brunton, Steven L.},
-  date = {2020-10},
-  journaltitle = {Proceedings of the Royal Society A: Mathematical, Physical and Engineering Sciences},
-  shortjournal = {Proc. R. Soc. A.},
+  year = 2020,
+  month = oct,
+  journal = {Proceedings of the Royal Society A: Mathematical, Physical and Engineering Sciences},
   volume = {476},
   number = {2242},
   eprint = {2004.02322},
-  eprinttype = {arXiv},
-  eprintclass = {cs},
+  primaryclass = {cs},
   pages = {20200279},
   issn = {1364-5021, 1471-2946},
   doi = {10.1098/rspa.2020.0279},
-  url = {http://arxiv.org/abs/2004.02322},
   urldate = {2024-11-08},
-  abstract = {Accurately modeling the nonlinear dynamics of a system from measurement data is a challenging yet vital topic. The sparse identification of nonlinear dynamics (SINDy) algorithm is one approach to discover dynamical systems models from data. Although extensions have been developed to identify implicit dynamics, or dynamics described by rational functions, these extensions are extremely sensitive to noise. In this work, we develop SINDy-PI (parallel, implicit), a robust variant of the SINDy algorithm to identify implicit dynamics and rational nonlinearities. The SINDy-PI framework includes multiple optimization algorithms and a principled approach to model selection. We demonstrate the ability of this algorithm to learn implicit ordinary and partial differential equations and conservation laws from limited and noisy data. In particular, we show that the proposed approach is several orders of magnitude more noise robust than previous approaches, and may be used to identify a class of ODE and PDE dynamics that were previously unattainable with SINDy, including for the double pendulum dynamics and simplified model for the Belousov–Zhabotinsky (BZ) reaction.},
+  abstract = {Accurately modeling the nonlinear dynamics of a system from measurement data is a challenging yet vital topic. The sparse identification of nonlinear dynamics (SINDy) algorithm is one approach to discover dynamical systems models from data. Although extensions have been developed to identify implicit dynamics, or dynamics described by rational functions, these extensions are extremely sensitive to noise. In this work, we develop SINDy-PI (parallel, implicit), a robust variant of the SINDy algorithm to identify implicit dynamics and rational nonlinearities. The SINDy-PI framework includes multiple optimization algorithms and a principled approach to model selection. We demonstrate the ability of this algorithm to learn implicit ordinary and partial differential equations and conservation laws from limited and noisy data. In particular, we show that the proposed approach is several orders of magnitude more noise robust than previous approaches, and may be used to identify a class of ODE and PDE dynamics that were previously unattainable with SINDy, including for the double pendulum dynamics and simplified model for the Belousov--Zhabotinsky (BZ) reaction.},
+  archiveprefix = {arXiv},
   langid = {english},
   keywords = {Computer Science - Machine Learning,Physics - Computational Physics,Statistics - Machine Learning},
-  file = {/home/echauchat/Zotero/storage/J2EZI6NI/Kaheman et al. - 2020 - SINDy-PI A Robust Algorithm for Parallel Implicit Sparse Identification of Nonlinear Dynamics.pdf}
+  file = {C:\Users\Eymeric\Zotero\storage\J2EZI6NI\Kaheman et al. - 2020 - SINDy-PI A Robust Algorithm for Parallel Implicit Sparse Identification of Nonlinear Dynamics.pdf}
+}
+
+@article{kaiserSparseIdentificationNonlinear2018,
+  title = {Sparse Identification of Nonlinear Dynamics for Model Predictive Control in the Low-Data Limit},
+  author = {Kaiser, Eurika and Kutz, J. Nathan and Brunton, Steven L.},
+  year = 2018,
+  month = nov,
+  journal = {Proceedings of the Royal Society A: Mathematical, Physical and Engineering Sciences},
+  volume = {474},
+  number = {2219},
+  eprint = {1711.05501},
+  primaryclass = {math},
+  pages = {20180335},
+  issn = {1364-5021, 1471-2946},
+  doi = {10.1098/rspa.2018.0335},
+  urldate = {2026-01-22},
+  abstract = {The data-driven discovery of dynamics via machine learning is currently pushing the frontiers of modeling and control efforts, and it provides a tremendous opportunity to extend the reach of model predictive control. However, many leading methods in machine learning, such as neural networks, require large volumes of training data, may not be interpretable, do not easily include known constraints and symmetries, and often do not generalize beyond the attractor where models are trained. These factors limit the use of these techniques for the online identification of a model in the low-data limit, for example following an abrupt change to the system dynamics. In this work, we extend the recent sparse identification of nonlinear dynamics (SINDY) modeling procedure to include the effects of actuation and demonstrate the ability of these models to enhance the performance of model predictive control (MPC), based on limited, noisy data. SINDY models are parsimonious, identifying the fewest terms in the model needed to explain the data, making them interpretable, generalizable, and reducing the burden of training data. We show that the resulting SINDY-MPC framework has higher performance, requires significantly less data, and is more computationally efficient and robust to noise than neural network models, making it viable for online training and execution in response to rapid changes to the system. SINDY-MPC also shows improved performance over linear data-driven models, although linear models may provide a stopgap until enough data is available for SINDY. SINDY-MPC is demonstrated on a variety of dynamical systems with different challenges, including the chaotic Lorenz system, a simple model for flight control of an F8 aircraft, and an HIV model incorporating drug treatment.},
+  archiveprefix = {arXiv},
+  keywords = {Mathematics - Dynamical Systems,Mathematics - Optimization and Control,Physics - Data Analysis Statistics and Probability},
+  file = {C\:\\Users\\Eymeric\\Zotero\\storage\\N6FAP6GP\\Kaiser et al. - 2018 - Sparse identification of nonlinear dynamics for model predictive control in the low-data limit.pdf;C\:\\Users\\Eymeric\\Zotero\\storage\\LFZDJZK2\\1711.html}
+}
+
+@article{kaptanogluPromotingGlobalStability2021,
+  title = {Promoting Global Stability in Data-Driven Models of Quadratic Nonlinear Dynamics},
+  author = {Kaptanoglu, Alan A. and Callaham, Jared L. and Aravkin, Aleksandr and Hansen, Christopher J. and Brunton, Steven L.},
+  year = 2021,
+  month = sep,
+  journal = {Physical Review Fluids},
+  volume = {6},
+  number = {9},
+  pages = {094401},
+  publisher = {American Physical Society},
+  doi = {10.1103/PhysRevFluids.6.094401},
+  urldate = {2026-01-22},
+  abstract = {Modeling realistic fluid and plasma flows is computationally intensive, motivating the use of reduced-order models for a variety of scientific and engineering tasks. However, it is challenging to characterize, much less guarantee, the global stability (i.e., long-time boundedness) of these models. Previous work provided a theorem outlining necessary and sufficient conditions to ensure global stability in systems with energy-preserving, quadratic nonlinearities, with the goal of evaluating the stability of projection-based models. In this work, we incorporate this theorem into modern data-driven models obtained via machine learning. First, we propose that this theorem should be a standard diagnostic for the stability of projection-based and data-driven models, examining the conditions under which it holds. Second, we illustrate how to modify the objective function in machine learning algorithms to promote globally stable models, with implications for the modeling of fluid and plasma flows. Specifically, we introduce a modified ``trapping SINDy'' algorithm based on the sparse identification of nonlinear dynamics (SINDy) method. This method enables the identification of models that, by construction, only produce bounded trajectories. The effectiveness and accuracy of this approach are demonstrated on a broad set of examples of varying model complexity and physical origin, including the vortex shedding in the wake of a circular cylinder.},
+  file = {C\:\\Users\\Eymeric\\Zotero\\storage\\CVR666RN\\Kaptanoglu et al. - 2021 - Promoting global stability in data-driven models of quadratic nonlinear dynamics.pdf;C\:\\Users\\Eymeric\\Zotero\\storage\\IXPGLM84\\PhysRevFluids.6.html}
+}
+
+@article{karniadakisPhysicsinformedMachineLearning2021,
+  title = {Physics-Informed Machine Learning},
+  author = {Karniadakis, George Em and Kevrekidis, Ioannis G. and Lu, Lu and Perdikaris, Paris and Wang, Sifan and Yang, Liu},
+  year = 2021,
+  month = jun,
+  journal = {Nature Reviews Physics},
+  volume = {3},
+  number = {6},
+  pages = {422--440},
+  publisher = {Nature Publishing Group},
+  issn = {2522-5820},
+  doi = {10.1038/s42254-021-00314-5},
+  urldate = {2026-01-22},
+  abstract = {Despite great progress in simulating multiphysics problems using the numerical discretization of partial differential equations (PDEs), one still cannot seamlessly incorporate noisy data into existing algorithms, mesh generation remains complex, and high-dimensional problems governed by parameterized PDEs cannot be tackled. Moreover, solving inverse problems with hidden physics is often prohibitively expensive and requires different formulations and elaborate computer codes. Machine learning has emerged as a promising alternative, but training deep neural networks requires big data, not always available for scientific problems. Instead, such networks can be trained from additional information obtained by enforcing the physical laws (for example, at random points in the continuous space-time domain). Such physics-informed learning integrates (noisy) data and mathematical models, and implements them through neural networks or other kernel-based regression networks. Moreover, it may be possible to design specialized network architectures that automatically satisfy some of the physical invariants for better accuracy, faster training and improved generalization. Here, we review some of the prevailing trends in embedding physics into machine learning, present some of the current capabilities and limitations and discuss diverse applications of physics-informed learning both for forward and inverse problems, including discovering hidden physics and tackling high-dimensional problems.},
+  copyright = {2021 Springer Nature Limited},
+  langid = {english},
+  keywords = {Applied mathematics,Computational science},
+  file = {C:\Users\Eymeric\Zotero\storage\6XF4GKRG\Karniadakis et al. - 2021 - Physics-informed machine learning.pdf}
+}
+
+@book{lagrangeMecaniqueAnalytique1811,
+  title = {{M\'ecanique analytique}},
+  author = {Lagrange, J. L. (Joseph Louis) and Binet, Jacques Philippe Marie and Garnier, Jean Guillaume},
+  year = 1811,
+  publisher = {Paris, Ve Courcier},
+  urldate = {2026-01-22},
+  abstract = {Edited by J.P.M. Binet and J.G. Garnier; Cf. Bibl. nat. cat; Interleaved with blank leaves; "Liste des ouvrages de M. Lagrange, communiqu\'ee par M. Lacroix": v. 2, p. [372]-378; 32},
+  collaborator = {{Fisher - University of Toronto}},
+  langid = {fre},
+  lccn = {AHH-8632},
+  keywords = {Mechanics Analytic}
+}
+
+@book{lanczosVariationalPrinciplesMechanics1986,
+  title = {The Variational Principles of Mechanics},
+  author = {Lanczos, Cornelius},
+  year = 1986,
+  publisher = {New York : Dover Publications},
+  urldate = {2026-01-22},
+  abstract = {xxix, 418 p. : 22 cm; Reprint. Originally published: Toronto : University of Toronto Press, c1970. (Mathematical expositions ; no. 4); Bibliography: p. 407-408; Includes index},
+  collaborator = {{Internet Archive}},
+  isbn = {978-0-486-65067-8},
+  langid = {english},
+  keywords = {Mechanics Analytic}
+}
+
+@book{lutterDeepLagrangianNetworks2019,
+  title = {Deep {{Lagrangian Networks}}: {{Using Physics}} as {{Model Prior}} for {{Deep Learning}}},
+  shorttitle = {Deep {{Lagrangian Networks}}},
+  author = {Lutter, Michael and Ritter, Christian and Peters, Jan},
+  year = 2019,
+  month = jul,
+  doi = {10.48550/arXiv.1907.04490},
+  abstract = {Deep learning has achieved astonishing results on many tasks with large amounts of data and generalization within the proximity of training data. For many important real-world applications, these requirements are unfeasible and additional prior knowledge on the task domain is required to overcome the resulting problems. In particular, learning physics models for model-based control requires robust extrapolation from fewer samples - often collected online in real-time - and model errors may lead to drastic damages of the system. Directly incorporating physical insight has enabled us to obtain a novel deep model learning approach that extrapolates well while requiring fewer samples. As a first example, we propose Deep Lagrangian Networks (DeLaN) as a deep network structure upon which Lagrangian Mechanics have been imposed. DeLaN can learn the equations of motion of a mechanical system (i.e., system dynamics) with a deep network efficiently while ensuring physical plausibility. The resulting DeLaN network performs very well at robot tracking control. The proposed method did not only outperform previous model learning approaches at learning speed but exhibits substantially improved and more robust extrapolation to novel trajectories and learns online in real-time}
+}
+
+@misc{martiusExtrapolationLearningEquations2016,
+  title = {Extrapolation and Learning Equations},
+  author = {Martius, Georg and Lampert, Christoph H.},
+  year = 2016,
+  month = oct,
+  number = {arXiv:1610.02995},
+  eprint = {1610.02995},
+  primaryclass = {cs},
+  publisher = {arXiv},
+  doi = {10.48550/arXiv.1610.02995},
+  urldate = {2026-01-22},
+  abstract = {In classical machine learning, regression is treated as a black box process of identifying a suitable function from a hypothesis set without attempting to gain insight into the mechanism connecting inputs and outputs. In the natural sciences, however, finding an interpretable function for a phenomenon is the prime goal as it allows to understand and generalize results. This paper proposes a novel type of function learning network, called equation learner (EQL), that can learn analytical expressions and is able to extrapolate to unseen domains. It is implemented as an end-to-end differentiable feed-forward network and allows for efficient gradient based training. Due to sparsity regularization concise interpretable expressions can be obtained. Often the true underlying source expression is identified.},
+  archiveprefix = {arXiv},
+  keywords = {Computer Science - Artificial Intelligence,Computer Science - Machine Learning},
+  file = {C\:\\Users\\Eymeric\\Zotero\\storage\\YYYK7LNB\\Martius and Lampert - 2016 - Extrapolation and learning equations.pdf;C\:\\Users\\Eymeric\\Zotero\\storage\\SBSXCF95\\1610.html}
+}
+
+@article{mnihHumanlevelControlDeep2015,
+  title = {Human-Level Control through Deep Reinforcement Learning},
+  author = {Mnih, Volodymyr and Kavukcuoglu, Koray and Silver, David and Rusu, Andrei A. and Veness, Joel and Bellemare, Marc G. and Graves, Alex and Riedmiller, Martin and Fidjeland, Andreas K. and Ostrovski, Georg and Petersen, Stig and Beattie, Charles and Sadik, Amir and Antonoglou, Ioannis and King, Helen and Kumaran, Dharshan and Wierstra, Daan and Legg, Shane and Hassabis, Demis},
+  year = 2015,
+  month = feb,
+  journal = {Nature},
+  volume = {518},
+  number = {7540},
+  pages = {529--533},
+  publisher = {Nature Publishing Group},
+  issn = {1476-4687},
+  doi = {10.1038/nature14236},
+  urldate = {2026-01-22},
+  abstract = {An artificial agent is developed that learns to play~a diverse range of classic Atari 2600 computer games directly from sensory experience, achieving a~performance comparable to that of an expert human player; this work paves the way to building general-purpose learning algorithms that bridge the divide between perception and action.},
+  copyright = {2015 Springer Nature Limited},
+  langid = {english},
+  keywords = {Computer science}
+}
+
+@misc{mowerDatadrivenInterpretableHybrid2025,
+  title = {Data-Driven {{Interpretable Hybrid Robot Dynamics}}},
+  author = {Mower, Christopher E. and Zong, Rui and {Bou-Ammar}, Haitham},
+  year = 2025,
+  month = dec,
+  number = {arXiv:2512.11900},
+  eprint = {2512.11900},
+  primaryclass = {cs},
+  publisher = {arXiv},
+  doi = {10.48550/arXiv.2512.11900},
+  urldate = {2026-01-22},
+  abstract = {We study data-driven identification of interpretable hybrid robot dynamics, where an analytical rigid-body dynamics model is complemented by a learned residual torque term. Using symbolic regression and sparse identification of nonlinear dynamics (SINDy), we recover compact closed-form expressions for this residual from joint-space data. In simulation on a 7-DoF Franka arm with known dynamics, these interpretable models accurately recover inertial, Coriolis, gravity, and viscous effects with very small relative error and outperform neural-network baselines in both accuracy and generalization. On real data from a 7-DoF WAM arm, symbolic-regression residuals generalize substantially better than SINDy and neural networks, which tend to overfit, and suggest candidate new closed-form formulations that extend the nominal dynamics model for this robot. Overall, the results indicate that interpretable residual dynamics models provide compact, accurate, and physically meaningful alternatives to black-box function approximators for torque prediction.},
+  archiveprefix = {arXiv},
+  keywords = {Computer Science - Robotics},
+  file = {C\:\\Users\\Eymeric\\Zotero\\storage\\BVQSC6FZ\\Mower et al. - 2025 - Data-driven Interpretable Hybrid Robot Dynamics.pdf;C\:\\Users\\Eymeric\\Zotero\\storage\\TAZVUKF5\\2512.html}
+}
+
+@article{pikulinskiDatadrivenInverseDynamics2025,
+  title = {Data-Driven Inverse Dynamics Modeling Using Neural-Networks and Regression-Based Techniques},
+  author = {Pikuli{\'n}ski, Maciej and Malczyk, Pawe{\l} and Aarts, Ronald},
+  year = 2025,
+  month = mar,
+  journal = {Multibody System Dynamics},
+  volume = {63},
+  number = {3},
+  pages = {341--366},
+  issn = {1573-272X},
+  doi = {10.1007/s11044-024-10024-2},
+  urldate = {2026-01-22},
+  abstract = {This research proposes a novel approach for the residual modeling of inverse dynamics employed to control a real robotic device. Specifically, we use techniques based on linear regression for residual modeling while a nominal model is discovered by physics-informed neural networks such as the Lagrangian Neural Network and the Feedforward Neural Network. We introduce an efficient online learning mechanism for the residual models that utilizes rank-one updates based on the Sherman--Morrison formula. This enables faster adaptation and updates to effects not captured by the neural networks. While the time complexity of updating the model is comparable to other successful learning methods, the method excels in prediction complexity, which depends solely on the model dimension. We propose two online learning strategies: a weighted approach that gradually diminishes the influence of past measurements on the model, and a windowed approach that sharply excludes the oldest data from impacting the model. We explore the relationship between these strategies, offering recommendations for parameter selection and practical application. Special attention is given to optimizing the computation time of the weighted approach when recomputation techniques are implemented, which results in comparable or even lower execution times of the weighted controller than the windowed one. Additionally, we assess other methods, such as the Woodbury identity, QR decomposition, and Cholesky decomposition, which can be implicitly used to update the model. We empirically validate our approach using real data from a 2-degrees-of-freedom flexible manipulator, demonstrating consistent improvements in feedforward controller performance.},
+  langid = {english},
+  keywords = {Data-driven,Error modelling,Feedforward control,Inverse dynamics,Neural networks,Online learning},
+  file = {C:\Users\Eymeric\Zotero\storage\SZHT736T\Pikuliński et al. - 2025 - Data-driven inverse dynamics modeling using neural-networks and regression-based techniques.pdf}
 }
 
 @article{purnomoSparseIdentificationLagrangian2023,
   title = {Sparse Identification of {{Lagrangian}} for Nonlinear Dynamical Systems via Proximal Gradient Method},
   author = {Purnomo, Adam and Hayashibe, Mitsuhiro},
-  date = {2023-05-16},
-  journaltitle = {Scientific Reports},
-  shortjournal = {Sci Rep},
+  year = 2023,
+  month = may,
+  journal = {Scientific Reports},
   volume = {13},
   number = {1},
   pages = {7919},
   publisher = {Nature Publishing Group},
   issn = {2045-2322},
   doi = {10.1038/s41598-023-34931-0},
-  url = {https://www.nature.com/articles/s41598-023-34931-0},
   urldate = {2024-11-08},
   abstract = {The autonomous distillation of physical laws only from data is of great interest in many scientific fields. Data-driven modeling frameworks that adopt sparse regression techniques, such as sparse identification of nonlinear dynamics (SINDy) and its modifications, are developed to resolve difficulties in extracting underlying dynamics from experimental data. However, SINDy faces certain difficulties when the dynamics contain rational functions. The Lagrangian is substantially more concise than the actual equations of motion, especially for complex systems, and it does not usually contain rational functions for mechanical systems. Few proposed methods proposed to date, such as Lagrangian-SINDy we have proposed recently, can extract the true form of the Lagrangian of dynamical systems from data; however, these methods are easily affected by noise as a fact. In this study, we developed an extended version of Lagrangian-SINDy (xL-SINDy) to obtain the Lagrangian of dynamical systems from noisy measurement data. We incorporated the concept of SINDy and used the proximal gradient method to obtain sparse Lagrangian expressions. Further, we demonstrated the effectiveness of xL-SINDy against different noise levels using four mechanical systems. In addition, we compared its performance with SINDy-PI (parallel, implicit) which is a latest robust variant of SINDy that can handle implicit dynamics and rational nonlinearities. The experimental results reveal that xL-SINDy is much more robust than the existing methods for extracting the governing equations of nonlinear mechanical systems from data with noise. We believe this contribution is significant toward noise-tolerant computational method for explicit dynamics law extraction from data.},
+  copyright = {2023 The Author(s)},
   langid = {english},
   keywords = {Applied mathematics,Computational science,Mechanical engineering},
-  file = {/home/echauchat/Zotero/storage/V9E942VR/Purnomo and Hayashibe - 2023 - Sparse identification of Lagrangian for nonlinear dynamical systems via proximal gradient method.pdf}
+  file = {C:\Users\Eymeric\Zotero\storage\V9E942VR\Purnomo and Hayashibe - 2023 - Sparse identification of Lagrangian for nonlinear dynamical systems via proximal gradient method.pdf}
 }
 
-@online{zolmanSINDyRLInterpretableEfficient2024,
-  title = {{{SINDy-RL}}: {{Interpretable}} and {{Efficient Model-Based Reinforcement Learning}}},
-  shorttitle = {{{SINDy-RL}}},
-  author = {Zolman, Nicholas and Fasel, Urban and Kutz, J. Nathan and Brunton, Steven L.},
-  date = {2024-03-14},
-  eprint = {2403.09110},
-  eprinttype = {arXiv},
-  eprintclass = {cs},
-  url = {http://arxiv.org/abs/2403.09110},
-  urldate = {2024-11-08},
-  abstract = {Deep reinforcement learning (DRL) has shown significant promise for uncovering sophisticated control policies that interact in environments with complicated dynamics, such as stabilizing the magnetohydrodynamics of a tokamak fusion reactor or minimizing the drag force exerted on an object in a fluid flow. However, these algorithms require an abundance of training examples and may become prohibitively expensive for many applications. In addition, the reliance on deep neural networks often results in an uninterpretable, black-box policy that may be too computationally expensive to use with certain embedded systems. Recent advances in sparse dictionary learning, such as the sparse identification of nonlinear dynamics (SINDy), have shown promise for creating efficient and interpretable data-driven models in the low-data regime. In this work we introduce SINDy-RL, a unifying framework for combining SINDy and DRL to create efficient, interpretable, and trustworthy representations of the dynamics model, reward function, and control policy. We demonstrate the effectiveness of our approaches on benchmark control environments and challenging fluids problems. SINDy-RL achieves comparable performance to state-of-the-art DRL algorithms using significantly fewer interactions in the environment and results in an interpretable control policy orders of magnitude smaller than a deep neural network policy.},
-  langid = {english},
-  pubstate = {prepublished},
-  keywords = {Computer Science - Machine Learning,Computer Science - Systems and Control,Electrical Engineering and Systems Science - Systems and Control,Mathematics - Dynamical Systems,Mathematics - Optimization and Control},
-  file = {/home/echauchat/Zotero/storage/47BEWLUU/Zolman et al. - 2024 - SINDy-RL Interpretable and Efficient Model-Based Reinforcement Learning.pdf}
+@inproceedings{rashadDataDrivenMPCQuadrotor2024,
+  title = {Data-{{Driven MPC}} for {{Quadrotor UAVs Using SINDy}}},
+  booktitle = {2024 34th {{International Conference}} on {{Computer Theory}} and {{Applications}} ({{ICCTA}})},
+  author = {Rashad, Abdullah and Ghorab, Hashem and Othman, Mostafa and {El-Badawy}, Ayman},
+  year = 2024,
+  month = dec,
+  pages = {165--170},
+  issn = {2770-6575},
+  doi = {10.1109/ICCTA64612.2024.10974872},
+  urldate = {2026-01-22},
+  abstract = {This paper presents a Data-Driven approach to modeling and control of quadrotor dynamics combining sparse identification of nonlinear dynamics (SINDy) with Nonlinear model predictive control (NMPC) to identify an accurate model for trajectory tracking. Accurate models are essential for NMPC to effectively control complex nonlinear systems, especially over long prediction horizons. Traditional modeling based on first principles often suffers from uncertainties and human errors, leading to insufficient accuracy for precise trajectory tracking in quadrotor UAVs. The SINDy algorithm provides the solution to this problem further expanding the use of NMPC by learning accurate parsimonious nonlinear models of complex dynamics with lots of model uncertainties. The SINDy algorithm reveals the most significant terms in the equations of motion and provides a reduced-order model suitable for real-time control. The identified model is then utilized in an NMPC framework to optimize the quadrotor's trajectory while respecting state and input constraints. Simulation results demonstrate the effectiveness of the proposed SINDy-MPC approach in accurately modeling the quadrotor dynamics even in the presence of uncertainties and noisy data, achieving precise trajectory tracking on long prediction horizons.},
+  keywords = {Accuracy,Data models,data-driven models,Heuristic algorithms,Mathematical models,model predictive control (MPC),Nonlinear dynamical systems,nonlinear systems,Predictive models,Quadrotor UAV,Quadrotors,Real-time systems,sparse identification of nonlinear dynamics(SINDy),trajectory tracking,Trajectory tracking,Uncertainty},
+  file = {C:\Users\Eymeric\Zotero\storage\Y54VCGPG\10974872.html}
 }
 
-@poster{echauchatSparseIdentificationNonlinear2024,
-  title = {Lagrangian SINDY-Based Reinforcement Learning for Reducing Full-order System Interactions},
+@article{schmidtDistillingFreeFormNatural2009,
+  title = {Distilling {{Free-Form Natural Laws}} from {{Experimental Data}}},
+  author = {Schmidt, Michael and Lipson, Hod},
+  year = 2009,
+  month = apr,
+  journal = {Science},
+  volume = {324},
+  number = {5923},
+  pages = {81--85},
+  publisher = {American Association for the Advancement of Science},
+  doi = {10.1126/science.1165893},
+  urldate = {2026-01-22},
+  abstract = {For centuries, scientists have attempted to identify and document analytical laws that underlie physical phenomena in nature. Despite the prevalence of computing power, the process of finding natural laws and their corresponding equations has resisted automation. A key challenge to finding analytic relations automatically is defining algorithmically what makes a correlation in observed data important and insightful. We propose a principle for the identification of nontriviality. We demonstrated this approach by automatically searching motion-tracking data captured from various physical systems, ranging from simple harmonic oscillators to chaotic double-pendula. Without any prior knowledge about physics, kinematics, or geometry, the algorithm discovered Hamiltonians, Lagrangians, and other laws of geometric and momentum conservation. The discovery rate accelerated as laws found for simpler systems were used to bootstrap explanations for more complex systems, gradually uncovering the ``alphabet'' used to describe those systems.}
 }
 
+@misc{schulzeContextAwareDeepLagrangian2025,
+  title = {Context-{{Aware Deep Lagrangian Networks}} for {{Model Predictive Control}}},
+  author = {Schulze, Lucas and Peters, Jan and Arenz, Oleg},
+  year = 2025,
+  month = jul,
+  number = {arXiv:2506.15249},
+  eprint = {2506.15249},
+  primaryclass = {cs},
+  publisher = {arXiv},
+  doi = {10.48550/arXiv.2506.15249},
+  urldate = {2026-01-22},
+  abstract = {Controlling a robot based on physics-consistent dynamic models, such as Deep Lagrangian Networks (DeLaN), can improve the generalizability and interpretability of the resulting behavior. However, in complex environments, the number of objects to potentially interact with is vast, and their physical properties are often uncertain. This complexity makes it infeasible to employ a single global model. Therefore, we need to resort to online system identification of context-aware models that capture only the currently relevant aspects of the environment. While physical principles such as the conservation of energy may not hold across varying contexts, ensuring physical plausibility for any individual context-aware model can still be highly desirable, particularly when using it for receding horizon control methods such as model predictive control (MPC). Hence, in this work, we extend DeLaN to make it context-aware, combine it with a recurrent network for online system identification, and integrate it with an MPC for adaptive, physics-consistent control. We also combine DeLaN with a residual dynamics model to leverage the fact that a nominal model of the robot is typically available. We evaluate our method on a 7-DOF robot arm for trajectory tracking under varying loads. Our method reduces the end-effector tracking error by 39\%, compared to a 21\% improvement achieved by a baseline that uses an extended Kalman filter.},
+  archiveprefix = {arXiv},
+  keywords = {Computer Science - Machine Learning,Computer Science - Robotics},
+  file = {C\:\\Users\\Eymeric\\Zotero\\storage\\JBLQTAYT\\Schulze et al. - 2025 - Context-Aware Deep Lagrangian Networks for Model Predictive Control.pdf;C\:\\Users\\Eymeric\\Zotero\\storage\\KVJZNBIS\\2506.html}
+}
 
-@book{goldsteinClassicalMechanics2002,
-  title={Classical Mechanics},
-  author={Goldstein, Herbert and Poole, Charles and Safko, John},
-  edition={3rd},
-  year={2002},
-  publisher={Addison-Wesley},
-  address={San Francisco},
-  isbn={978-0-201-65702-9}
+@article{simpkinsSystemIdentificationTheory2012,
+  title = {System {{Identification}}: {{Theory}} for the {{User}}, 2nd {{Edition}} ({{Ljung}}, {{L}}.; 1999) [{{On}} the {{Shelf}}]},
+  shorttitle = {System {{Identification}}},
+  author = {Simpkins, Alex},
+  year = 2012,
+  month = jun,
+  journal = {IEEE Robotics \& Automation Magazine},
+  volume = {19},
+  number = {2},
+  pages = {95--96},
+  issn = {1558-223X},
+  doi = {10.1109/MRA.2012.2192817},
+  urldate = {2026-01-22},
+  abstract = {Roboticists are increasingly dealing with challenging complex problems in system identification for model-based control, and this book lays a foundation of knowledge for the reader to absorb, which can help address the said challenges. That being said, the reader should prepare for a challenge when reading this book. Though it is an excellent text, it is not for the casual reader. A background in Fourier series and Laplace transforms helps as well,though Ljung does a good job with the early chapters, providing an overview of the concepts that will be used throughout the book. This book covers parametric and nonparametric methods, parameter estimation methods in the prediction error framework, frequency domain data and interpretations, various ways to compute estimates, recursive estimation techniques, model validation,and case studies. Each chapter ends with an extensive bibliography for further reading and, often, has an appendix for proofs and derivations. The author presents a thorough and complete picture of system identification as a methodology, set of tools,and practical approach to generating models from data. The author's work has been influential for decades, and anyone interested in buildingmodels from data would be well served to put the effort into mastering thismaterial.},
+  keywords = {Book reviews,Modeling,Parameter estimation,System identification},
+  file = {C:\Users\Eymeric\Zotero\storage\6GS7RPWZ\Simpkins - 2012 - System Identification Theory for the User, 2nd Edition (Ljung, L.; 1999) [On the Shelf].pdf}
 }
 
 @article{zhangConvergenceSINDyAlgorithm2019,
@@ -229,4 +454,22 @@
   copyright = {\copyright{} 2019, Society for Industrial and Applied Mathematics},
   langid = {english},
   file = {C\:\\Users\\Eymeric\\Zotero\\storage\\K32ETP2I\\Zhang and Schaeffer - 2019 - On the Convergence of the SINDy Algorithm.pdf;C\:\\Users\\Eymeric\\Zotero\\storage\\BPCIER8H\\18M1189828.html}
+}
+
+@misc{zolmanSINDyRLInterpretableEfficient2024,
+  title = {{{SINDy-RL}}: {{Interpretable}} and {{Efficient Model-Based Reinforcement Learning}}},
+  shorttitle = {{{SINDy-RL}}},
+  author = {Zolman, Nicholas and Fasel, Urban and Kutz, J. Nathan and Brunton, Steven L.},
+  year = 2024,
+  month = mar,
+  number = {arXiv:2403.09110},
+  eprint = {2403.09110},
+  primaryclass = {cs},
+  publisher = {arXiv},
+  urldate = {2024-11-08},
+  abstract = {Deep reinforcement learning (DRL) has shown significant promise for uncovering sophisticated control policies that interact in environments with complicated dynamics, such as stabilizing the magnetohydrodynamics of a tokamak fusion reactor or minimizing the drag force exerted on an object in a fluid flow. However, these algorithms require an abundance of training examples and may become prohibitively expensive for many applications. In addition, the reliance on deep neural networks often results in an uninterpretable, black-box policy that may be too computationally expensive to use with certain embedded systems. Recent advances in sparse dictionary learning, such as the sparse identification of nonlinear dynamics (SINDy), have shown promise for creating efficient and interpretable data-driven models in the low-data regime. In this work we introduce SINDy-RL, a unifying framework for combining SINDy and DRL to create efficient, interpretable, and trustworthy representations of the dynamics model, reward function, and control policy. We demonstrate the effectiveness of our approaches on benchmark control environments and challenging fluids problems. SINDy-RL achieves comparable performance to state-of-the-art DRL algorithms using significantly fewer interactions in the environment and results in an interpretable control policy orders of magnitude smaller than a deep neural network policy.},
+  archiveprefix = {arXiv},
+  langid = {english},
+  keywords = {Computer Science - Machine Learning,Computer Science - Systems and Control,Electrical Engineering and Systems Science - Systems and Control,Mathematics - Dynamical Systems,Mathematics - Optimization and Control},
+  file = {C:\Users\Eymeric\Zotero\storage\47BEWLUU\Zolman et al. - 2024 - SINDy-RL Interpretable and Efficient Model-Based Reinforcement Learning.pdf}
 }

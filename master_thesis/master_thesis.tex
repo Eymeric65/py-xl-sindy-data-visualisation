@@ -335,9 +335,10 @@ In this introductory chapter, we outline the historical progression of system id
 
 \section{The Imperative of Dynamics in Robotics}
 
-Classically, the control of robotic manipulators and mobile agents has relied on the existence of an analytical model derived from first principles. The Lagrangian formulation ($L = T - V$) and the Newtonian formulation ($F=ma$) allow engineers to derive the equations of motion (EOM) that describe how torques map to accelerations \cite{sciaviccoRoboticsModellingPlanning2009}. These models are essential for techniques such as Computed Torque Control, Model Predictive Control (MPC), and feedback linearization, which require an inverse dynamics model to cancel out nonlinearities in the system \cite{hollerbachDynamicsInverseDynamics2008}.
+Classically, the control of robotic manipulators and mobile agents has relied on the existence of an analytical model derived from first principles. The Lagrangian formulation ($L = T - V$) and the Newtonian formulation ($F=ma$) allow engineers to derive the equations of motion (EOM) that describe how torques map to accelerations \cite{badarinSiciliano2009Robotics}. These models are essential for techniques such as Computed Torque Control, Model Predictive Control (MPC), and feedback linearization, which require an inverse dynamics model to cancel out nonlinearities in the system \cite{hollerbachModelIdentification2008}.
 
-However, deriving these models analytically becomes exponentially difficult as systems grow in complexity. For rigid body systems, the recursive Newton-Euler algorithm provides a solution, but for soft robots, systems with significant friction, or robots interacting with unknown environments, the "true" parameters (mass, inertia, friction coefficients) are often unknown or time-varying. This uncertainty necessitates \textit{System Identification}, the process of building mathematical models of dynamical systems from measured data \cite{ljungSystemIdentificationTheory1999}.
+
+However, deriving these models analytically becomes exponentially difficult as systems grow in complexity. For rigid body systems, the recursive Newton-Euler algorithm provides a solution, but for soft robots, systems with significant friction, or robots interacting with unknown environments, the "true" parameters (mass, inertia, friction coefficients) are often unknown or time-varying. This uncertainty necessitates \textit{System Identification}, the process of building mathematical models of dynamical systems from measured data \cite{simpkinsSystemIdentificationTheory2012}.
 
 \section{From Analytical Models to Data-Driven Black Boxes}
 
@@ -347,21 +348,24 @@ The history of system identification in robotics can be viewed as a pendulum swi
 Early approaches focused on parametric identification, where the structure of the equation was assumed known (e.g., a standard rigid body model), and optimization techniques were used to fit the inertial parameters. While effective for industrial manipulators, this approach fails when the assumed structure does not match reality, for instance, when unmodeled aerodynamic drag or complex stiction is present.
 
 To bypass the need for structural assumptions, the field turned toward non-parametric, "black-box" modeling. The rise of machine learning, and specifically Deep Neural Networks (DNNs), revolutionized this space. A neural network can approximate any continuous function to an arbitrary degree of accuracy, given sufficient data \cite{hornikMultilayerFeedforwardNetworks1989}. In robotics, this allowed for the creation of control laws and dynamic models that could learn implicitly from sensor data, bypassing the need for manual derivation. This paradigm shift facilitated significant advances in reinforcement learning, where agents learn policies directly from raw observations without an explicit understanding of the underlying physics \cite{mnihHumanlevelControlDeep2015}.
+A intermediate "grey box" paradigm have been atteigned by \cite{schulzeContextAwareDeepLagrangian2025} which team have successfully controlled a robot from an approximated lagrangian by neural network with a model predictive control algorithm.
 
 \subsection{The Interpretability and Safety Gap}
 Despite the performance of neural networks, they suffer from a critical flaw: a lack of interpretability. A neural network weights matrix offers no insight into the physics of the system. It does not tell the engineer if the robot is behaving due to Coriolis forces, gravity, or friction.
 
 This "Black Box" nature presents a severe barrier to deployment in safety-critical fields such as medical robotics, nuclear decommissioning, or human-robot collaboration. In these domains, a statistical guarantee of performance is insufficient; a mathematical proof of stability is often required. If a medical robot deviates from its trajectory, engineers must be able to analyze the governing equations to understand \textit{why}. A black-box model, which obscures the dynamics within hidden layers, makes this analytical validation impossible. Furthermore, black-box models often generalize poorly outside their training distribution, leading to unpredictable behavior in novel states \cite{karniadakisPhysicsinformedMachineLearning2021}.
 
-Therefore, there is a distinct need for "White Box" modeling: methods that leverage the flexibility of data-driven learning but output parsimonious, human-readable differential equations.
+Therefore, there is a distinct need for "White Box" modeling: methods that leverage the flexibility of data-driven learning but output parsimonious, human-readable differential equations. 
 
 \section{Sparse Identification of Nonlinear Dynamics (SINDy)}
 
-To address the interpretability gap, the field of Symbolic Regression emerged, aiming to find both the structure and the parameters of a system simultaneously. The seminal work by Schmidt and Lipson demonstrated that evolutionary algorithms could distill natural laws from data \cite{schmidtDistillingFreeformNatural2009}. However, these genetic approaches were computationally expensive and prone to overfitting.
+To address the interpretability gap, the field of Symbolic Regression emerged, aiming to find both the structure and the parameters of a system simultaneously. The seminal work by Schmidt and Lipson demonstrated that evolutionary algorithms could distill natural laws from data \cite{schmidtDistillingFreeFormNatural2009}. However, these genetic approaches were computationally expensive and prone to overfitting.
 
 A breakthrough occurred with the development of \textit{Sparse Identification of Nonlinear Dynamics} (SINDy) by Brunton et al. \cite{bruntonDiscoveringGoverningEquations2016}. SINDy reframes the model discovery problem as a sparse linear regression. It posits that the dynamics of most physical systems are sparse in the space of possible functions; that is, the equation of motion for a pendulum may contain $\sin(\theta)$ and $\dot{\theta}$, but it will likely not contain $e^{\theta^5}$.
 
 By constructing a library of candidate functions $\boldsymbol{\Theta}$ and employing sparse regularization (such as LASSO or Sequential Thresholded Least Squares), SINDy selects only the few terms necessary to describe the data. The result is a set of interpretable differential equations that balance accuracy with model complexity, adhering to the principle of Occam's Razor.
+
+Even if they don't call it SINDy per se, other team have also converged to the same type of regression \cite{pikulinskiDatadrivenInverseDynamics2025}
 
 \section{The Challenge: Complex Robotic Architectures}
 
@@ -551,7 +555,9 @@ The primary objective of the prior research conducted within our laboratory was 
 \subsection{Lagrangian Formalism}
 \textit{\textcolor{gray}{[Background - Classical Mechanics]}}
 
-The Lagrangian formulation represents an alternative yet equivalent framework to Newtonian mechanics, fundamentally grounded in the Principle of Least Action and D'Alembert's principle of virtual work \cite{goldsteinClassicalMechanics2002}. While Newtonian mechanics describes motion through vector forces acting on point masses, Lagrangian mechanics adopts an energy-based perspective, often referred to as analytical mechanics.
+Lagrangian and subsequently the Hamiltonian as been developped in the 19s century in \textit{Mécanique analytique}\cite{lagrangeMecaniqueAnalytique1811} for the Lagrangian and in a series of article \cite{hamiltonXVGeneralMethod1834}.
+
+The Lagrangian formulation represents an alternative yet equivalent framework to Newtonian mechanics, fundamentally grounded in the Principle of Least Action and D'Alembert's principle of virtual work \cite{goldsteinClassicalMechanics3rd2002,lanczosVariationalPrinciplesMechanics1986}. While Newtonian mechanics describes motion through vector forces acting on point masses, Lagrangian mechanics adopts an energy-based perspective, often referred to as analytical mechanics.
 
 In an abstract sense, the Lagrangian approach can be viewed as a projection of Newton's laws into a configuration space governed by constraints. The central quantity in this framework is the Lagrangian, a scalar function $\mathcal{L}$ that summarizes the entire dynamics of the system. For non-relativistic mechanical systems, the Lagrangian is defined as the difference between kinetic and potential energy:
 \begin{equation}
@@ -1043,7 +1049,7 @@ Using this enhanced clustering algorithm, validation tests confirm that we are a
 
 Throughout the course of this study, we investigated and employed a variety of sparse linear regression algorithms. In the context of system identification, the choice of the regression optimizer is not merely a computational detail but a fundamental decision that dictates the balance between model sparsity (parsimony) and predictive accuracy. Each algorithm presents a unique set of advantages and drawbacks regarding convergence speed, numerical stability, and sensitivity to noise.
 
-Although the results presented in the subsequent chapter primarily utilize \textsc{lasso} regression due to its robustness, our preliminary studies—such as those detailed in \cite{echauchatSparseIdentificationNonlinear2024}—required the implementation of several alternative solvers within our \textsc{py-xl-sindy} library to benchmark performance.
+Although the results presented in the subsequent chapter primarily utilize \textsc{lasso} regression due to its robustness, our preliminary studies—such as those detailed in \cite{chauchatLagrangianSindybasedReinforcement2025}—required the implementation of several alternative solvers within our \textsc{py-xl-sindy} library to benchmark performance.
 
 In the following sections, we provide a detailed development of the three primary algorithms utilized:
 \begin{itemize}
@@ -1125,6 +1131,8 @@ The hyperparameters defined in our implementation are:
 \textbf{\textcolor{blue}{[Novel Contribution]}}
 
 One of the most critical, yet frequently under-discussed, aspects of the SINDy methodology is the strategy governing the selection of the candidate catalog and the acquisition of training data. Specifically, one must determine how to structure the input data and predict how these initial choices—data quantity, quality, and library composition—will ultimately impact the fidelity of the identified model. By their very nature, these questions are difficult to resolve through purely theoretical derivation, as they depend heavily on the specific non-linearities of the system in question. Consequently, in this section, we present a series of empirical observations and guidelines that take their theoretical roots from the field of Information Theory.
+
+A few publication on this thematic are available and usually modify SINDy to match their constraint on knowledge and "data shape". As example in \cite{kaptanogluPromotingGlobalStability2021} they modify SINDy in order to only produce models that produce bounded trajectory.
 
 \subsection{Training Data Information Analysis}
 \textbf{\textcolor{blue}{[Novel Contribution]}}
@@ -1302,7 +1310,7 @@ Before concluding this chapter and proceeding to the experimental results, it is
 
 In practice, while our experimental training batches generate trajectories containing thousands of discrete time-steps (for specific dataset metrics, refer to the Results Chapter~\ref{ch:results}), we employ a rigorous subsampling strategy. We restrict the active regression matrix to a height of only a few hundred rows—typically maintaining a ratio of approximately 1 to 2 times the size of the catalog. This aggressive subsampling is a deliberate design choice, intended to explicitly demonstrate and leverage the extreme compactness and efficiency of our \textit{unified catalog}.
 
-Regarding the specific mechanism for selecting these samples, although detailed quantitative benchmarks are reserved for the subsequent analysis, qualitative insights from our preliminary studies \cite{echauchatSparseIdentificationNonlinear2024} have been instrumental. We observed that simple uniform sampling in the temporal domain consistently yielded superior identification results compared to more complex heuristic methods. Specifically, uniform temporal sampling outperformed:
+Regarding the specific mechanism for selecting these samples, although detailed quantitative benchmarks are reserved for the subsequent analysis, qualitative insights from our preliminary studies \cite{chauchatLagrangianSindybasedReinforcement2025} have been instrumental. We observed that simple uniform sampling in the temporal domain consistently yielded superior identification results compared to more complex heuristic methods. Specifically, uniform temporal sampling outperformed:
 \begin{itemize}
     \item \textbf{Random Sampling:} Stochastic selection of indices with uniform probability.
     \item \textbf{Entropy-Based Sampling:} A method prioritizing the selection of data points that maximize the Shannon entropy of the phase portrait distribution.
@@ -1397,7 +1405,7 @@ As established by the protocol defined in Sec.~\ref{sec:same-knowledge-catalog},
 
 \section{Result Analysis of Batch Data}
 
-The comprehensive quantitative analysis presented in the following sections is the direct result of the rigorous experimental protocol established in Sec.~\ref{sec:data-gathering-strategy}. While key summary graphs are integrated directly into the text to facilitate the immediate discussion of trends, the complete compendium of detailed performance visualizations—covering every system configuration and noise level—is cataloged in Appendix \ref{ch:all-result-figures}.
+The comprehensive quantitative analysis presented in the following sections is the direct result of the rigorous experimental protocol established in Sec.~\ref{sec:data-gathering-strategy}.
 
 In all statistical figures presented throughout this section, we define the normalization constant $n_{max}$ as the count of "viable" experiments. An experiment is classified as viable if at least one of the tested regression paradigms successfully identified the governing equations at any of the tested noise levels. Conversely, experiments where every method failed universally—typically due to numerical instability in the simulation or insufficient phase-space exploration—are considered non-informative outliers. These are silently discarded from the comparative statistics to prevent skewing the success rates with impossible-to-solve data.
 
@@ -1979,7 +1987,7 @@ Finally, UNI-SINDy also dominates the success rate in the double pendulum experi
 
 \section{Results on Real System}
 
-To empirically validate the robustness of the proposed Uni-SINDy algorithm beyond the simulation environment, we constructed a physical experimental platform: a passive double pendulum, as illustrated in Fig.~\ref{fig:real-double-prendulum}. This system was fabricated using additive manufacturing (3D printing) to ensure rapid prototyping and reproducibility.
+To empirically validate the robustness of the proposed Uni-SINDy algorithm beyond the simulation environment, we constructed a physical experimental platform: a passive double pendulum, as illustrated in Fig.~\ref{fig:real-double-prendulum}. This system was fabricated using additive manufacturing (3D printing) to ensure rapid prototyping and reproducibility. This works is an echo of the work of \cite{mowerDatadrivenInterpretableHybrid2025} which use SINDy to discover the dynamics of a robot arm.
 
 The dataset was constructed by aggregating approximately 100 seconds of experimental data derived from unforced, free-response trajectories. These experiments involved releasing the pendulum from a diverse set of initial angular configurations to ensure adequate phase-space coverage. To digitize the motion, we employed a custom computer-vision tracking algorithm. This pipeline extracted the raw Cartesian coordinates of the joint centers, from which the generalized coordinates (angles), velocities, and accelerations were derived. Special care was taken to apply smoothing filters during differentiation to mitigate the quantization noise inherent in visual tracking.
 
@@ -2121,6 +2129,8 @@ While the regression step is efficient, the symbolic construction of the Lagrang
 The ability to extract interpretable, physics-based models from data opens significant avenues for future research.
 
 The most immediate application is in Model Predictive Control (MPC). The equations discovered by UNI-SINDy are sparse and explicit, making them ideal candidates for real-time optimization solvers that require rapid gradient computation. Future work will focus on closing the loop: running UNI-SINDy online to adaptively update the model of a robot as it interacts with unknown environments (e.g., picking up a heavy object).
+
+A novel work from Rashad et al. \cite{rashadDataDrivenMPCQuadrotor2024} successfully applied SINDy to the control of Quadrator UAVs which encourage us to continue in this path of automatic system identification and control.
 
 Furthermore, the framework could be extended to the domain of Soft Robotics. By incorporating basis functions derived from continuum mechanics or finite element approximations into the Unified Catalog, it may be possible to discover reduced-order models for soft actuators that are currently treated as black boxes.
 
