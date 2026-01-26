@@ -73,7 +73,7 @@
 \usepackage[colorlinks=true, linkcolor=black, citecolor=blue, urlcolor=blue]{hyperref}
 
 % --- Bibliography ---
-\usepackage[style=ieee, backend=biber]{biblatex}
+\usepackage[style=ieee, backend=biber, url=false]{biblatex}
 \addbibresource{references.bib}
 
 % --- Tikz ---
@@ -296,7 +296,7 @@ To address the challenge of under-actuated and hybrid systems, this thesis devel
 
 Furthermore, to enhance the robustness of the implicit solver, we introduce a novel solution selection metric based on \textbf{Information-Theoretic Clustering}. Traditional methods rely solely on sparsity (Occam's Razor) to select candidate models, which often leads to the selection of disjoint or physically inconsistent solutions in high-dimensional spaces. The proposed clustering algorithm analyzes the geometric directionality of candidate coefficient vectors, aggregating partial solutions to robustly identify the true global dynamics even in the presence of noise and disjoint subspaces.
 
-The framework is validated through an extensive suite of benchmarks comprising both high-fidelity simulation and physical experimentation. We utilized the MuJoCo physics engine to generate datasets for three distinct robotic topologies: a Cartpole, a Double Pendulum, and a highly under-actuated "Cartpole Double" (3-DOF) system. These systems were tested under varying conditions, including fully explicit actuation, fully implicit dynamics, and mixed actuation with varying degrees of viscous damping. To ensure a rigorous comparison, we established a "Protocol of Equivalent Input Knowledge," normalizing the inductive bias provided to the candidate libraries of competing paradigms.
+The framework is validated through an extensive suite of benchmarks comprising both high-fidelity simulation and physical experimentation. We utilized the MuJoCo physics engine to generate datasets for three distinct robotic topologies: a Cartpole, a Double Pendulum, and "Cartpole Double" (3-DOF) system. These systems were tested under varying conditions, including fully explicit actuation, fully implicit dynamics, and mixed actuation with varying degrees of viscous damping. To ensure a rigorous comparison, we established a "Protocol of Equivalent Input Knowledge," normalizing the inductive bias provided to the candidate libraries of competing paradigms.
 
 The simulation results demonstrate that UNI-SINDy significantly outperforms existing baselines. In the "Mixed" experimental category, which most closely mimics real-world robotics, UNI-SINDy achieved superior identification success rates compared to both Standard SINDy and XL-SINDy. Most notably, in the challenging 3-DOF Cartpole Double experiment, the standard SINDy-PI algorithm failed completely (0\% success rate) due to the combinatorial expansion of the library, whereas UNI-SINDy successfully identified the governing equations. This result provides strong empirical evidence that the injection of structural physical priors via the Unified Catalog is necessary for the tractability of high-dimensional identification.
 
@@ -384,7 +384,7 @@ Traditional SINDy assumes an explicit system structure: $\dot{x} = f(x, u)$. How
 Kaheman et al. introduced \textit{SINDy-PI} (Parallel Implicit) to handle rational functions and implicit dynamics \cite{kahemanSINDyPIRobustAlgorithm2020}. While theoretically robust, SINDy-PI is computationally intensive and treats all variables with equal uncertainty, failing to leverage the fact that robotics engineers often know \textit{some} inputs (e.g., current to a motor) while being ignorant of others (e.g., reaction forces).
 
 \subsection{3. The "Mixed" Reality of Robotics}
-Real-world robotic systems are rarely purely Lagrangian (conservative) or purely Newtonian (explicit). They are "mixed" systems. A standard manipulator has active motors (explicit inputs), passive joints (implicit dynamics), gravity and inertia (Lagrangian energy), and joint friction (Newtonian dissipative forces).
+Real-world robotic systems are rarely purely Lagrangian or purely Newtonian. They are "mixed" systems. A standard manipulator has active motors (explicit inputs), passive joints (implicit dynamics), gravity and inertia (Lagrangian energy), and joint friction (Newtonian dissipative forces).
 Existing variations of SINDy tend to specialize in one domain:
 \begin{itemize}
     \item \textbf{Standard SINDy:} Good for Newtonian, explicit systems. Bad for energy constraints.
@@ -407,7 +407,7 @@ The specific contributions of this work are as follows:
     
     \item \textbf{Information-Theoretic Clustering for Solution Selection:} We enhance the robustness of the implicit solver by introducing a solution selection metric based on vector clustering and weak sparsity, addressing the issue of disjoint subspaces in high-dimensional catalogs.
     
-    \item \textbf{Validation on Simulated and Physical Systems:} The framework is rigorously benchmarked against standard SINDy, SINDy-PI, and Lagrangian SINDy using MuJoCo simulations of under-actuated systems (Cartpole, Double Pendulum). Finally, we demonstrate the real-world applicability of the method by identifying the dynamics of a physical passive double pendulum from video data.
+    \item \textbf{Validation on Simulated and Physical Systems:} The framework is rigorously benchmarked against standard SINDy, SINDy-PI, and Lagrangian SINDy using MuJoCo simulations of under-actuated systems (Cartpole, Double Pendulum and Double Pendulum on Cartpole). Finally, we demonstrate the real-world applicability of the method by identifying the dynamics of a physical passive double pendulum from video data.
 \end{enumerate}
 
 \section{Thesis Outline}
@@ -1526,7 +1526,9 @@ Concerning the cartpole experiment UNI-SINDY and XL-SINDy have a perfect success
 
 On the double pendulum UNI-SINDy and XL-SINDy have a perfect success rate only on two of the three experiment and SINDy failed to retrieve any model from it.
 
-In conclusion for this case study, this validate the result from Purmono et al. \cite{purnomoSparseIdentificationLagrangian2023} where XL-SINDy outperform SINDy on the non damping subset of experiment
+In conclusion for this case study, this validate the result from Purmono et al. \cite{purnomoSparseIdentificationLagrangian2023} where XL-SINDy outperform SINDy on the non damping subset of experiment.
+
+\newpage
 
 \begin{figure}[H]
     \centering
@@ -1551,6 +1553,8 @@ In conclusion for this case study, this validate the result from Purmono et al. 
     \caption{\textbf{No damping explicit results system details:} validation error comparison (top) and success rate comparison (bottom) across all systems}
     \label{fig:no-damping-explicit-detail}
 \end{figure}
+
+\newpage
 
 \subsection{Any Damping Explicit Experiment}
 
@@ -1616,6 +1620,8 @@ The performance on the cartpole system are quite equivalent between UNI-SINDy an
 
 However concerning the double pendulum result are much more surprising, classical SINDy performed twice as much as UNI-SINDy with a validation error much lower than the one in UNI-SINDy.
 
+\newpage
+
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{result/plots_damping_explicit/noise_comparison_combined_white_background.eps}
@@ -1639,6 +1645,8 @@ However concerning the double pendulum result are much more surprising, classica
     \caption{\textbf{Any damping explicit results system details:} validation error comparison (top) and success rate comparison (bottom) across all systems}
     \label{fig:damping-explicit-detail}
 \end{figure}
+
+\newpage
 
 \subsection{Any Damping Implicit Experiment}
 
@@ -1753,6 +1761,8 @@ Concerning the cartpole system, only 3 experiment over the 12 have lead to a suc
 
 These highly contrasted results shows how challenging the implicit retrieval is for SINDY method even with the help of the new catalog definition.
 
+\newpage
+
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{result/plots_damping_implicit/noise_comparison_combined_white_background.eps}
@@ -1776,6 +1786,8 @@ These highly contrasted results shows how challenging the implicit retrieval is 
     \caption{\textbf{Any damping implicit results system details:} validation error comparison (top) and success rate comparison (bottom) across all systems}
     \label{fig:damping-implicit-detail}
 \end{figure}
+
+\newpage
 
 \subsection{Any Damping Mixed Experiment}
 
@@ -1967,6 +1979,8 @@ Only UNI-SINDy successfully retrieved mixed experiment in the double cart pole s
 
 Finally, UNI-SINDy also dominates the success rate in the double pendulum experiment with however a clear cut as soon as noise is introduce, this phenomenum could be the source of some post studies.
 
+\newpage
+
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{result/plots_damping_mixed/noise_comparison_combined_white_background.eps}
@@ -1990,6 +2004,8 @@ Finally, UNI-SINDy also dominates the success rate in the double pendulum experi
     \caption{\textbf{Any damping implicit results system details:} validation error comparison (top) and success rate comparison (bottom) across all systems}
     \label{fig:damping-mixed-detail}
 \end{figure}
+
+\newpage
 
 \section{Results on Real System}
 
@@ -2061,7 +2077,45 @@ It is important to highlight a specific methodological deviation employed here: 
     \label{fig:real-double-prendulum}
 \end{figure}
 
-To rigorously mitigate the risk of overfitting—a pervasive issue when identifying models from noisy sensor data—we enforced a strict data aspect ratio of $1.5$. Practically, this implies that the optimization was constrained to use only $39$ discrete time samples extracted from the $100$ seconds of available training data. Despite this extreme subsampling, the algorithm converged to a sparse model comprising $13$ active terms. 
+To rigorously mitigate the risk of overfitting—a pervasive issue when identifying models from noisy sensor data—we enforced a strict data aspect ratio of $1.5$. Practically, this implies that the optimization was constrained to use only $39$ discrete time samples extracted from the $100$ seconds of available training data. Despite this extreme subsampling, the algorithm converged to a sparse model comprising $13$ active terms : 
+
+{\scriptsize
+\begin{longtable}{|l|r|}
+\hline
+Function Label & Retrieved Value \\
+\hline
+\endfirsthead
+\hline
+Function Label & Retrieved Value \\
+\hline
+\endhead
+\hline
+\endfoot
+$\dot{{q}}_{0}^{2}{\left(t \right)}$ & -1.319066 \\
+$\dot{{q}}_{1}^{2}{\left(t \right)}$ & -1.000000 \\
+$\dot{{q}}_{0}{\left(t \right)} \dot{{q}}_{1}{\left(t \right)} \cos{\left(q_{0}{\left(t \right)} \right)}$ & -0.169001 \\
+$\dot{{q}}_{0}{\left(t \right)} \dot{{q}}_{1}{\left(t \right)} \sin{\left(q_{0}{\left(t \right)} \right)}$ & -0.193875 \\
+$\dot{{q}}_{0}{\left(t \right)} \dot{{q}}_{1}{\left(t \right)} \cos{\left(q_{1}{\left(t \right)} \right)}$ & -0.044784 \\
+$\dot{{q}}_{0}{\left(t \right)} \dot{{q}}_{1}{\left(t \right)} \sin{\left(q_{1}{\left(t \right)} \right)}$ & -0.082760 \\
+$\dot{{q}}_{0}{\left(t \right)} \dot{{q}}_{1}{\left(t \right)} \sin{\left(q_{1}{\left(t \right)} \right)} \cos{\left(q_{0}{\left(t \right)} \right)}$ & 0.382532 \\
+$\dot{{q}}_{0}{\left(t \right)} \dot{{q}}_{1}{\left(t \right)} \cos{\left(q_{0}{\left(t \right)} \right)} \cos{\left(q_{1}{\left(t \right)} \right)}$ & -1.046419 \\
+$\dot{{q}}_{0}{\left(t \right)} \dot{{q}}_{1}{\left(t \right)} \sin{\left(q_{0}{\left(t \right)} \right)} \sin{\left(q_{1}{\left(t \right)} \right)}$ & -1.728535 \\
+$\cos{\left(q_{0}{\left(t \right)} \right)}$ & -497.394763 \\
+$\cos{\left(q_{1}{\left(t \right)} \right)}$ & -348.091731 \\
+$\dot{{q}}_{1}{\left(t \right)} \cos{\left(q_{0}{\left(t \right)} \right)}$ & -1.524681 \\
+$\text{coordinate}_{0} \ \dot{{q}}_{0}{\left(t \right)}$ & 1.824844 \\
+$\text{coordinate}_{1} \ \dot{{q}}_{0}{\left(t \right)}$ & -2.841925 \\
+$\text{coordinate}_{1} \ \dot{{q}}_{1}{\left(t \right)}$ & 1.455887 \\
+\end{longtable}
+}
+
+By performing a reversed analysis on this retrieved model. We found that the main term of a double pendulum are present and these term match a double pendulum with the following parameter:
+\begin{itemize}
+    \item \textbf{Effective length of Arm 2 (distance to its CoM):} $c_1 \approx 5.6 cm$
+    \item \textbf{Effective length of Arm 1 (distance to its CoM):} $c_2 \approx 5.2 cm$
+\end{itemize}
+
+which is close to the real value of $5cm$ each. Concerning the mass result it is more contrasted since we first need to give the mass of one link to get the mass of the other, due to the adimensionality of SINDy. The mass of the second link is thought to be $2.8g$ when given the mass of the first one to be $5g$. This result is more contrasted because in reality both link weighted the same. In the next work we should focus more on this post analysis in order to validate SINDy on real system more seriously.
 
 The predictive fidelity of this model is visualized in Fig.~\ref{fig:result-real-pendulum}, which depicts a 1-second forecast horizon. It must be noted that for a double pendulum, which is an inherently chaotic system sensitive to initial conditions (positive Lyapunov exponent), a one-second horizon represents a significant duration. The ability to track the real system over this interval indicates that the model has successfully captured the complex inertial coupling, rather than just the first-order gravity terms.
 
@@ -2096,6 +2150,8 @@ The most significant finding of this study is the scalability of the Unified Cat
 By adhering to the "equivalent input knowledge" protocol, the Newtonian library was forced to span the full polynomial space required to cover the dynamics. For a multi-degree-of-freedom system, this results in a combinatorial explosion of candidate terms. The regression algorithm is essentially tasked with finding a needle in a haystack of thousands of correlated functions.
 
 In contrast, the UNI-SINDy framework leverages the strong inductive bias of the Lagrangian formulation. By solving for a scalar energy function ($L$) rather than a vector field of accelerations, we reduced the search space by an order of magnitude (as detailed in Table \ref{table:catalog-size}). Effectively, the Euler-Lagrange operator acts as a "physics-informed filter," automatically enforcing the coupling between inertial terms that standard SINDy must "learn" from scratch. This result suggests that in high-dimensional mechanical systems, the injection of structural physical priors is not merely an optimization trick, but a prerequisite for tractability.
+
+This addition is a direct upgrade from the work of \cite{tianjianSparseIdentificationLagrangian2025} that uses a double optimisation algorithm to get the value of the Rayleigh dissipation function and the SINDy catalog variable. This sequential double optimisation algorithm while enabling XL-SINDy to retrieve dynamics of system with damping totally erased the noise resiliance. 
 
 \section{The Efficacy of the Mixed Implicit-Explicit Algorithm}
 
@@ -2139,6 +2195,8 @@ The most immediate application is in Model Predictive Control (MPC). The equatio
 A novel work from Rashad et al. \cite{rashadDataDrivenMPCQuadrotor2024} successfully applied SINDy to the control of Quadrator UAVs which encourage us to continue in this path of automatic system identification and control.
 
 Furthermore, the framework could be extended to the domain of Soft Robotics. By incorporating basis functions derived from continuum mechanics or finite element approximations into the Unified Catalog, it may be possible to discover reduced-order models for soft actuators that are currently treated as black boxes.
+
+One of the main question that should be resolve in the future is how that we account for motor law in SINDy. More particularly, how to identify a complete robotic system from the input current in the motor until the movement of the end effector. This question could be answered by thinking about a new catalog type that would bridge the gap between current and torque. Another solution could be to create a sequential double optimisation algorithm even if it could come at the cost revealed in \cite{tianjianSparseIdentificationLagrangian2025}. 
 
 In conclusion, this thesis demonstrates that by respecting the distinct physical nature of conservative and dissipative forces, and by unifying them into a coherent mathematical framework, we can achieve data-driven identification that is both robust and interpretable.
 
