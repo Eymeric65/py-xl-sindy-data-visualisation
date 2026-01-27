@@ -1,21 +1,10 @@
 import React, { useState, useMemo } from "react";
 import { createSolutionRanking } from './solutionRanking';
 import type { SolutionRanking, GroupData as RankingGroupData, ExtraInfo } from './solutionRanking';
+import type { Experiment, TrajectoryGroup } from './types';
 
 interface SolutionControlTableProps {
-  groups: {
-    [groupName: string]: {
-      data: {
-        [seriesName: string]: {
-          solution?: {
-            [solutionType: string]: any;
-          };
-          reference?: boolean;
-          extra_info?: ExtraInfo;
-        };
-      };
-    };
-  };
+  experiment: Experiment;
   onSolutionToggle?: (solutionId: string, isVisible: boolean) => void;
 }
 
@@ -23,37 +12,75 @@ type SortField = 'rank' | 'solution_type' | 'regression_type' | 'optimization_fu
 type SortDirection = 'asc' | 'desc';
 
 interface TableSolution extends SolutionRanking {
-  id: string; // Full series name for identification
+  id: string; // Full trajectory name for identification
   groupName: string;
   isVisible: boolean;
-  solutionType: string; // The parent key of extra_info (e.g., "linear", "nonlinear")
+  solutionType: string; // The mode_solution (e.g., "mixed", "explicit")
 }
 
-const SolutionControlTable: React.FC<SolutionControlTableProps> = ({ groups, onSolutionToggle }) => {
+const SolutionControlTable: React.FC<SolutionControlTableProps> = ({ experiment, onSolutionToggle }) => {
   const [sortField, setSortField] = useState<SortField>('rank');
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
   const [visibilityMap, setVisibilityMap] = useState<Map<string, boolean>>(new Map());
 
   // Create ranking and collect all solutions
   const allSolutions = useMemo(() => {
-    const rankingMap = createSolutionRanking(groups as { [groupName: string]: RankingGroupData });
+    // Convert experiment structure to format expected by ranking function
+    const groupsForRanking: { [groupName: string]: RankingGroupData } = {};
+    
+    ['validation_group', 'training_group'].forEach(groupKey => {
+      const group = experiment.data[groupKey as keyof typeof experiment.data] as TrajectoryGroup;
+      const dataObj: { [key: string]: any } = {};
+      
+      group.trajectories.forEach(traj => {
+        if (!traj.reference && traj.solutions && traj.regression_result) {
+          dataObj[traj.name] = {
+            solution: {},
+            extra_info: {
+              noise_level: traj.regression_result.regression_parameters.noise_level,
+              optimization_function: traj.regression_result.regression_parameters.optimization_function,
+              regression_type: traj.regression_result.regression_parameters.regression_type,
+              valid: traj.regression_result.valid,
+              regression_time: traj.regression_result.regression_time,
+              results: {
+                RMSE_acceleration: traj.regression_result.RMSE_acceleration
+              }
+            }
+          };
+          
+          // Add solutions
+          traj.solutions.forEach(sol => {
+            dataObj[traj.name].solution[sol.mode_solution] = {
+              vector: sol.solution_vector,
+              label: sol.solution_label
+            };
+          });
+        }
+      });
+      
+      groupsForRanking[groupKey] = { data: dataObj };
+    });
+    
+    const rankingMap = createSolutionRanking(groupsForRanking);
     const solutions: TableSolution[] = [];
 
-    Object.entries(groups).forEach(([groupName, groupData]) => {
-      Object.entries(groupData.data).forEach(([seriesName, seriesData]) => {
-        if (seriesData.solution && seriesData.extra_info && !seriesData.reference) {
-          const uid = seriesName.substring(0, 8);
+    ['validation_group', 'training_group'].forEach(groupKey => {
+      const group = experiment.data[groupKey as keyof typeof experiment.data] as TrajectoryGroup;
+      
+      group.trajectories.forEach(traj => {
+        if (!traj.reference && traj.solutions && traj.regression_result) {
+          const uid = traj.name.substring(0, 8);
           const ranking = rankingMap.get(uid);
           
-          // Extract solution type (first key in solution object)
-          const solutionType = Object.keys(seriesData.solution)[0] || 'unknown';
+          // Extract solution type (paradigm from regression_parameters)
+          const solutionType = traj.regression_result.regression_parameters.paradigm || 'unknown';
           
           if (ranking) {
-            const solutionId = `${groupName}_${seriesName}`;
+            const solutionId = `${groupKey}_${traj.name}`;
             solutions.push({
               ...ranking,
               id: solutionId,
-              groupName: groupName,
+              groupName: groupKey,
               solutionType: solutionType,
               isVisible: visibilityMap.get(solutionId) ?? false
             });
@@ -63,7 +90,7 @@ const SolutionControlTable: React.FC<SolutionControlTableProps> = ({ groups, onS
     });
 
     return solutions;
-  }, [groups, visibilityMap]);
+  }, [experiment, visibilityMap]);
 
   // Sort solutions based on current sort field and direction
   const sortedSolutions = useMemo(() => {
@@ -363,7 +390,7 @@ const SolutionControlTable: React.FC<SolutionControlTableProps> = ({ groups, onS
                   )}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  {solution.extraInfo.results?.RMSE_acceleration !== undefined ? (
+                  {solution.extraInfo.results?.RMSE_acceleration !== undefined && solution.extraInfo.results.RMSE_acceleration !== null ? (
                     <span 
                       className="text-sm font-mono text-gray-900 cursor-pointer hover:text-blue-600 transition-colors"
                       onClick={() => handleValueClick('rmse', solution.extraInfo.results!.RMSE_acceleration)}

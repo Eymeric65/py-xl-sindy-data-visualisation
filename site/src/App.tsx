@@ -9,61 +9,72 @@ import SolutionControlTable from "./SolutionControlTable";
 import PresentationSlides from "./PresentationSlides";
 import { createSolutionRanking, transformLinesWithRanking, transformDataWithRanking } from './solutionRanking';
 import type { GroupData as RankingGroupData } from './solutionRanking';
-
-type CoordinateData = {
-  [varName: string]: number[];
-};
-
-type SeriesData = {
-  [coordinateName: string]: CoordinateData;
-};
-
-type VisualisationData = {
-  time: number[];
-  series: SeriesData;
-  reference?: boolean;
-  solution?: any;
-};
-
-type GroupData = {
-  data: {
-    [dataName: string]: VisualisationData;
-  };
-  batch_starting_times?: number[];
-};
-
-type VisualisationGroups = {
-  [groupName: string]: GroupData;
-};
-
-type ResultJson = {
-  generation_settings?: {
-    experiment_folder?: string;
-  };
-  visualisation: VisualisationGroups;
-};
+import type { 
+  Experiment, 
+  TrajectoryGroup, 
+  FlatDataPoint, 
+  GroupedLines 
+} from './types';
 
 const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<'data' | 'slides'>('data');
   const [selectedFile, setSelectedFile] = useState<string>("");
   const [availableGroups, setAvailableGroups] = useState<string[]>([]);
   const [selectedGroup, setSelectedGroup] = useState<string>("");
-  const [data, setData] = useState<any[]>([]);
-  const [groupedLines, setGroupedLines] = useState<{[varType: string]: {[coordinate: string]: string[]}}>({});
+  const [data, setData] = useState<FlatDataPoint[]>([]);
+  const [groupedLines, setGroupedLines] = useState<GroupedLines>({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [currentIdx, setCurrentIdx] = useState(0);
   const [simulationType, setSimulationType] = useState<string>("");
   const [batchStartTimes, setBatchStartTimes] = useState<number[]>([]);
-  const [generationSettings, setGenerationSettings] = useState<any | null>(null);
-  const [allGroupsData, setAllGroupsData] = useState<VisualisationGroups>({});
+  const [generationParams, setGenerationParams] = useState<any | null>(null);
+  const [experiment, setExperiment] = useState<Experiment | null>(null);
   const [relativeMode, setRelativeMode] = useState<boolean>(false);
   const [hiddenSolutions, setHiddenSolutions] = useState<Set<string>>(new Set());
   
   // Create ranking map for consistent solution numbering across all components
   const rankingMap = useMemo(() => {
-    return createSolutionRanking(allGroupsData as { [groupName: string]: RankingGroupData });
-  }, [allGroupsData]);
+    if (!experiment) return new Map();
+    
+    // Convert experiment structure to format expected by ranking function
+    const groupsForRanking: { [groupName: string]: RankingGroupData } = {};
+    
+    ['validation_group', 'training_group'].forEach(groupKey => {
+      const group = experiment.data[groupKey as keyof typeof experiment.data] as TrajectoryGroup;
+      const dataObj: { [key: string]: any } = {};
+      
+      group.trajectories.forEach(traj => {
+        if (!traj.reference && traj.solutions && traj.regression_result) {
+          dataObj[traj.name] = {
+            solution: {},
+            extra_info: {
+              noise_level: traj.regression_result.regression_parameters.noise_level,
+              optimization_function: traj.regression_result.regression_parameters.optimization_function,
+              regression_type: traj.regression_result.regression_parameters.regression_type,
+              valid: traj.regression_result.valid,
+              regression_time: traj.regression_result.regression_time,
+              results: {
+                RMSE_acceleration: traj.regression_result.RMSE_acceleration
+              }
+            }
+          };
+          
+          // Add solutions
+          traj.solutions.forEach(sol => {
+            dataObj[traj.name].solution[sol.mode_solution] = {
+              vector: sol.solution_vector,
+              label: sol.solution_label
+            };
+          });
+        }
+      });
+      
+      groupsForRanking[groupKey] = { data: dataObj };
+    });
+    
+    return createSolutionRanking(groupsForRanking);
+  }, [experiment]);
 
   // Handle solution visibility toggle
   const handleSolutionToggle = (solutionId: string, isVisible: boolean) => {
@@ -84,11 +95,26 @@ const App: React.FC = () => {
     setSelectedFile(filename);
   };
 
-  // Set a default file if none selected (for backward compatibility)
+  // Set a default file if none selected (pick random from manifest)
   useEffect(() => {
     if (!selectedFile) {
-      // Set a default file - you can change this to any default filename
-      setSelectedFile("242eaf2ea764a3a70c8c55098ffabf61.json");
+      fetch('results/files.json')
+        .then(res => {
+          if (!res.ok) throw new Error('Failed to load files manifest');
+          return res.json();
+        })
+        .then(data => {
+          if (data && data.files && data.files.length > 0) {
+            // Pick a random file from the manifest
+            const randomIndex = Math.floor(Math.random() * data.files.length);
+            const randomFile = data.files[randomIndex];
+            setSelectedFile(randomFile.filename);
+          }
+        })
+        .catch(err => {
+          console.error('Failed to load files.json:', err);
+          setError('Failed to load experiment list');
+        });
     }
   }, [selectedFile]);
 
@@ -104,25 +130,39 @@ const App: React.FC = () => {
         if (!res.ok) throw new Error("Failed to load data");
         return res.json();
       })
-      .then((json: ResultJson) => {
-        const groups = Object.keys(json.visualisation);
+      .then((json: Experiment) => {
+        // Store the experiment
+        setExperiment(json);
+        
+        // Set available groups
+        const groups = ['validation_group', 'training_group'];
         setAvailableGroups(groups);
         if (groups.length > 0 && !selectedGroup) {
           setSelectedGroup(groups[0]);
         }
         
-        // Store all groups data for solution tables
-        setAllGroupsData(json.visualisation);
-        
-        // Set generation settings
-        setGenerationSettings(json.generation_settings || null);
+        // Set generation params
+        setGenerationParams(json.generation_params);
         
         // Extract simulation type from experiment_folder
-        if (json.generation_settings?.experiment_folder) {
-          const folderPath = json.generation_settings.experiment_folder;
+        if (json.generation_params?.experiment_folder) {
+          const folderPath = json.generation_params.experiment_folder;
           const simType = folderPath.split('/').pop() || "";
           setSimulationType(simType);
         }
+        
+        // Initialize hiddenSolutions with all solution IDs (hide all by default)
+        const allSolutionIds = new Set<string>();
+        ['validation_group', 'training_group'].forEach(groupKey => {
+          const group = json.data[groupKey as keyof typeof json.data] as TrajectoryGroup;
+          group.trajectories.forEach(traj => {
+            if (!traj.reference && traj.solutions) {
+              const solutionId = `${groupKey}_${traj.name}`;
+              allSolutionIds.add(solutionId);
+            }
+          });
+        });
+        setHiddenSolutions(allSolutionIds);
         
         setLoading(false);
       })
@@ -134,74 +174,46 @@ const App: React.FC = () => {
 
   // Process data when group is selected
   useEffect(() => {
-    if (!selectedFile || !selectedGroup) return;
+    if (!experiment || !selectedGroup) return;
 
     setLoading(true);
     
-    fetch(`results/${selectedFile}`)
-      .then(res => res.json())
-      .then((json: ResultJson) => {
-        const groupData = json.visualisation[selectedGroup];
+    try {
+      const groupData = experiment.data[selectedGroup as keyof typeof experiment.data] as TrajectoryGroup;
+      
+      // Set batch starting times
+      if (groupData.batch_starting_time) {
+        setBatchStartTimes(groupData.batch_starting_time);
+      } else {
+        setBatchStartTimes([]);
+      }
+      
+      // Find reference trajectory and other trajectories
+      const referenceTrajectory = groupData.trajectories.find(traj => traj.reference === true);
+      const otherTrajectories = groupData.trajectories.filter(traj => traj.reference !== true);
+      
+      if (!referenceTrajectory || !referenceTrajectory.series) {
+        setError("No reference trajectory found in selected group");
+        setLoading(false);
+        return;
+      }
+      
+      const refSeries = referenceTrajectory.series;
+      const timeArr = refSeries.time.time;
+      
+      // Create unified flat data containing reference + other trajectories
+      const groupedByVar: GroupedLines = {};
+      const flatData: FlatDataPoint[] = timeArr.map((t: number, i: number) => {
+        const point: FlatDataPoint = { time: t };
         
-        // Set batch starting times if available
-        if (groupData.batch_starting_times) {
-          setBatchStartTimes(groupData.batch_starting_times);
-        } else {
-          setBatchStartTimes([]);
-        }
-        
-        // Process ALL data entries in the group
-        const dataKeys = Object.keys(groupData.data);
-        if (dataKeys.length === 0) {
-          setError("No data found in selected group");
-          setLoading(false);
-          return;
-        }
-        
-        // Find all series with data
-        const seriesWithData = dataKeys.filter(key => {
-          const seriesData = groupData.data[key];
-          return seriesData.time && seriesData.time.length > 0 && 
-                 seriesData.series && Object.keys(seriesData.series).length > 0;
-        });
-        
-        if (seriesWithData.length === 0) {
-          setError("No series with data found in selected group");
-          setLoading(false);
-          return;
-        }
-        
-        // Find the reference series and other series
-        const referenceSeriesKey = seriesWithData.find(key => {
-          const seriesData = groupData.data[key];
-          return seriesData.reference === true;
-        });
-        
-        const otherSeriesKeys = seriesWithData.filter(key => {
-          const seriesData = groupData.data[key];
-          return seriesData.reference !== true;
-        });
-        
-        if (!referenceSeriesKey) {
-          setError("No reference series found in selected group");
-          setLoading(false);
-          return;
-        }
-        
-        const referenceData = groupData.data[referenceSeriesKey];
-        // Flatten time array if it's nested (handle [[0.1], [0.2]] format)
-        const timeArr = referenceData.time.map((t: any) => Array.isArray(t) ? t[0] : t);
-        
-        // Create unified flat data containing reference + other series
-        const groupedByVar: {[varType: string]: {[coordinate: string]: string[]}} = {};
-        const flatData = timeArr.map((t: number, i: number) => {
-          const point: any = { time: t };
-          
-          // 1. Process reference series data (clean keys for visualization compatibility)
-          Object.entries(referenceData.series).forEach(([coordinateName, coordinateData]) => {
-            Object.entries(coordinateData as CoordinateData).forEach(([varName, arr]) => {
-              const key = `${coordinateName}.${varName}`; // Clean key for cart pole visualization
-              point[key] = (arr as number[])[i];
+        // 1. Process reference series data (clean keys for visualization compatibility)
+        const processCoordinate = (coordSeries: any[], varName: string, timeIndex: number, prefix: string = '') => {
+          coordSeries.forEach(coord => {
+            const coordinateName = `coor_${coord.coordinate_number}`;
+            const key = prefix ? `${prefix}.${coordinateName}.${varName}` : `${coordinateName}.${varName}`;
+            
+            if (timeIndex < coord.data.length) {
+              point[key] = coord.data[timeIndex];
               
               // Group by variable type, then by coordinate
               if (!groupedByVar[varName]) groupedByVar[varName] = {};
@@ -209,73 +221,63 @@ const App: React.FC = () => {
               if (!groupedByVar[varName][coordinateName].includes(key)) {
                 groupedByVar[varName][coordinateName].push(key);
               }
-            });
-          });
-          
-          // 2. Process other series data (prefixed keys for curve visualization)
-          otherSeriesKeys.forEach(seriesKey => {
-            const seriesData = groupData.data[seriesKey];
-            const seriesPrefix = seriesKey.substring(0, 8); // Use first 8 chars as prefix
-            
-            // Skip if this series doesn't have data at this time index
-            if (!seriesData.time || i >= seriesData.time.length) return;
-            
-            // Flatten time for this series too
-            const seriesTimeArr = seriesData.time.map((t: any) => Array.isArray(t) ? t[0] : t);
-            
-            // Find closest time index for this series
-            let closestIndex = i;
-            if (seriesTimeArr.length !== timeArr.length) {
-              // If different lengths, find the closest time point
-              const targetTime = timeArr[i];
-              closestIndex = seriesTimeArr.reduce((closest, time, idx) => {
-                return Math.abs(time - targetTime) < Math.abs(seriesTimeArr[closest] - targetTime) ? idx : closest;
-              }, 0);
             }
-            
-            // Process coordinates for this other series
-            Object.entries(seriesData.series).forEach(([coordinateName, coordinateData]) => {
-              Object.entries(coordinateData as CoordinateData).forEach(([varName, arr]) => {
-                const key = `${seriesPrefix}.${coordinateName}.${varName}`;
-                if (closestIndex < (arr as number[]).length) {
-                  point[key] = (arr as number[])[closestIndex];
-                  
-                  // Group by variable type, then by coordinate
-                  if (!groupedByVar[varName]) groupedByVar[varName] = {};
-                  if (!groupedByVar[varName][coordinateName]) groupedByVar[varName][coordinateName] = [];
-                  if (!groupedByVar[varName][coordinateName].includes(key)) {
-                    groupedByVar[varName][coordinateName].push(key);
-                  }
-                }
-              });
-            });
           });
+        };
+        
+        // Process reference trajectory
+        processCoordinate(refSeries.qpos.series, 'qpos', i);
+        processCoordinate(refSeries.qvel.series, 'qvel', i);
+        processCoordinate(refSeries.qacc.series, 'qacc', i);
+        processCoordinate(refSeries.forces.series, 'forces', i);
+        
+        // 2. Process other trajectories (prefixed keys)
+        otherTrajectories.forEach(traj => {
+          if (!traj.series) return;
           
-          return point;
+          const trajPrefix = traj.name.substring(0, 8); // Use first 8 chars as prefix
+          const trajTime = traj.series.time.time;
+          
+          // Find closest time index for this trajectory
+          let closestIndex = i;
+          if (trajTime.length !== timeArr.length) {
+            const targetTime = timeArr[i];
+            closestIndex = trajTime.reduce((closest, time, idx) => {
+              return Math.abs(time - targetTime) < Math.abs(trajTime[closest] - targetTime) ? idx : closest;
+            }, 0);
+          }
+          
+          // Process all coordinates with trajectory prefix
+          processCoordinate(traj.series.qpos.series, 'qpos', closestIndex, trajPrefix);
+          processCoordinate(traj.series.qvel.series, 'qvel', closestIndex, trajPrefix);
+          processCoordinate(traj.series.qacc.series, 'qacc', closestIndex, trajPrefix);
+          processCoordinate(traj.series.forces.series, 'forces', closestIndex, trajPrefix);
         });
         
-        // Transform data and lines to use ranking numbers instead of UIDs
-        const transformedData = transformDataWithRanking(flatData, rankingMap, hiddenSolutions);
-        
-        // Transform groupedLines to use ranking numbers
-        const transformedGroupedLines: {[varType: string]: {[coordinate: string]: string[]}} = {};
-        Object.entries(groupedByVar).forEach(([varType, coordinateGroups]) => {
-          transformedGroupedLines[varType] = {};
-          Object.entries(coordinateGroups).forEach(([coordinateName, lines]) => {
-            transformedGroupedLines[varType][coordinateName] = transformLinesWithRanking(lines, rankingMap, hiddenSolutions);
-          });
-        });
-        
-        setData(transformedData);
-        setGroupedLines(transformedGroupedLines);
-        setCurrentIdx(0);
-        setLoading(false);
-      })
-      .catch((e) => {
-        setError(e.message);
-        setLoading(false);
+        return point;
       });
-  }, [selectedFile, selectedGroup, hiddenSolutions, rankingMap]);
+      
+      // Transform data and lines to use ranking numbers instead of UIDs
+      const transformedData = transformDataWithRanking(flatData, rankingMap, hiddenSolutions);
+      
+      // Transform groupedLines to use ranking numbers
+      const transformedGroupedLines: GroupedLines = {};
+      Object.entries(groupedByVar).forEach(([varType, coordinateGroups]) => {
+        transformedGroupedLines[varType] = {};
+        Object.entries(coordinateGroups).forEach(([coordinateName, lines]) => {
+          transformedGroupedLines[varType][coordinateName] = transformLinesWithRanking(lines, rankingMap, hiddenSolutions);
+        });
+      });
+      
+      setData(transformedData);
+      setGroupedLines(transformedGroupedLines);
+      setCurrentIdx(0);
+      setLoading(false);
+    } catch (e: any) {
+      setError(e.message);
+      setLoading(false);
+    }
+  }, [experiment, selectedGroup, hiddenSolutions, rankingMap]);
 
   // Calculate position and force ranges for cart pole visualization
   const getPositionRange = () => {
@@ -395,17 +397,17 @@ const App: React.FC = () => {
         </div>
 
         {/* Generation Settings Section */}
-        {generationSettings !== null && (
+        {generationParams !== null && (
           <div className="bg-white rounded-lg shadow p-6 mb-6">
-            <GenerationSettings settings={generationSettings} />
+            <GenerationSettings settings={generationParams} />
           </div>
         )}
 
         {/* Solution Control Table - Full Width Section */}
-        {Object.keys(allGroupsData).length > 0 && (
+        {experiment && (
           <div className="mb-6">
             <SolutionControlTable 
-              groups={allGroupsData}
+              experiment={experiment}
               onSolutionToggle={handleSolutionToggle}
             />
           </div>
@@ -434,9 +436,10 @@ const App: React.FC = () => {
         )}
 
         {/* Solution Analysis Tables */}
-        {!loading && !error && selectedGroup && allGroupsData[selectedGroup] && (
+        {!loading && !error && selectedGroup && experiment && (
           <SolutionTables 
-            groups={{ [selectedGroup]: allGroupsData[selectedGroup] }} 
+            experiment={experiment}
+            selectedGroup={selectedGroup}
             hiddenSolutions={hiddenSolutions}
           />
         )}

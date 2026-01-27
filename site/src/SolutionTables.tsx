@@ -3,6 +3,7 @@ import { InlineMath, BlockMath } from 'react-katex';
 import 'katex/dist/katex.min.css';
 import { createSolutionRanking } from './solutionRanking';
 import type { SolutionRanking, GroupData as RankingGroupData } from './solutionRanking';
+import type { Experiment, TrajectoryGroup } from './types';
 
 type SolutionData = {
   vector: number[];
@@ -21,24 +22,9 @@ type ExtraInfo = {
   };
 };
 
-type SeriesData = {
-  solution?: {
-    [solutionType: string]: SolutionData;
-  };
-  reference?: boolean;
-  extra_info?: ExtraInfo;
-};
-
-type GroupData = {
-  data: {
-    [seriesName: string]: SeriesData;
-  };
-};
-
 type SolutionTablesProps = {
-  groups: {
-    [groupName: string]: GroupData;
-  };
+  experiment: Experiment;
+  selectedGroup: string;
   hiddenSolutions?: Set<string>;
 };
 
@@ -79,7 +65,7 @@ const SolutionInfoCard: React.FC<{ extraInfo: ExtraInfo; seriesName: string; ran
             </span>
           </div>
         )}
-        {extraInfo.results?.RMSE_acceleration !== undefined && (
+        {extraInfo.results?.RMSE_acceleration !== undefined && extraInfo.results.RMSE_acceleration !== null && (
           <div className="flex justify-between">
             <span className="text-gray-600">RMSE:</span>
             <span className="font-medium text-orange-700">
@@ -92,15 +78,51 @@ const SolutionInfoCard: React.FC<{ extraInfo: ExtraInfo; seriesName: string; ran
   );
 };
 
-const SolutionTables: React.FC<SolutionTablesProps> = ({ groups, hiddenSolutions }) => {
+const SolutionTables: React.FC<SolutionTablesProps> = ({ experiment, selectedGroup, hiddenSolutions }) => {
   
   const [showValues, setShowValues] = useState(true);
   const [collapseZeros, setCollapseZeros] = useState(true);
   
   // Create ranking map for consistent solution numbering
   const rankingMap = useMemo(() => {
-    return createSolutionRanking(groups as { [groupName: string]: RankingGroupData });
-  }, [groups]);
+    // Convert experiment structure to format expected by ranking function
+    const groupsForRanking: { [groupName: string]: RankingGroupData } = {};
+    
+    ['validation_group', 'training_group'].forEach(groupKey => {
+      const group = experiment.data[groupKey as keyof typeof experiment.data] as TrajectoryGroup;
+      const dataObj: { [key: string]: any } = {};
+      
+      group.trajectories.forEach(traj => {
+        if (!traj.reference && traj.solutions && traj.regression_result) {
+          dataObj[traj.name] = {
+            solution: {},
+            extra_info: {
+              noise_level: traj.regression_result.regression_parameters.noise_level,
+              optimization_function: traj.regression_result.regression_parameters.optimization_function,
+              regression_type: traj.regression_result.regression_parameters.regression_type,
+              valid: traj.regression_result.valid,
+              regression_time: traj.regression_result.regression_time,
+              results: {
+                RMSE_acceleration: traj.regression_result.RMSE_acceleration
+              }
+            }
+          };
+          
+          // Add solutions
+          traj.solutions.forEach(sol => {
+            dataObj[traj.name].solution[sol.mode_solution] = {
+              vector: sol.solution_vector,
+              label: sol.solution_label
+            };
+          });
+        }
+      });
+      
+      groupsForRanking[groupKey] = { data: dataObj };
+    });
+    
+    return createSolutionRanking(groupsForRanking);
+  }, [experiment]);
   
   // Helper function to safely format numbers
   const formatValue = (value: any): string => {
@@ -168,44 +190,60 @@ const SolutionTables: React.FC<SolutionTablesProps> = ({ groups, hiddenSolutions
     return refIsZero && allOthersZero;
   };
 
-  // Extract all solution types across all groups and series
+  // Extract all solution types and collect solution data from experiment
   const solutionTypes = new Set<string>();
-  const solutionData: { [solutionType: string]: { [groupName: string]: { [seriesName: string]: SolutionData } } } = {};
+  const solutionData: { [solutionType: string]: { [groupName: string]: { [trajectoryName: string]: SolutionData } } } = {};
 
+  // Get the selected group
+  const groupData = experiment.data[selectedGroup as keyof typeof experiment.data] as TrajectoryGroup;
+  
   // Collect all solution data organized by solution type
-  Object.entries(groups).forEach(([groupName, groupData]) => {
-    Object.entries(groupData.data).forEach(([seriesName, seriesData]) => {
-      if (seriesData.solution) {
-        Object.entries(seriesData.solution).forEach(([solutionType, solutionInfo]) => {
-          solutionTypes.add(solutionType);
-          
-          if (!solutionData[solutionType]) {
-            solutionData[solutionType] = {};
+  groupData.trajectories.forEach(traj => {
+    if (traj.solutions && traj.regression_result) {
+      traj.solutions.forEach(sol => {
+        const solutionType = sol.mode_solution;
+        solutionTypes.add(solutionType);
+        
+        if (!solutionData[solutionType]) {
+          solutionData[solutionType] = {};
+        }
+        if (!solutionData[solutionType][selectedGroup]) {
+          solutionData[solutionType][selectedGroup] = {};
+        }
+        
+        // Store solution info with extra_info from regression_result
+        solutionData[solutionType][selectedGroup][traj.name] = {
+          vector: sol.solution_vector,
+          label: sol.solution_label,
+          extraInfo: {
+            noise_level: traj.regression_result.regression_parameters.noise_level,
+            optimization_function: traj.regression_result.regression_parameters.optimization_function,
+            regression_type: traj.regression_result.regression_parameters.regression_type,
+            valid: traj.regression_result.valid,
+            regression_time: traj.regression_result.regression_time,
+            results: {
+              RMSE_acceleration: traj.regression_result.RMSE_acceleration
+            }
           }
-          if (!solutionData[solutionType][groupName]) {
-            solutionData[solutionType][groupName] = {};
-          }
-          // Store both solution info and extra_info
-          solutionData[solutionType][groupName][seriesName] = {
-            ...solutionInfo,
-            extraInfo: seriesData.extra_info
-          };
-        });
-      }
-    });
+        };
+      });
+    }
   });
 
-  // Find reference data (series with reference: true)
+  // Find reference data (trajectory with reference: true)
   const findReferenceData = (solutionType: string) => {
-    for (const [groupName, groupData] of Object.entries(groups)) {
-      for (const [seriesName, seriesData] of Object.entries(groupData.data)) {
-        if (seriesData.reference && seriesData.solution?.[solutionType]) {
-          return {
-            groupName,
-            seriesName,
-            data: seriesData.solution[solutionType]
-          };
-        }
+    const refTraj = groupData.trajectories.find(traj => traj.reference === true);
+    if (refTraj && refTraj.solutions) {
+      const refSolution = refTraj.solutions.find(sol => sol.mode_solution === solutionType);
+      if (refSolution) {
+        return {
+          groupName: selectedGroup,
+          seriesName: refTraj.name,
+          data: {
+            vector: refSolution.solution_vector,
+            label: refSolution.solution_label
+          }
+        };
       }
     }
     return null;

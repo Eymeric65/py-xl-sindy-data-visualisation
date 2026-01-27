@@ -18,6 +18,7 @@ interface FileInfo {
   forces_scale_vector: number[];
   experiment_folder: string;
   damping_coefficients: number[];
+  all_solutions_invalid?: boolean;
 }
 
 interface FilesManifest {
@@ -306,35 +307,47 @@ const FileExplorer: React.FC<FileExplorerProps> = ({ onFileSelect, selectedFile 
                   >
                     {Object.entries(forceGroups).map(([forcesKey, files]) => {
                       const forces = JSON.parse(forcesKey) as number[];
-                      // Since there's only one file per force category, get the first (and only) file
-                      const file = files[0];
-                      const humanReadableName = formatExperimentName(file.experiment_folder);
-                      const summaryName = `${humanReadableName} - Damping: [${file.damping_coefficients.map(c => c.toFixed(1)).join(', ')}]`;
                       
-                      return (
-                        <div key={forcesKey} className="border-b border-gray-100 last:border-b-0">
-                          <button
-                            onClick={() => onFileSelect(file.filename)}
-                            className={`w-full px-4 py-2 bg-white hover:bg-gray-50 transition-colors ${
-                              selectedFile === file.filename
-                                ? 'bg-blue-50 border-l-4 border-blue-400'
-                                : ''
-                            }`}
-                          >
-                            <div className="flex items-center space-x-3">
-                              <div className="flex items-center space-x-2">
-                                <span className="text-xs text-gray-600">Forces mode:</span>
-                                <ForcePattern forces={forces} />
-                              </div>
-                              <div className="flex-1 text-left">
-                                <div className="text-sm font-medium text-gray-800">
-                                  {summaryName}
+                      // Display ALL files for this force pattern (not just the first one)
+                      return files.map((file, fileIndex) => {
+                        const humanReadableName = formatExperimentName(file.experiment_folder);
+                        const dampingStr = file.damping_coefficients.map(c => c.toFixed(1)).join(', ');
+                        const allInvalid = file.all_solutions_invalid ?? false;
+                        
+                        // Build the summary name with seed number and validity
+                        let summaryName = `${humanReadableName} - Damping: [${dampingStr}]`;
+                        if (files.length > 1) {
+                          summaryName += ` - seed #${fileIndex + 1}`;
+                        }
+                        if (allInvalid) {
+                          summaryName += ' - all invalid ❌';
+                        }
+                        
+                        return (
+                          <div key={`${forcesKey}-${fileIndex}`} className="border-b border-gray-100 last:border-b-0">
+                            <button
+                              onClick={() => onFileSelect(file.filename)}
+                              className={`w-full px-4 py-2 bg-white hover:bg-gray-50 transition-colors ${
+                                selectedFile === file.filename
+                                  ? 'bg-blue-50 border-l-4 border-blue-400'
+                                  : ''
+                              }`}
+                            >
+                              <div className="flex items-center space-x-3">
+                                <div className="flex items-center space-x-2">
+                                  <span className="text-xs text-gray-600">Forces mode:</span>
+                                  <ForcePattern forces={forces} />
+                                </div>
+                                <div className="flex-1 text-left">
+                                  <div className="text-sm font-medium text-gray-800">
+                                    {summaryName}
+                                  </div>
                                 </div>
                               </div>
-                            </div>
-                          </button>
-                        </div>
-                      );
+                            </button>
+                          </div>
+                        );
+                      });
                     })}
                   </CollapsibleSection>
                 );

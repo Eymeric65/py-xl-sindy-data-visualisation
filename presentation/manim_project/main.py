@@ -509,7 +509,7 @@ section_name = [
     "What is SINDy",
     "SINDy types",
     "The Lab SINDy",
-    "New additions",
+    "New contributions",
     "Results",
     "Discussion",
     "Conclusion",
@@ -690,7 +690,7 @@ class MainBlack(BaseSlide):
 
         text_1 = Text("White box, black box system identification",font_size=self.CONTENT_FONT_SIZE).to_corner(UL).shift(DOWN*1)
 
-        self.new_clean_slide("Opening",contents=text_1)
+        self.new_clean_slide("1. Opening",contents=text_1)
 
         system_box = Rectangle(fill_opacity=1,height=2,width=3).set_fill(color=WHITE)
         input_arrow = Arrow(start=system_box.get_left()+LEFT*3,end=system_box.get_left(),buff=0.0)
@@ -820,12 +820,12 @@ class MainBlack(BaseSlide):
             font_size=self.CONTENT_FONT_SIZE,
         ).align_to(self.UL, LEFT).shift(RIGHT*1)
 
-        self.new_clean_slide("1 Introduction",contents=contents)
+        self.new_clean_slide("2.1 Introduction",contents=contents)
 
     def construct_what_is_sindy(self):
 
         self.next_slide(notes=" # What is SINDy")
-        self.new_clean_slide(r"1 What is SINDy")
+        self.new_clean_slide(r"2.2 What is SINDy")
 
 
         pendulum_L = 1
@@ -847,7 +847,7 @@ class MainBlack(BaseSlide):
 
         sindy_text_deployed = VGroup(Text("Sparse",t2c={"S":RED_E}),Text("Identification of",t2c={"I":RED_E}),Text("Nonlinear",t2c={"N":RED_E}),Text("Dynamics",t2c={"D":RED_E})).arrange_in_grid(rows=4,cols=1,col_alignments="l").shift(LEFT*3)
 
-        self.next_slide(notes="What does SINDy stand for ?")
+        self.next_slide(notes="What does SINDy stand for?")
 
         self.play(
             LaggedStart(
@@ -1457,7 +1457,7 @@ class MainBlack(BaseSlide):
     def construct_sindy_type(self):
 
 
-        self.next_slide(notes=" # What are the different type of Sindy ?")
+        self.next_slide(notes=" # What are the different type of Sindy?")
 
         def one_line_title_wrapper(text,i,j):
             return f"\\boldsymbol{{{text}_{{{j+1}}}}}"
@@ -1500,7 +1500,7 @@ class MainBlack(BaseSlide):
             force_vector
         ).arrange(RIGHT,buff=0.5)
 
-        self.new_clean_slide("2.1 Sindy type : classic SINDy",contents=[sindy_equation,citation],t2c={"-PI":RED_E})
+        self.new_clean_slide("3.1. Sindy type : classic SINDy",contents=[sindy_equation,citation],t2c={"-PI":RED_E})
 
         self.next_slide(notes="SINDy-PI introduces implicit formulations")
 
@@ -1508,7 +1508,7 @@ class MainBlack(BaseSlide):
 
         self.play(
             Transform(force_vector.get_contents(),zero),
-            self.next_slide_title_animation("2.2 Sindy type : SINDy-PI",t2c={"-PI":RED_E}),
+            self.next_slide_title_animation("3.2. Sindy type : SINDy-PI",t2c={"-PI":RED_E}),
             Transform(citation,Tex(r"Kaheman, K., Kutz, J. N. \& Brunton, S. L. SINDy-PI: A Robust Algorithm for Parallel Implicit Sparse Identification of Nonlinear Dynamics. (2020).",font_size=self.SOURCE_FONT_SIZE).to_corner(DL)),
             self.next_slide_number_animation()
         )
@@ -1546,9 +1546,9 @@ class MainBlack(BaseSlide):
 
 
 
-        self.next_slide(notes="What if this contender is not inside our solution ?")
+        self.next_slide(notes="What if this contender is not inside our solution?")
 
-        question_text = Text("What if the right term is not in our catalog ?",t2c={"right term":RED_E,"not":RED_E,"catalog":RED_E},font_size=self.CONTENT_FONT_SIZE).next_to(sindy_equation,DOWN,aligned_edge=LEFT)
+        question_text = Text("What if the right term is not in our catalog?",t2c={"right term":RED_E,"not":RED_E,"catalog":RED_E},font_size=self.CONTENT_FONT_SIZE).next_to(sindy_equation,DOWN,aligned_edge=LEFT)
 
         self.play(
             Write(question_text)
@@ -1790,7 +1790,7 @@ class MainBlack(BaseSlide):
 
         catalog_list = MathTex(r"\sin(\qcoordinate)",r",",r"\cos(\qcoordinate)",r",",r"\ddot{\qcoordinate}",r",",r"\dot{\qcoordinate}").next_to(intro_text,DOWN,buff=0.5).set_x(0)
 
-        self.new_clean_slide("3.1 SINDy limitation",contents=VGroup(intro_text,catalog_list))
+        self.new_clean_slide("4.1. SINDy limitation",contents=VGroup(intro_text,catalog_list))
 
         catalog_list_1 = MathTex(r"\sin({\qcoordinate}_1{{)}}",r",",r"\cos({\qcoordinate}_1{{)}}",r",",r"\ddot{\qcoordinate}_1",r",",r"\dot{\qcoordinate}_1")
         catalog_list_2 = MathTex(r",",r"\sin({\qcoordinate}_2{{)}}",r",",r"\cos({\qcoordinate}_2{{)}}",r",",r"\ddot{\qcoordinate}_2",r",",r"\dot{\qcoordinate}_2")
@@ -1947,11 +1947,11 @@ class MainBlack(BaseSlide):
 
         self.next_slide(notes=" # The Lab SINDy")
 
-        intro_text = Text("One solution, the lagrangian formulation",t2c={"lagrangian":RED_E},font_size=self.CONTENT_FONT_SIZE).to_corner(UL).shift(DOWN*1)
+        intro_text = Text("A solution, the lagrangian formulation",t2c={"lagrangian":RED_E},font_size=self.CONTENT_FONT_SIZE).to_corner(UL).shift(DOWN*1)
 
-        lagrangian = intro_text[15:25].copy()
+        lagrangian = intro_text[13:23].copy()
 
-        self.new_clean_slide("3.2 The Lab SINDy introduction",contents=intro_text)
+        self.new_clean_slide("4.2. The Lab SINDy introduction",contents=intro_text)
 
         self.next_slide(notes=" The lagrangian formula")
 
@@ -2075,7 +2075,7 @@ class MainBlack(BaseSlide):
 
         citation = Tex(r"Purnomo, A. \& Hayashibe, M. Sparse identification of Lagrangian for nonlinear dynamical systems via proximal gradient method. (2023).",font_size=self.SOURCE_FONT_SIZE).to_corner(DL)
 
-        self.new_clean_slide("3.3 The Lab SINDy formulation",contents=[intro_text,f_group,citation])        
+        self.new_clean_slide("4.3. The Lab SINDy formulation",contents=[intro_text,f_group,citation])        
 
         self.next_slide(notes=" # The Lab SINDy")
 
@@ -2126,7 +2126,7 @@ class MainBlack(BaseSlide):
             else:
                 return r"\boldsymbol{f_4}"
             
-        intro_text=Text("How could we have a compact catalog with the advantages of newton ?",t2c={"compact":RED_E,"advantages":RED_E},font_size=self.CONTENT_FONT_SIZE).to_corner(UL).shift(DOWN*1)
+        intro_text=Text("How could we have a compact catalog with the advantages of Newton?",t2c={"compact":RED_E,"advantages":RED_E},font_size=self.CONTENT_FONT_SIZE).to_corner(UL).shift(DOWN*1)
 
         uni_sindy_matrix = SindyMatrix(
             [
@@ -2184,7 +2184,7 @@ class MainBlack(BaseSlide):
         ).arrange(RIGHT,buff=SINDY_MATRIX_CLEARANCE*2)
         ).arrange(RIGHT,buff=1).next_to(intro_text,DOWN,buff=0.5).set_x(0)
 
-        self.new_clean_slide("4.1 First addition",contents=[intro_text,bi_matrix])
+        self.new_clean_slide("5.1. First contribution",contents=[intro_text,bi_matrix],t2c={"contribution":BLUE_E})
 
         self.next_slide(notes=" The lagrangian formula")
 
@@ -2207,7 +2207,7 @@ class MainBlack(BaseSlide):
 
         self.next_slide(notes=" # Addition 2")
 
-        extra_description_text= Text("How can we guess implicit and explicit in complex system ?",t2c={"complex":RED_E,"implicit":RED_E,"explicit":RED_E},font_size=self.CONTENT_FONT_SIZE).to_corner(UL).shift(DOWN*1)
+        extra_description_text= Text("How to guess implicit and explicit subspaces of complex systems?",t2c={"complex":RED_E,"implicit":RED_E,"explicit":RED_E},font_size=self.CONTENT_FONT_SIZE).to_corner(UL).shift(DOWN*1)
 
         complex_sindy_matrix = SindyMatrix(
             [
@@ -2243,13 +2243,13 @@ class MainBlack(BaseSlide):
             forces_matrix
         ).arrange(RIGHT,buff=0.5).scale(0.75).next_to(extra_description_text,DOWN,buff=0.5).set_x(0)
 
-        self.new_clean_slide("4.2 Second addition",contents=[extra_description_text,sindy_equation])
+        self.new_clean_slide("5.2. Second contribution",contents=[extra_description_text,sindy_equation],t2c={"contribution":BLUE_E})
 
         sindy_equation.generate_target()
 
-        first_step = Text("1. Where are external forces ?",t2c={"external forces":RED_E},font_size=self.CONTENT_FONT_SIZE)
-        second_step = Text("2. What functions are activated ?",t2c={"activated":RED_E},font_size=self.CONTENT_FONT_SIZE).next_to(first_step,DOWN,aligned_edge=LEFT,buff=0.5)
-        third_step = Text("3. What coordinate activate these functions ? ",t2c={"coordinate":RED_E},font_size=self.CONTENT_FONT_SIZE).next_to(second_step,DOWN,aligned_edge=LEFT,buff=0.5)
+        first_step = Text("1. Where are external forces?",t2c={"external forces":RED_E},font_size=self.CONTENT_FONT_SIZE)
+        second_step = Text("2. What functions are activated?",t2c={"activated":RED_E},font_size=self.CONTENT_FONT_SIZE).next_to(first_step,DOWN,aligned_edge=LEFT,buff=0.5)
+        third_step = Text("3. What coordinate activate these functions? ",t2c={"coordinate":RED_E},font_size=self.CONTENT_FONT_SIZE).next_to(second_step,DOWN,aligned_edge=LEFT,buff=0.5)
         fourth_step = Text("4. Loop until no more discovery",t2c={"no more discovery":RED_E},font_size=self.CONTENT_FONT_SIZE).next_to(third_step,DOWN,aligned_edge=LEFT,buff=0.5)
         fifth_step = Text("5. Execute SINDy on this sub-system",t2c={"SINDy":RED_E,"sub-system":RED_E},font_size=self.CONTENT_FONT_SIZE).next_to(fourth_step,DOWN,aligned_edge=LEFT,buff=0.5)
         sixth_step = Text("6. Execute SINDy-PI on non-discovered coordinate",t2c={"SINDy-PI":RED_E,"non-discovered":RED_E},font_size=self.CONTENT_FONT_SIZE).next_to(fifth_step,DOWN,aligned_edge=LEFT,buff=0.5)
@@ -2350,7 +2350,7 @@ class MainBlack(BaseSlide):
 
         self.next_slide(notes=" # Result")
 
-        intro_text = Text("Test protocol has been established to evaluate the performance of the algorithm",font_size=self.CONTENT_FONT_SIZE).to_corner(UL).shift(DOWN*1)
+        intro_text = Text("Test protocol used to evaluate the algorithms:",font_size=self.CONTENT_FONT_SIZE).to_corner(UL).shift(DOWN*1)
 
         image_double_pendulum = ImageMobject("image/double_pendulum.png")
         double_pendulum_text= Text("Double Pendulum",t2c={"Double Pendulum":RED_E},font_size=self.CONTENT_FONT_SIZE).next_to(image_double_pendulum,DOWN,buff=0.1)
@@ -2367,7 +2367,7 @@ class MainBlack(BaseSlide):
             Group(image_double_cartpole,double_cartpole_text)
         ).arrange(RIGHT,buff=1).scale(0.5)
 
-        self.new_clean_slide("5.1 Result gathering",contents=[intro_text,image_group])
+        self.new_clean_slide("6.1. Gathering results",contents=[intro_text,image_group])
 
         self.next_slide(notes=" let's take example of double cartpole")
 
@@ -2449,7 +2449,7 @@ class MainBlack(BaseSlide):
         first_experiment_image = import_svg("plots/damping_zero_force_nonzero_cart_pole",suffixe="",scale=7).scale_to_fit_height(5.5).next_to(description,DOWN,buff=0.1).set_x(0)
 
         #: No damping, external forces
-        self.new_clean_slide("Example data 1 ",contents= first_experiment_image)
+        self.new_clean_slide("6.2. Example data 1 ",contents= first_experiment_image)
         self.play(
             Write(description)
         )
@@ -2458,7 +2458,7 @@ class MainBlack(BaseSlide):
         description = Text("Nonzero damping, mixed external forces",font_size=self.CONTENT_FONT_SIZE).to_corner(UL).shift(DOWN*1)
         second_experiment_image = import_svg("plots/damping_nonzero_force_mixed_cart_pole_double",suffixe="",scale=7).scale_to_fit_width(8).next_to(description,DOWN,buff=0.1).set_x(0)
         #: Nonzero damping, mixed external forces
-        self.new_clean_slide("Example data 2 ",contents= second_experiment_image)
+        self.new_clean_slide("6.3. Example data 2 ",contents= second_experiment_image)
         self.play(
             Write(description)
         )
@@ -2473,7 +2473,7 @@ class MainBlack(BaseSlide):
             success_rate_combined
             ).arrange(RIGHT,buff=0.5).set_x(0).scale_to_fit_width(13)
 
-        self.new_clean_slide("Noise analysis combined",contents=[graph_combined])
+        self.new_clean_slide("6.4. Noise analysis combined",contents=[graph_combined])
 
         self.next_slide(notes=" # Results per system")
 
@@ -2489,21 +2489,21 @@ class MainBlack(BaseSlide):
             ReplacementTransform(noise_comparison_combined,noise_comparison),
             ReplacementTransform(success_rate_combined,success_rate),
             self.next_slide_number_animation(),
-            self.next_slide_title_animation("Noise analysis per system")
+            self.next_slide_title_animation("6.5. Noise analysis per system")
         )
 
     def real_robot_result(self):
 
         self.next_slide(notes=" # Real experiment")
 
-        description = Text("Gather data on real system",font_size=self.CONTENT_FONT_SIZE).to_corner(UL).shift(DOWN*1)
+        description = Text("Data gathering protocol:",font_size=self.CONTENT_FONT_SIZE).to_corner(UL).shift(DOWN*1)
 
         def video_transform(video_mobject:Mobject):
 
-            return video_mobject.scale_to_fit_width(8).next_to(description,DOWN,buff=0.2).set_x(0)
+            return video_mobject.scale_to_fit_width(8).next_to(description,DOWN,buff=0.3).set_x(0)
 
         #: No damping, external forces
-        self.new_clean_slide("Real system experiment")
+        self.new_clean_slide("6.6. Real world experiment")
 
         self.play(
             Write(description),
@@ -2511,7 +2511,7 @@ class MainBlack(BaseSlide):
         
         self.play_video("image/real_pendulum_mosaic.mp4",video_transform)
 
-        slower_text = Text("Slowned down x4 for better visualisation",t2c={"x4":RED_E},font_size=self.CONTENT_FONT_SIZE).next_to(description,RIGHT,buff=1)
+        slower_text = Text("Slowed down x4 for better visualisation",t2c={"x4":RED_E},font_size=self.CONTENT_FONT_SIZE).next_to(description,RIGHT,buff=1)
 
         self.play(
             Write(slower_text),
@@ -2519,7 +2519,7 @@ class MainBlack(BaseSlide):
 
         self.play_video("image/real_pendulum_mosaic_x4.mp4",video_transform)
 
-        result_description = Text("Result on real system",font_size=self.CONTENT_FONT_SIZE).to_corner(UL).shift(DOWN*1)
+        result_description = Text("Results on real system",font_size=self.CONTENT_FONT_SIZE).to_corner(UL).shift(DOWN*1)
         
         self.play(
             FadeOut(slower_text),
@@ -2540,7 +2540,7 @@ class MainBlack(BaseSlide):
 
         intro_text = Text("Pros and cons, future works",font_size=self.CONTENT_FONT_SIZE).to_corner(UL).shift(DOWN*1)
 
-        self.new_clean_slide("Discussion",contents=intro_text)
+        self.new_clean_slide("7. Discussion",contents=intro_text)
 
         self.next_slide(notes=" pros and cons")
 
@@ -2548,7 +2548,7 @@ class MainBlack(BaseSlide):
             "Pros:",
             "- Compact catalogs",
             "- Better discovery rate",
-            "- Handle complex system",
+            "- Handle complex systems",
             "- Unified framework",
             t2c={"Pros":GREEN_E,"Compact":GREEN_E,"Better":GREEN_E,"complex":GREEN_E,"Unified":GREEN_E},
             font_size=self.CONTENT_FONT_SIZE
@@ -2557,14 +2557,14 @@ class MainBlack(BaseSlide):
         cons_text = Paragraph(
             "Cons:",
             "- Complex implementation",
-            "- Still limited by catalog functions",
+            "- Limited by catalog functions",
             "- Ensemble-SINDy not yet implemented",
             t2c={"Cons":RED_E,"Complex":RED_E,"catalog":RED_E,"implemented":RED_E},
             font_size=self.CONTENT_FONT_SIZE
         )
 
         future_work_text = Paragraph(
-            "Future works:",
+            "Future work:",
             "- Extend to more complex systems (ENSEMBLE-SINDy, catalog discovery)",
             "- Improve catalog function selection",
             "- Real world applications",
@@ -2592,14 +2592,14 @@ class MainBlack(BaseSlide):
 
         conclusion_paragraph = Paragraph(
             "Unified SINDy enables the use of more compact catalogs,",
-            "keep the advantages of both Newton and Lagrange formulation,",
-            "open the door to complex system identification.",
+            "keeps the advantages of both Newton and Lagrange formulation,",
+            "opens the door to complex system identification.",
             "Real world mixed implicit and explicit systems can also be identified",
             t2c={"Unified SINDy":RED_E,"Newton":RED_E,"Lagrange":RED_E,"complex":RED_E,"real world":RED_E},
             font_size=self.CONTENT_FONT_SIZE
         ).align_to(self.UL,LEFT).shift(RIGHT*1)
 
-        self.new_clean_slide("6 Conclusion",contents=conclusion_paragraph)
+        self.new_clean_slide("8. Conclusion",contents=conclusion_paragraph)
 
     def construct_qa(self):
 
@@ -2624,11 +2624,11 @@ class MainBlack(BaseSlide):
             live_demo_link
         ).move_to(ORIGIN)
 
-        self.new_clean_slide("7 Questions and answers",contents=content_group)
+        self.new_clean_slide("9. Questions and answers",contents=content_group)
 
     def construct_annexe_math(self):
 
-        self.next_slide(notes=" # Annexe math")
+        self.next_slide(notes=" # Annex math")
 
         math = ImageMobject("image/math.png").scale_to_fit_height(6).to_corner(UL).shift(DOWN*1).set_x(0)
 
@@ -2686,7 +2686,7 @@ class WIP(BaseSlide):
 
         self.play_video("image/real_pendulum_mosaic_x4.mp4",video_transform)
 
-        result_description = Text("Result on real system",font_size=self.CONTENT_FONT_SIZE).to_corner(UL).shift(DOWN*1)
+        result_description = Text("Results on a real world system",font_size=self.CONTENT_FONT_SIZE).to_corner(UL).shift(DOWN*1)
         
         self.play(
             FadeOut(slower_text),
