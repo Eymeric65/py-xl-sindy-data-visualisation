@@ -14,9 +14,9 @@ from manim_slides import Slide
 
 import functools
 
-BLACK_BACKGOUND = False
+BLACK_BACKGOUND = True
 
-VIDEO_DEBUG = True
+VIDEO_DEBUG = False
 
 if not BLACK_BACKGOUND:
 
@@ -27,6 +27,57 @@ else:
 
     DEFAULT_COLOR = WHITE
     DEFAULT_BACKGROUND_COLOR = ManimColor.from_rgb([0.01,0.01,0.01])  # Almost white
+
+class VideoAnimation(Animation):
+    def __init__(self, video_mobject, **kwargs):
+        self.video_mobject = video_mobject
+        self.index = 0
+        self.dt = 1.0 / len(video_mobject)
+        super().__init__(video_mobject, **kwargs)
+
+    def interpolate_mobject(self, dt):
+        index = int(dt / self.dt) % len(self.video_mobject)
+
+        if index != self.index:
+            self.index = index
+            self.video_mobject.pixel_array = self.video_mobject[index].pixel_array
+
+        return self
+
+class VideoMobject(ImageMobject):
+    def __init__(self, video_file, **kwargs):
+
+        self.frame_arrays = []
+
+        cap = cv2.VideoCapture(video_file)
+        flag = True
+        self.kwargs = kwargs
+        self.total_time = 0
+
+        while flag:
+            flag, frame = cap.read()
+            fps = cap.get(cv2.CAP_PROP_FPS)
+            delay = 1 / fps
+
+            if flag:
+                frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                self.frame_arrays.append(frame)
+                self.total_time += delay
+
+            if VIDEO_DEBUG and self.total_time > 2:
+                break
+
+        cap.release()
+
+        super().__init__(self.frame_arrays[0], **kwargs)
+    def __len__(self):
+        return len(self.frame_arrays)
+
+    def __getitem__(self, index):
+        return ImageMobject(self.frame_arrays[index],**self.kwargs)
+
+    def play(self, **kwargs):
+        return VideoAnimation(self,run_time=self.total_time, **kwargs)
 
 def import_svg(filename: str,suffixe: str="_background", scale: float = 6.0) -> SVGMobject:
     """Imports an SVG file and scales it.
@@ -518,48 +569,6 @@ class BaseSlide(Slide):
         ).to_corner(UL)
         self.add_to_canvas(slide_number=self.slide_number)
 
-    def play_video(self,file, *args,mobject_transform = lambda x:x, **kwargs):
-        cap = cv2.VideoCapture(file)
-        flag = True
-
-        first_image= True
-        frame_counter=0
-
-        frame_img = None
-
-        while flag:
-            flag, frame = cap.read()
-            fps = cap.get(cv2.CAP_PROP_FPS)
-            delay = 1 / fps
-
-            frame_counter+=1
-
-            if flag:
-
-                if frame_img:
-                    self.remove(frame_img)
-
-                frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                frame_img = mobject_transform(ImageMobject(frame, *args, **kwargs))
-                
-
-                if first_image:
-                    first_image= False
-                    self.play(
-                        FadeIn(frame_img)
-                    )
-                    self.next_slide(notes=" # video first frame")
-                else:
-                    self.add(frame_img)
-                self.wait(delay)
-
-                if VIDEO_DEBUG and frame_counter > fps*2:  # Limit to 2 seconds for debug
-                    break
-
-        cap.release()
-
-        return frame_img
-
     def next_slide_number_animation(self):
         global global_slide_counter
         global_slide_counter = global_slide_counter + 1
@@ -601,9 +610,21 @@ class BaseSlide(Slide):
         else:
             self.play(self.next_slide_number_animation(),self.next_slide_title_animation(title,**kwargs))
 
+    def play_video(self, video_file,mobject_transform=None, **kwargs):
+        video = VideoMobject(video_file)
+
+        if mobject_transform is not None:
+            mobject_transform(video)
+        
+        self.play(FadeIn(video))
+        self.next_slide(notes=" Playing video ")
+        self.play(video.play(**kwargs))
+        self.next_slide(notes=" Video ended ")
+        self.play(FadeOut(video))
 
 
-class MainWhite(BaseSlide):
+
+class MainBlack(BaseSlide):
 
 
     def construct_intro(self):
@@ -621,7 +642,7 @@ class MainWhite(BaseSlide):
 
         lab_title = Text("Tohoku University - School of engineering - NeuroRobotics Laboratory").scale(0.3)
         author_date = (
-            Text("Eymeric CHAUCHAT C4TM1417 - 18th November 2025")
+            Text("Eymeric CHAUCHAT C4TM1417 - 27th January 2026")
             .scale(0.3)
         )
 
@@ -667,7 +688,7 @@ class MainWhite(BaseSlide):
 
         self.next_slide(notes=" # Opening")
 
-        text_1 = Text("White box, Black box system identification",font_size=self.CONTENT_FONT_SIZE).to_corner(UL).shift(DOWN*1)
+        text_1 = Text("White box, black box system identification",font_size=self.CONTENT_FONT_SIZE).to_corner(UL).shift(DOWN*1)
 
         self.new_clean_slide("Opening",contents=text_1)
 
@@ -749,7 +770,7 @@ class MainWhite(BaseSlide):
             Text("Cons:",font_size=self.CONTENT_FONT_SIZE,color=RED),
             Text("- Scales with expert knowledge",font_size=self.CONTENT_FONT_SIZE),
             Text("- Difficult to model complex systems",font_size=self.CONTENT_FONT_SIZE),
-        ).arrange(DOWN,buff=0.2,aligned_edge=LEFT).scale(0.5)
+        ).arrange(DOWN,buff=0.2,aligned_edge=LEFT).scale(0.6)
 
         Black_box_text= VGroup(
             Text("Pros:",font_size=self.CONTENT_FONT_SIZE,color=GREEN),
@@ -759,7 +780,7 @@ class MainWhite(BaseSlide):
             Text("- Not physically interpretable",font_size=self.CONTENT_FONT_SIZE),
             Text("- Poor generalization",font_size=self.CONTENT_FONT_SIZE),
             Text("- Requires large amount of data",font_size=self.CONTENT_FONT_SIZE),
-        ).arrange(DOWN,buff=0.2,aligned_edge=LEFT).scale(0.5)
+        ).arrange(DOWN,buff=0.2,aligned_edge=LEFT).scale(0.6)
 
         VGroup(
             White_box_text,
@@ -2471,6 +2492,45 @@ class MainWhite(BaseSlide):
             self.next_slide_title_animation("Noise analysis per system")
         )
 
+    def real_robot_result(self):
+
+        self.next_slide(notes=" # Real experiment")
+
+        description = Text("Gather data on real system",font_size=self.CONTENT_FONT_SIZE).to_corner(UL).shift(DOWN*1)
+
+        def video_transform(video_mobject:Mobject):
+
+            return video_mobject.scale_to_fit_width(8).next_to(description,DOWN,buff=0.2).set_x(0)
+
+        #: No damping, external forces
+        self.new_clean_slide("Real system experiment")
+
+        self.play(
+            Write(description),
+        )
+        
+        self.play_video("image/real_pendulum_mosaic.mp4",video_transform)
+
+        slower_text = Text("Slowned down x4 for better visualisation",t2c={"x4":RED_E},font_size=self.CONTENT_FONT_SIZE).next_to(description,RIGHT,buff=1)
+
+        self.play(
+            Write(slower_text),
+        )
+
+        self.play_video("image/real_pendulum_mosaic_x4.mp4",video_transform)
+
+        result_description = Text("Result on real system",font_size=self.CONTENT_FONT_SIZE).to_corner(UL).shift(DOWN*1)
+        
+        self.play(
+            FadeOut(slower_text),
+            Transform(description,result_description),
+        )
+
+        self.play_video("image/prediction_t42.96s.mp4",video_transform)
+
+        self.play_video("image/prediction_t45.46s.mp4",video_transform)
+
+
     def construct_discussion(self):
         """
         Discussion slide
@@ -2577,7 +2637,6 @@ class MainWhite(BaseSlide):
     def construct(self):
 
         self.construct_intro()
-        #self.construct_introduction()
         self.construct_opening()
         self.construct_what_is_sindy()
         self.construct_sindy_type()
@@ -2588,6 +2647,7 @@ class MainWhite(BaseSlide):
         self.construct_addition_2() # 11mn until here (probable)
         self.construct_result_protocol() # 12mn until here
         self.construct_result()
+        self.real_robot_result() # 13mn until here
         self.construct_discussion() # 14mn until here
         self.construct_conclusion() # 15mn until here
         self.construct_qa() # 16mn until here
@@ -2600,55 +2660,42 @@ class WIP(BaseSlide):
         """
         WIP slide 
         """
+
         self.next_slide(notes=" # Real experiment")
 
         description = Text("Gather data on real system",font_size=self.CONTENT_FONT_SIZE).to_corner(UL).shift(DOWN*1)
 
+        def video_transform(video_mobject:Mobject):
+
+            return video_mobject.scale_to_fit_width(8).next_to(description,DOWN,buff=0.2).set_x(0)
+
         #: No damping, external forces
-        self.new_clean_slide("Real system experiment ")
-        self.play(
-            Write(description)
-        )
-        video_transform = lambda x : x.scale_to_fit_width(8).next_to(description,DOWN,buff=0.1).set_x(0)
-
-        last_frame = self.play_video("image/real_pendulum_mosaic.mp4",mobject_transform=video_transform)
-
-        slower = Text("Slowned down x4 for better visualisation",t2c={"x4":RED_E},font_size=self.CONTENT_FONT_SIZE).next_to(last_frame,DOWN,buff=0.1)
-
-        self.next_slide(notes=" Slowned down for better visualisation")
+        self.new_clean_slide("Real system experiment")
 
         self.play(
-            Write(slower),
-            FadeOut(last_frame)
+            Write(description),
+        )
+        
+        self.play_video("image/real_pendulum_mosaic.mp4",video_transform)
+
+        slower_text = Text("Slowned down x4 for better visualisation",t2c={"x4":RED_E},font_size=self.CONTENT_FONT_SIZE).next_to(description,RIGHT,buff=1)
+
+        self.play(
+            Write(slower_text),
         )
 
-        last_frame = self.play_video("image/real_pendulum_mosaic_x4.mp4",mobject_transform=video_transform)
-
-        self.next_slide(notes=" Result on real system")
+        self.play_video("image/real_pendulum_mosaic_x4.mp4",video_transform)
 
         result_description = Text("Result on real system",font_size=self.CONTENT_FONT_SIZE).to_corner(UL).shift(DOWN*1)
-
+        
         self.play(
-            FadeOut(last_frame),
-            FadeOut(slower),
-            ReplacementTransform(description,result_description)
+            FadeOut(slower_text),
+            Transform(description,result_description),
         )
 
-        last_frame = self.play_video("image/prediction_t42.96s.mp4",mobject_transform=video_transform)
+        self.play_video("image/prediction_t42.96s.mp4",video_transform)
 
-        self.next_slide(notes=" other result")
-
-        self.play(
-            FadeOut(last_frame)
-        )
-
-        last_frame = self.play_video("image/prediction_t45.46s.mp4",mobject_transform=video_transform)
-
-        self.next_slide(notes=" other result")
-
-        self.play(
-            FadeOut(last_frame)
-        )
+        self.play_video("image/prediction_t45.46s.mp4",video_transform)
 
 
 
