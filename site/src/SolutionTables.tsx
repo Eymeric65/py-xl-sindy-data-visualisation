@@ -221,7 +221,7 @@ const SolutionTables: React.FC<SolutionTablesProps> = ({ experiment, selectedGro
             optimization_function: regressionResult.regression_parameters.optimization_function,
             regression_type: regressionResult.regression_parameters.regression_type,
             valid: regressionResult.valid,
-            regression_time: regressionResult.regression_time,
+            regression_time: regressionResult.regression_time ?? undefined,
             results: {
               RMSE_acceleration: regressionResult.RMSE_acceleration ?? undefined
             }
