@@ -200,6 +200,7 @@ const SolutionTables: React.FC<SolutionTablesProps> = ({ experiment, selectedGro
   // Collect all solution data organized by solution type
   groupData.trajectories.forEach(traj => {
     if (traj.solutions && traj.regression_result) {
+      const regressionResult = traj.regression_result; // Capture for null safety
       traj.solutions.forEach(sol => {
         const solutionType = sol.mode_solution;
         solutionTypes.add(solutionType);
@@ -216,13 +217,13 @@ const SolutionTables: React.FC<SolutionTablesProps> = ({ experiment, selectedGro
           vector: sol.solution_vector,
           label: sol.solution_label,
           extraInfo: {
-            noise_level: traj.regression_result.regression_parameters.noise_level,
-            optimization_function: traj.regression_result.regression_parameters.optimization_function,
-            regression_type: traj.regression_result.regression_parameters.regression_type,
-            valid: traj.regression_result.valid,
-            regression_time: traj.regression_result.regression_time,
+            noise_level: regressionResult.regression_parameters.noise_level,
+            optimization_function: regressionResult.regression_parameters.optimization_function,
+            regression_type: regressionResult.regression_parameters.regression_type,
+            valid: regressionResult.valid,
+            regression_time: regressionResult.regression_time,
             results: {
-              RMSE_acceleration: traj.regression_result.RMSE_acceleration
+              RMSE_acceleration: regressionResult.RMSE_acceleration ?? undefined
             }
           }
         };

@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { createSolutionRanking } from './solutionRanking';
-import type { SolutionRanking, GroupData as RankingGroupData, ExtraInfo } from './solutionRanking';
+import type { SolutionRanking, GroupData as RankingGroupData } from './solutionRanking';
 import type { Experiment, TrajectoryGroup } from './types';
 
 interface SolutionControlTableProps {
